@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import {
   Card,
@@ -10,6 +11,7 @@ import { ConfidenceScore } from "@/components/passports/confidence-score";
 import { PassportStatusBadge } from "@/components/passports/passport-status-badge";
 import { PassportSummaryView } from "@/components/passports/passport-summary";
 import { PassportTimeline } from "@/components/passports/passport-timeline";
+import { AcceptPassportButton } from "@/components/passports/accept-passport-button";
 import type { PublicPassportView } from "@/lib/passports/public";
 import {
   effectiveStatus,
@@ -30,12 +32,19 @@ function safeSummary(value: unknown): PassportSummary {
 
 export async function PublicPassportReport({
   view,
+  token,
+  loggedIn,
+  isOwner,
 }: {
   view: PublicPassportView;
+  token: string;
+  loggedIn: boolean;
+  isOwner: boolean;
 }) {
   const t = await getTranslations("passports");
   const tv = await getTranslations("vehicles");
   const locale = await getLocale();
+  const loginHref = `/login?redirectTo=${encodeURIComponent(`/p/${token}`)}`;
 
   const status = effectiveStatus(view);
   const fmt = (d: string | null) =>
@@ -202,17 +211,26 @@ export async function PublicPassportReport({
         </CardContent>
       </Card>
 
-      {/* I. Accept CTA placeholder (not implemented) */}
+      {/* I. Accept CTA — sign-in / owner / buyer */}
       <Card>
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
-          <button
-            type="button"
-            disabled
-            className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground opacity-60"
-          >
-            {t("public.acceptCta")}
-          </button>
-          <p className="text-xs text-muted-foreground">{t("public.acceptHint")}</p>
+          {isOwner ? (
+            <p className="text-sm font-medium">{t("accept.ownerNote")}</p>
+          ) : loggedIn ? (
+            <AcceptPassportButton token={token} />
+          ) : (
+            <>
+              <Link
+                href={loginHref}
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+              >
+                {t("accept.signInCta")}
+              </Link>
+              <p className="text-xs text-muted-foreground">
+                {t("accept.notOfficial")}
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

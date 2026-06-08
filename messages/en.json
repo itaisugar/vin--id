@@ -501,9 +501,10 @@
       "confirm": "Create passport",
       "creating": "Creating…",
       "cancel": "Cancel",
-      "successTitle": "Passport created",
+      "successTitle": "Passport created successfully",
       "successBody": "Your Vehicle Passport snapshot is frozen and tamper-evident.",
-      "openPassport": "Open passport"
+      "openPassport": "Open passport",
+      "openPreview": "Open public preview"
     },
     "warnings": {
       "nonShareableExcluded": "{count} document(s) are not shareable and are excluded.",
@@ -515,6 +516,7 @@
       "title": "Share link",
       "copy": "Copy",
       "copied": "Copied",
+      "copyOnce": "This link is shown only once. Copy it now — for your security only a hash is stored, so it won't be shown here again.",
       "saveNote": "Save this link now — for your security only a hash is stored, so the full link won't be shown here again.",
       "terms": "This secure link expires in 72 hours and can be revoked by the owner. Accepting the Passport is a one-time action.",
       "activeNote": "Your share link is active until {date}. It can be opened multiple times until it expires, is revoked, or is accepted.",
@@ -611,6 +613,29 @@
         "accepted": "This Passport has already been accepted.",
         "generic": "This Passport link can't be opened.",
         "hint": "Ask the owner to share a new link."
+      }
+    },
+    "accept": {
+      "signInCta": "Sign in to accept this Passport",
+      "acceptCta": "Accept Passport into my account",
+      "ownerNote": "You are the owner of this Passport.",
+      "notOfficial": "This is not an official ownership transfer document.",
+      "confirmTitle": "Accept this Passport into your account?",
+      "confirmBody": "The vehicle history shared by the seller will be copied to your account.",
+      "confirm": "Accept Passport",
+      "cancel": "Cancel",
+      "pending": "Accepting…",
+      "bannerTitle": "Vehicle Passport accepted. This vehicle has been added to your account.",
+      "bannerNote": "The accepted Passport remains a snapshot of the seller's shared history.",
+      "errors": {
+        "not_authenticated": "Please sign in to accept this Passport.",
+        "not_found": "Passport link not found or invalid.",
+        "expired": "This Passport link has expired.",
+        "token_revoked": "This Passport link was revoked by the owner.",
+        "passport_revoked": "This Passport was revoked by the owner.",
+        "accepted": "This Passport has already been accepted.",
+        "own_passport": "You are the owner of this Passport.",
+        "generic": "We couldn't accept this Passport. Please try again."
       }
     }
   }

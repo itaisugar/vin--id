@@ -88,18 +88,30 @@ export function CreatePassportForm({
           <p className="text-sm text-muted-foreground">
             {t("create.successBody")}
           </p>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <p className="text-sm font-medium">{t("share.title")}</p>
             <ShareUrl url={success.shareUrl} />
-            <p className="text-xs text-muted-foreground">{t("share.saveNote")}</p>
+            <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+              ⚠️ {t("share.copyOnce")}
+            </p>
             <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
           </div>
-          <Link
-            href={`/vehicles/${vehicleId}/passports/${success.passportId}`}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-          >
-            {t("create.openPassport")}
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={success.shareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            >
+              {t("create.openPreview")}
+            </a>
+            <Link
+              href={`/vehicles/${vehicleId}/passports/${success.passportId}`}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+            >
+              {t("create.openPassport")}
+            </Link>
+          </div>
         </CardContent>
       </Card>
     );

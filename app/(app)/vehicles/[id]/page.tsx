@@ -23,9 +23,12 @@ import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
   params,
+  searchParams,
 }: PageProps<"/vehicles/[id]">) {
   const { id } = await params;
+  const { accepted } = await searchParams;
   const t = await getTranslations("vehicles");
+  const tp = await getTranslations("passports.accept");
   const locale = await getLocale();
 
   const vehicle = await getVehicleById(id);
@@ -50,6 +53,18 @@ export default async function VehicleDetailPage({
 
   return (
     <div className="space-y-6">
+      {/* Passport accepted banner (Phase 3C) */}
+      {accepted === "1" ? (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            {tp("bannerTitle")}
+          </p>
+          <p className="mt-1 text-xs text-emerald-700/90 dark:text-emerald-400/90">
+            {tp("bannerNote")}
+          </p>
+        </div>
+      ) : null}
+
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">

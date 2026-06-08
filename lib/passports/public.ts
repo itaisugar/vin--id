@@ -72,3 +72,28 @@ export async function getPublicPassport(
   }
   return { state: envelope.state };
 }
+
+/**
+ * Whether the currently logged-in user is the OWNER of the passport behind this
+ * token. Uses the caller's own session: transfer_tokens RLS is owner-scoped, so
+ * the row is only visible to the owner. Returns false for anonymous users and
+ * non-owners — without ever exposing the owner's id.
+ */
+export async function isTokenOwner(rawToken: string): Promise<boolean> {
+  const token = (rawToken ?? "").trim();
+  if (!token) return false;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("transfer_tokens")
+    .select("id")
+    .eq("token_hash", sha256Hex(token))
+    .maybeSingle();
+
+  return Boolean(data);
+}
