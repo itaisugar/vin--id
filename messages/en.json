@@ -373,5 +373,91 @@
         "deleteFailed": "We couldn't remove this document. Please try again."
       }
     }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "addReminder": "Add reminder",
+    "viewAll": "View all ({count})",
+    "backToVehicle": "Back to vehicle",
+    "untitled": "Reminder",
+    "empty": {
+      "title": "No reminders yet",
+      "body": "Add a reminder by date or mileage so you don't miss service, inspection or renewals."
+    },
+    "sections": {
+      "active": "Active",
+      "noActive": "No active reminders.",
+      "completedDismissed": "Completed & dismissed"
+    },
+    "types": {
+      "service": "Service",
+      "inspection": "Inspection",
+      "insurance": "Insurance",
+      "registration": "Registration",
+      "tires": "Tires",
+      "battery": "Battery",
+      "custom": "Custom"
+    },
+    "urgencies": {
+      "green": "Upcoming",
+      "orange": "Soon",
+      "red": "Overdue"
+    },
+    "statuses": {
+      "pending": "Active",
+      "completed": "Completed",
+      "dismissed": "Dismissed"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "reminderType": "Type",
+      "dueDate": "Due date",
+      "dueMileage": "Due mileage",
+      "dueHint": "Provide a due date, a due mileage, or both.",
+      "urgency": "Urgency",
+      "status": "Status"
+    },
+    "actions": {
+      "complete": "Complete",
+      "dismiss": "Dismiss"
+    },
+    "new": {
+      "title": "Add reminder",
+      "subtitle": "Get an in-app heads-up by date or mileage."
+    },
+    "edit": {
+      "title": "Edit reminder",
+      "action": "Edit"
+    },
+    "delete": {
+      "action": "Remove",
+      "title": "Remove from active reminders?",
+      "description": "This reminder is hidden from your lists but is not permanently deleted.",
+      "confirm": "Remove from active reminders",
+      "pending": "Removing…"
+    },
+    "dashboard": {
+      "title": "Upcoming reminders",
+      "viewVehicles": "View vehicles",
+      "empty": "No upcoming reminders. Add one from a vehicle's page.",
+      "untitledVehicle": "Vehicle"
+    },
+    "form": {
+      "create": "Add reminder",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "This field is required.",
+        "tooLong": "This value is too long.",
+        "invalidDate": "Enter a valid date.",
+        "invalidMileage": "Enter a valid mileage.",
+        "dueRequired": "Provide a due date or a due mileage.",
+        "saveFailed": "We couldn't save this reminder. Please try again.",
+        "actionFailed": "We couldn't update this reminder. Please try again.",
+        "deleteFailed": "We couldn't remove this reminder. Please try again."
+      }
+    }
   }
 }

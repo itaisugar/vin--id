@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { CarIcon } from "@/components/icons";
+import { DashboardReminders } from "@/components/reminders/dashboard-reminders";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
@@ -22,19 +22,8 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      {/* Placeholder empty state — vehicles/records arrive in later phases. */}
-      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
-        <CarIcon className="h-10 w-10 text-muted-foreground" />
-        <div className="space-y-1">
-          <p className="font-medium">{t("emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            {t("emptyBody")}
-          </p>
-        </div>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          {t("comingSoon")}
-        </span>
-      </div>
+      {/* Upcoming/urgent reminders across the user's active vehicles (Phase 2F) */}
+      <DashboardReminders />
     </div>
   );
 }

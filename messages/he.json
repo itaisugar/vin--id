@@ -373,5 +373,91 @@
         "deleteFailed": "לא הצלחנו להסיר את המסמך. נסה שוב."
       }
     }
+  },
+  "reminders": {
+    "title": "תזכורות",
+    "addReminder": "הוספת תזכורת",
+    "viewAll": "הצג הכל ({count})",
+    "backToVehicle": "חזרה לרכב",
+    "untitled": "תזכורת",
+    "empty": {
+      "title": "אין עדיין תזכורות",
+      "body": "הוסף תזכורת לפי תאריך או קילומטראז' כדי לא לפספס טיפול, טסט או חידושים."
+    },
+    "sections": {
+      "active": "פעילות",
+      "noActive": "אין תזכורות פעילות.",
+      "completedDismissed": "הושלמו ובוטלו"
+    },
+    "types": {
+      "service": "טיפול",
+      "inspection": "טסט",
+      "insurance": "ביטוח",
+      "registration": "רישוי",
+      "tires": "צמיגים",
+      "battery": "מצבר",
+      "custom": "מותאם"
+    },
+    "urgencies": {
+      "green": "קרוב",
+      "orange": "בקרוב",
+      "red": "באיחור"
+    },
+    "statuses": {
+      "pending": "פעילה",
+      "completed": "הושלמה",
+      "dismissed": "בוטלה"
+    },
+    "fields": {
+      "title": "כותרת",
+      "description": "תיאור",
+      "reminderType": "סוג",
+      "dueDate": "תאריך יעד",
+      "dueMileage": "קילומטראז' יעד",
+      "dueHint": "ציין תאריך יעד, קילומטראז' יעד, או שניהם.",
+      "urgency": "דחיפות",
+      "status": "סטטוס"
+    },
+    "actions": {
+      "complete": "השלמה",
+      "dismiss": "ביטול"
+    },
+    "new": {
+      "title": "הוספת תזכורת",
+      "subtitle": "קבל התראה באפליקציה לפי תאריך או קילומטראז'."
+    },
+    "edit": {
+      "title": "עריכת תזכורת",
+      "action": "עריכה"
+    },
+    "delete": {
+      "action": "הסרה",
+      "title": "להסיר מהתזכורות הפעילות?",
+      "description": "התזכורת תוסתר מהרשימות שלך אך לא תימחק לצמיתות.",
+      "confirm": "הסר מהתזכורות הפעילות",
+      "pending": "מסיר…"
+    },
+    "dashboard": {
+      "title": "תזכורות קרובות",
+      "viewVehicles": "צפייה ברכבים",
+      "empty": "אין תזכורות קרובות. הוסף אחת מעמוד הרכב.",
+      "untitledVehicle": "רכב"
+    },
+    "form": {
+      "create": "הוספת תזכורת",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "cancel": "ביטול",
+      "errors": {
+        "required": "שדה חובה.",
+        "tooLong": "הערך ארוך מדי.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidMileage": "הזן קילומטראז' תקין.",
+        "dueRequired": "ציין תאריך יעד או קילומטראז' יעד.",
+        "saveFailed": "לא הצלחנו לשמור את התזכורת. נסה שוב.",
+        "actionFailed": "לא הצלחנו לעדכן את התזכורת. נסה שוב.",
+        "deleteFailed": "לא הצלחנו להסיר את התזכורת. נסה שוב."
+      }
+    }
   }
 }

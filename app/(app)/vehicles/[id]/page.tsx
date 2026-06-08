@@ -12,9 +12,11 @@ import { VehicleStatusBadge } from "@/components/vehicles/vehicle-status-badge";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
 import { IssueSection } from "@/components/issues/issue-section";
 import { DocumentSection } from "@/components/documents/document-section";
+import { ReminderSection } from "@/components/reminders/reminder-section";
 import { listMaintenanceLogs } from "@/lib/maintenance/service";
 import { listIssues } from "@/lib/issues/service";
 import { listDocuments } from "@/lib/documents/service";
+import { listReminders } from "@/lib/reminders/service";
 import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
@@ -35,15 +37,16 @@ export default async function VehicleDetailPage({
     dateStyle: "medium",
   }).format(new Date(vehicle.created_at));
 
-  const [maintenanceLogs, issues, documents] = await Promise.all([
+  const [maintenanceLogs, issues, documents, reminders] = await Promise.all([
     listMaintenanceLogs(vehicle.id),
     listIssues(vehicle.id),
     listDocuments(vehicle.id),
+    listReminders(vehicle.id),
   ]);
 
-  // Maintenance (2C), Issues (2D) and Documents (2E) are implemented; the rest
-  // remain placeholders.
-  const placeholderSections = ["reminders", "passport"] as const;
+  // Maintenance (2C), Issues (2D), Documents (2E) and Reminders (2F) are
+  // implemented; only Passport remains a placeholder.
+  const placeholderSections = ["passport"] as const;
 
   return (
     <div className="space-y-6">
@@ -125,6 +128,14 @@ export default async function VehicleDetailPage({
 
       {/* Documents (Phase 2E) */}
       <DocumentSection vehicleId={vehicle.id} documents={documents} />
+
+      {/* Reminders (Phase 2F) */}
+      <ReminderSection
+        vehicleId={vehicle.id}
+        reminders={reminders}
+        currentMileage={vehicle.current_mileage}
+        mileageUnit={vehicle.mileage_unit}
+      />
 
       {/* Placeholders for future phases — intentionally not implemented yet. */}
       <div className="grid gap-4 sm:grid-cols-2">
