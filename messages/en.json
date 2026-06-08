@@ -620,6 +620,7 @@
       "acceptCta": "Accept Passport into my account",
       "ownerNote": "You are the owner of this Passport.",
       "notOfficial": "This is not an official ownership transfer document.",
+      "reassurance": "Previewing this link does not use it. Accepting this Passport is a one-time action.",
       "confirmTitle": "Accept this Passport into your account?",
       "confirmBody": "The vehicle history shared by the seller will be copied to your account.",
       "confirm": "Accept Passport",

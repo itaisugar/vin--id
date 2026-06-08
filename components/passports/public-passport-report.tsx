@@ -231,6 +231,11 @@ export async function PublicPassportReport({
               </p>
             </>
           )}
+          {!isOwner ? (
+            <p className="text-xs text-muted-foreground">
+              {t("accept.reassurance")}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     </div>
