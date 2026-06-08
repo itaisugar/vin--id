@@ -582,6 +582,36 @@
       "invalidOptions": "Please review your selection and try again.",
       "createFailed": "We couldn't create the passport. Please try again.",
       "revokeFailed": "We couldn't revoke the passport. Please try again."
+    },
+    "public": {
+      "title": "Vehicle Passport",
+      "verified": "Tamper-evident",
+      "vehicleSummary": "Vehicle summary",
+      "missingTitle": "Missing or not shared",
+      "missing": {
+        "issuesExcluded": "Issue history was not included.",
+        "documentsExcluded": "Documents not included: {count}",
+        "personalExcluded": "Documents with personal information excluded: {count}",
+        "noDocumentBacked": "No document-backed maintenance records.",
+        "noRecentService": "No recent service record.",
+        "none": "Nothing notable was excluded."
+      },
+      "disclaimers": {
+        "provided": "This Vehicle Passport is a user-provided maintenance and history record.",
+        "notOwnership": "It is not an official ownership document.",
+        "notCertification": "It does not certify the vehicle's mechanical condition.",
+        "inspect": "Always inspect the vehicle and consult a qualified professional before buying."
+      },
+      "acceptCta": "Sign in to accept this Passport — coming soon",
+      "acceptHint": "Accepting a Passport copies its history into your account. This is a one-time action and is coming soon.",
+      "errors": {
+        "notFound": "Passport link not found or invalid.",
+        "expired": "This Passport link has expired.",
+        "revoked": "This Passport link was revoked by the owner.",
+        "accepted": "This Passport has already been accepted.",
+        "generic": "This Passport link can't be opened.",
+        "hint": "Ask the owner to share a new link."
+      }
     }
   }
 }
