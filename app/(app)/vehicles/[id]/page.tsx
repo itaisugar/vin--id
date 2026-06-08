@@ -13,10 +13,12 @@ import { MaintenanceSection } from "@/components/maintenance/maintenance-section
 import { IssueSection } from "@/components/issues/issue-section";
 import { DocumentSection } from "@/components/documents/document-section";
 import { ReminderSection } from "@/components/reminders/reminder-section";
+import { PassportSection } from "@/components/passports/passport-section";
 import { listMaintenanceLogs } from "@/lib/maintenance/service";
 import { listIssues } from "@/lib/issues/service";
 import { listDocuments } from "@/lib/documents/service";
 import { listReminders } from "@/lib/reminders/service";
+import { listPassports } from "@/lib/passports/service";
 import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
@@ -37,16 +39,14 @@ export default async function VehicleDetailPage({
     dateStyle: "medium",
   }).format(new Date(vehicle.created_at));
 
-  const [maintenanceLogs, issues, documents, reminders] = await Promise.all([
-    listMaintenanceLogs(vehicle.id),
-    listIssues(vehicle.id),
-    listDocuments(vehicle.id),
-    listReminders(vehicle.id),
-  ]);
-
-  // Maintenance (2C), Issues (2D), Documents (2E) and Reminders (2F) are
-  // implemented; only Passport remains a placeholder.
-  const placeholderSections = ["passport"] as const;
+  const [maintenanceLogs, issues, documents, reminders, passports] =
+    await Promise.all([
+      listMaintenanceLogs(vehicle.id),
+      listIssues(vehicle.id),
+      listDocuments(vehicle.id),
+      listReminders(vehicle.id),
+      listPassports(vehicle.id),
+    ]);
 
   return (
     <div className="space-y-6">
@@ -137,23 +137,8 @@ export default async function VehicleDetailPage({
         mileageUnit={vehicle.mileage_unit}
       />
 
-      {/* Placeholders for future phases — intentionally not implemented yet. */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {placeholderSections.map((key) => (
-          <Card key={key}>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {t(`detail.placeholders.${key}`)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {t("detail.comingSoon")}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Vehicle Passport (Phase 3A) */}
+      <PassportSection vehicleId={vehicle.id} passports={passports} />
     </div>
   );
 }

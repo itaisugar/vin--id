@@ -459,5 +459,129 @@
         "deleteFailed": "We couldn't remove this reminder. Please try again."
       }
     }
+  },
+  "passports": {
+    "title": "Vehicle Passport",
+    "subtitle": "A tamper-evident snapshot of selected history.",
+    "backToVehicle": "Back to vehicle",
+    "viewAll": "View all ({count})",
+    "confidenceHelp": "Record Confidence measures how well the history is documented. It does not certify the mechanical condition of the vehicle.",
+    "empty": {
+      "title": "No passports yet",
+      "body": "Create a Vehicle Passport to share a tamper-evident snapshot of this vehicle's history."
+    },
+    "statuses": {
+      "draft": "Draft",
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "accepted": "Accepted"
+    },
+    "scopes": {
+      "maintenance": "Maintenance",
+      "issues": "Issues",
+      "documents": "Documents",
+      "reminders": "Reminders"
+    },
+    "confidence": {
+      "title": "Record Confidence Score",
+      "short": "Confidence"
+    },
+    "card": {
+      "created": "Created",
+      "expires": "Expires"
+    },
+    "create": {
+      "cta": "Create Vehicle Passport",
+      "title": "Create Vehicle Passport",
+      "subtitle": "Choose what to include. You'll see a preview before creating.",
+      "chooseScopes": "What to include",
+      "previewTitle": "Preview",
+      "includePersonalDocs": "Include {count} shared document(s) that contain personal information",
+      "confirm": "Create passport",
+      "creating": "Creating…",
+      "cancel": "Cancel",
+      "successTitle": "Passport created",
+      "successBody": "Your Vehicle Passport snapshot is frozen and tamper-evident.",
+      "openPassport": "Open passport"
+    },
+    "warnings": {
+      "nonShareableExcluded": "{count} document(s) are not shareable and are excluded.",
+      "personalExcluded": "{count} document(s) with personal information are excluded unless you allow them above.",
+      "notOwnershipDocument": "This is not an official ownership document.",
+      "notConditionScore": "Record Confidence is not a vehicle condition score."
+    },
+    "share": {
+      "title": "Share link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "saveNote": "Save this link now — for your security only a hash is stored, so the full link won't be shown here again.",
+      "terms": "This secure link expires in 72 hours and can be revoked by the owner. Accepting the Passport is a one-time action.",
+      "activeNote": "Your share link is active until {date}. It can be opened multiple times until it expires, is revoked, or is accepted.",
+      "inactiveNote": "This passport is no longer shareable.",
+      "tokenNote": "The full link is shown only at creation (only a hash is stored). Opening the preview does not use up the link."
+    },
+    "detail": {
+      "title": "Vehicle Passport",
+      "status": "Status",
+      "created": "Created",
+      "expires": "Expires",
+      "version": "Version",
+      "includedScopes": "Included scopes",
+      "noScopes": "No scopes were included.",
+      "hashLabel": "Snapshot hash (SHA-256)"
+    },
+    "summary": {
+      "title": "Summary",
+      "none": "No summary items.",
+      "groups": {
+        "strengths": "Strengths",
+        "attention_points": "Attention points",
+        "recommended_checks": "Recommended checks",
+        "missing_or_not_shared": "Missing or not shared"
+      },
+      "items": {
+        "document_backed_maintenance": "Multiple maintenance records are backed by documents.",
+        "recent_service": "A recent service record is present.",
+        "shareable_documents": "Shareable documents are included.",
+        "issue_history_present": "Issue history is included.",
+        "no_documents": "No documents are included.",
+        "unresolved_urgent_issue": "An unresolved high-severity issue is recorded.",
+        "mileage_inconsistency": "Mileage entries appear inconsistent.",
+        "tires": "Consider checking the tires.",
+        "battery": "Consider checking the battery.",
+        "brakes": "Consider checking the brakes.",
+        "issue_history_excluded": "Issue history was not included.",
+        "documents_excluded": "Some documents were not included.",
+        "personal_documents_excluded": "Documents with personal information were excluded.",
+        "no_document_backed_records": "No document-backed maintenance records.",
+        "no_recent_service": "No recent service record was found."
+      }
+    },
+    "timeline": {
+      "title": "Timeline preview",
+      "emptyScope": "No records in this section."
+    },
+    "verification": {
+      "title": "Verification",
+      "text": "This snapshot is tamper-evident. The hash can be used to detect changes."
+    },
+    "disclaimers": {
+      "notOwnership": "This is not an official ownership document.",
+      "notCertification": "This does not certify the vehicle's mechanical condition."
+    },
+    "revoke": {
+      "action": "Revoke",
+      "title": "Revoke this passport?",
+      "description": "The share link will stop working. The snapshot is kept for your records.",
+      "confirm": "Revoke passport",
+      "cancel": "Cancel",
+      "pending": "Revoking…"
+    },
+    "errors": {
+      "invalidOptions": "Please review your selection and try again.",
+      "createFailed": "We couldn't create the passport. Please try again.",
+      "revokeFailed": "We couldn't revoke the passport. Please try again."
+    }
   }
 }
