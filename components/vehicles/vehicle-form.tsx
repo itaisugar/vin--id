@@ -1,0 +1,217 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import {
+  useForm,
+  type Resolver,
+  type SubmitHandler,
+  type UseFormRegisterReturn,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import type { VehicleActionState } from "@/app/(app)/vehicles/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  EMPTY_VEHICLE_FORM,
+  MILEAGE_UNITS,
+  vehicleInputSchema,
+  type VehicleFormValues,
+} from "@/lib/vehicles/types";
+
+interface VehicleFormProps {
+  mode: "create" | "edit";
+  defaultValues?: VehicleFormValues;
+  /** Returns a state on failure; on success it redirects (never returns). */
+  action: (values: VehicleFormValues) => Promise<VehicleActionState>;
+  cancelHref: string;
+}
+
+const FIELD_NAMES: (keyof VehicleFormValues)[] = [
+  "make",
+  "model",
+  "year",
+  "vin",
+  "license_plate",
+  "mileage",
+  "mileage_unit",
+  "photo_url",
+];
+
+export function VehicleForm({
+  mode,
+  defaultValues = EMPTY_VEHICLE_FORM,
+  action,
+  cancelHref,
+}: VehicleFormProps) {
+  const t = useTranslations("vehicles");
+  const [serverError, setServerError] = React.useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<VehicleFormValues>({
+    resolver: zodResolver(
+      vehicleInputSchema,
+    ) as unknown as Resolver<VehicleFormValues>,
+    defaultValues,
+  });
+
+  const onSubmit: SubmitHandler<VehicleFormValues> = async (values) => {
+    setServerError(null);
+    const result = await action(values);
+    // Reaching here means no redirect happened → it failed.
+    if (result?.fieldErrors) {
+      for (const name of FIELD_NAMES) {
+        const key = result.fieldErrors[name];
+        if (key) setError(name, { message: key });
+      }
+    }
+    if (result?.error) setServerError(result.error);
+  };
+
+  // Resolve a field's error message key into translated text.
+  const fieldError = (name: keyof VehicleFormValues) => {
+    const message = errors[name]?.message;
+    return message ? t(`form.errors.${message}`) : null;
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <Field
+        name="make"
+        label={t("fields.make")}
+        required
+        error={fieldError("make")}
+        registration={register("make")}
+      />
+      <Field
+        name="model"
+        label={t("fields.model")}
+        required
+        error={fieldError("model")}
+        registration={register("model")}
+      />
+      <Field
+        name="year"
+        label={t("fields.year")}
+        required
+        type="number"
+        inputMode="numeric"
+        placeholder={t("fields.yearPlaceholder")}
+        error={fieldError("year")}
+        registration={register("year")}
+      />
+      <Field
+        name="vin"
+        label={t("fields.vin")}
+        error={fieldError("vin")}
+        registration={register("vin")}
+      />
+      <Field
+        name="license_plate"
+        label={t("fields.licensePlate")}
+        error={fieldError("license_plate")}
+        registration={register("license_plate")}
+      />
+
+      {/* Mileage + unit on one row */}
+      <div className="grid grid-cols-[1fr_auto] gap-2">
+        <Field
+          name="mileage"
+          label={t("fields.mileage")}
+          type="number"
+          inputMode="numeric"
+          error={fieldError("mileage")}
+          registration={register("mileage")}
+        />
+        <div className="space-y-1.5">
+          <Label htmlFor="mileage_unit">{t("fields.mileageUnit")}</Label>
+          <Select id="mileage_unit" {...register("mileage_unit")}>
+            {MILEAGE_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {t(`units.${unit}`)}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </div>
+
+      <Field
+        name="photo_url"
+        label={t("fields.photoUrl")}
+        type="url"
+        placeholder="https://…"
+        error={fieldError("photo_url")}
+        registration={register("photo_url")}
+      />
+
+      {serverError ? (
+        <p role="alert" className="text-sm text-red-600">
+          {t(`form.errors.${serverError}`)}
+        </p>
+      ) : null}
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? t("form.saving")
+            : mode === "create"
+              ? t("form.create")
+              : t("form.save")}
+        </Button>
+        <Link
+          href={cancelHref}
+          className={cn(
+            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+          )}
+        >
+          {t("form.cancel")}
+        </Link>
+      </div>
+    </form>
+  );
+}
+
+// Small labelled input row. `registration` carries RHF's name/onChange/ref.
+function Field({
+  name,
+  label,
+  required,
+  error,
+  registration,
+  ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "name"> & {
+  name: string;
+  label: string;
+  required?: boolean;
+  error?: string | null;
+  registration: UseFormRegisterReturn;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={name}>
+        {label}
+        {required ? <span className="text-red-600"> *</span> : null}
+      </Label>
+      <Input
+        id={name}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${name}-error` : undefined}
+        {...registration}
+        {...props}
+      />
+      {error ? (
+        <p id={`${name}-error`} className="text-sm text-red-600">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}

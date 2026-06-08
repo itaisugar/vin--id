@@ -1,0 +1,51 @@
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { createClient } from "@/lib/supabase/server";
+import { SidebarNav, BottomNav } from "@/components/app-nav";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { LogoutButton } from "@/components/logout-button";
+
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Real authorization check (the proxy only does an optimistic redirect).
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const t = await getTranslations("common");
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      {/* Top bar */}
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-4 py-3">
+        <span className="text-lg font-bold">{t("appName")}</span>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <LogoutButton className="hidden sm:inline-flex" />
+        </div>
+      </header>
+
+      <div className="mx-auto flex w-full max-w-6xl flex-1">
+        {/* Desktop sidebar */}
+        <aside className="hidden w-60 shrink-0 border-e border-border p-4 md:flex md:flex-col md:justify-between">
+          <SidebarNav />
+          <LogoutButton className="w-full justify-start" />
+        </aside>
+
+        {/* Main content (extra bottom padding leaves room for mobile nav) */}
+        <main className="flex-1 p-4 pb-24 md:pb-8">{children}</main>
+      </div>
+
+      {/* Mobile bottom navigation */}
+      <BottomNav />
+    </div>
+  );
+}

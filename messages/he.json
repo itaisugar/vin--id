@@ -1,0 +1,377 @@
+{
+  "common": {
+    "appName": "Vin.ID",
+    "tagline": "הזהות הדיגיטלית החכמה של הרכב שלך",
+    "loading": "טוען…",
+    "language": "שפה",
+    "retry": "נסה שוב",
+    "somethingWentWrong": "משהו השתבש"
+  },
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "vehicles": "רכבים",
+    "passport": "דרכון",
+    "settings": "הגדרות"
+  },
+  "auth": {
+    "loginTitle": "ברוך שובך",
+    "loginSubtitle": "התחבר לחשבון ה-Vin.ID שלך",
+    "signupTitle": "יצירת חשבון",
+    "signupSubtitle": "התחל לבנות את הזהות הדיגיטלית של הרכב שלך",
+    "email": "אימייל",
+    "emailPlaceholder": "you@example.com",
+    "password": "סיסמה",
+    "passwordPlaceholder": "••••••••",
+    "signIn": "התחברות",
+    "signingIn": "מתחבר…",
+    "signUp": "הרשמה",
+    "signingUp": "יוצר חשבון…",
+    "signOut": "התנתקות",
+    "signingOut": "מתנתק…",
+    "noAccount": "אין לך חשבון?",
+    "haveAccount": "כבר יש לך חשבון?",
+    "createOne": "צור חשבון",
+    "signInInstead": "התחבר במקום",
+    "checkEmail": "בדוק את האימייל שלך כדי לאשר את החשבון, ואז התחבר.",
+    "errors": {
+      "invalidEmail": "נא להזין כתובת אימייל תקינה.",
+      "passwordTooShort": "הסיסמה חייבת להכיל לפחות 8 תווים.",
+      "invalidCredentials": "אימייל או סיסמה שגויים.",
+      "generic": "לא הצלחנו להשלים את הבקשה. נסה שוב."
+    }
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "welcome": "ברוך הבא, {email}",
+    "subtitle": "זהו הבית שלך ב-Vin.ID. הרכבים והרשומות שלך יופיעו כאן.",
+    "emptyTitle": "אין כאן עדיין כלום",
+    "emptyBody": "לאחר הוספת רכבים, תראה כאן את הזהות הדיגיטלית וההיסטוריה שלהם.",
+    "comingSoon": "בקרוב"
+  },
+  "vehicles": {
+    "title": "רכבים",
+    "addVehicle": "הוספת רכב",
+    "untitled": "רכב ללא שם",
+    "noDetails": "אין עדיין פרטים",
+    "sections": {
+      "active": "פעילים",
+      "noActive": "אין רכבים פעילים.",
+      "archivedSold": "בארכיון ונמכרו"
+    },
+    "empty": {
+      "title": "אין עדיין רכבים",
+      "body": "הוסף את הרכב הראשון שלך כדי להתחיל לבנות את הזהות הדיגיטלית וההיסטוריה שלו."
+    },
+    "status": {
+      "active": "פעיל",
+      "archived": "בארכיון",
+      "sold": "נמכר"
+    },
+    "units": {
+      "km": "ק״מ",
+      "miles": "מייל"
+    },
+    "fields": {
+      "make": "יצרן",
+      "model": "דגם",
+      "year": "שנה",
+      "yearPlaceholder": "לדוגמה 2019",
+      "vin": "מספר שלדה (VIN)",
+      "licensePlate": "מספר רישוי",
+      "mileage": "קילומטראז'",
+      "mileageUnit": "יחידה",
+      "photoUrl": "כתובת תמונה",
+      "status": "סטטוס",
+      "createdAt": "נוסף בתאריך"
+    },
+    "new": {
+      "title": "הוספת רכב",
+      "subtitle": "הזן את הפרטים הבסיסיים. אפשר להוסיף היסטוריה ומסמכים בהמשך."
+    },
+    "edit": {
+      "title": "עריכת רכב",
+      "action": "עריכה"
+    },
+    "detail": {
+      "title": "פרטי הרכב",
+      "comingSoon": "בקרוב",
+      "placeholders": {
+        "maintenance": "תחזוקה",
+        "issues": "תקלות",
+        "documents": "מסמכים",
+        "reminders": "תזכורות",
+        "passport": "דרכון רכב"
+      }
+    },
+    "archive": {
+      "action": "העברה לארכיון",
+      "title": "להעביר את הרכב לארכיון?",
+      "description": "הרכב וההיסטוריה שלו נשמרים, אך הוא עובר לרשימת הארכיון. תוכל לצפות בו גם בהמשך.",
+      "confirm": "העברה לארכיון",
+      "pending": "מעביר לארכיון…"
+    },
+    "notFound": {
+      "title": "הרכב לא נמצא",
+      "body": "הרכב הזה לא קיים או שאין לך הרשאה אליו.",
+      "back": "חזרה לרכבים"
+    },
+    "form": {
+      "create": "הוספת רכב",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "cancel": "ביטול",
+      "errors": {
+        "required": "שדה חובה.",
+        "tooLong": "הערך ארוך מדי.",
+        "invalidYear": "הזן שנה תקינה.",
+        "invalidMileage": "הזן קילומטראז' תקין.",
+        "invalidUrl": "הזן כתובת URL תקינה.",
+        "saveFailed": "לא הצלחנו לשמור את הרכב. נסה שוב.",
+        "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב."
+      }
+    }
+  },
+  "maintenance": {
+    "title": "תחזוקה",
+    "addMaintenance": "הוספת תחזוקה",
+    "viewAll": "הצג הכל ({count})",
+    "backToVehicle": "חזרה לרכב",
+    "untitled": "רשומת תחזוקה",
+    "empty": {
+      "title": "אין עדיין תחזוקה",
+      "body": "הוסף רשומת טיפול כדי להתחיל לבנות את היסטוריית התחזוקה של הרכב."
+    },
+    "fields": {
+      "date": "תאריך",
+      "mileage": "קילומטראז' בעת הטיפול",
+      "category": "קטגוריה",
+      "categoryPlaceholder": "לדוגמה: החלפת שמן, בלמים",
+      "description": "תיאור",
+      "cost": "עלות",
+      "currency": "מטבע",
+      "trustLevel": "תווית אמון"
+    },
+    "trustLevels": {
+      "user_entered": "הוזן ע״י המשתמש",
+      "document_backed": "מגובה במסמך",
+      "ai_extracted": "חולץ ע״י AI",
+      "mechanic_verified": "אומת ע״י מוסך",
+      "external_source": "מקור חיצוני"
+    },
+    "trustHelp": "תוויות אמון מתארות כיצד הרשומה נוצרה או גובתה. הן אינן מעידות על מצב הרכב.",
+    "source": {
+      "label": "מקור"
+    },
+    "new": {
+      "title": "הוספת תחזוקה",
+      "subtitle": "תעד טיפול או תיקון עבור הרכב הזה."
+    },
+    "edit": {
+      "title": "עריכת תחזוקה",
+      "action": "עריכה"
+    },
+    "delete": {
+      "action": "הסרה",
+      "title": "להסיר מההיסטוריה הפעילה?",
+      "description": "הרשומה תוסתר מההיסטוריה הפעילה אך לא תימחק לצמיתות.",
+      "confirm": "הסר מההיסטוריה הפעילה",
+      "pending": "מסיר…"
+    },
+    "form": {
+      "create": "הוספת תחזוקה",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "cancel": "ביטול",
+      "errors": {
+        "required": "שדה חובה.",
+        "tooLong": "הערך ארוך מדי.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidMileage": "הזן קילומטראז' תקין.",
+        "invalidCost": "הזן עלות תקינה.",
+        "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב.",
+        "deleteFailed": "לא הצלחנו להסיר את הרשומה. נסה שוב."
+      }
+    }
+  },
+  "issues": {
+    "title": "תקלות",
+    "addIssue": "הוספת תקלה",
+    "viewAll": "הצג הכל ({count})",
+    "backToVehicle": "חזרה לרכב",
+    "resolutionPrefix": "פתרון",
+    "empty": {
+      "title": "אין עדיין תקלות",
+      "body": "תעד תקלה כדי לעקוב אחר הסימפטומים וכיצד טופלו."
+    },
+    "fields": {
+      "date": "תאריך",
+      "mileage": "קילומטראז'",
+      "symptoms": "סימפטומים",
+      "symptomsPlaceholder": "תאר מה הבחנת (רעשים, נוריות אזהרה, התנהגות)…",
+      "status": "סטטוס",
+      "severity": "חומרה",
+      "resolutionNotes": "הערות פתרון",
+      "resolutionNotesHelp": "אופציונלי. מה נעשה, או התוצאה.",
+      "trustLevel": "תווית אמון"
+    },
+    "statuses": {
+      "open": "פתוח",
+      "monitoring": "במעקב",
+      "resolved": "טופל"
+    },
+    "severities": {
+      "info": "מידע",
+      "monitor": "מעקב",
+      "diy_simple": "בדיקה עצמית פשוטה",
+      "mechanic_recommended": "מומלץ מוסך",
+      "urgent": "דחוף",
+      "stop_immediately": "עצור מיד"
+    },
+    "severityHelp": {
+      "info": "מידע בלבד — אין צורך בפעולה כרגע.",
+      "monitor": "המשך לעקוב ושים לב לשינויים.",
+      "diy_simple": "נראה כמו בדיקה עצמית פשוטה.",
+      "mechanic_recommended": "כדאי לשקול לקבוע תור למוסך לבדיקה.",
+      "urgent": "כדאי לשקול לטפל בקרוב ולהימנע מנסיעה מיותרת.",
+      "stop_immediately": "ייתכן סיכון בטיחותי — כדאי לשקול להפסיק לנסוע."
+    },
+    "trustLevels": {
+      "user_entered": "הוזן ע״י המשתמש",
+      "document_backed": "מגובה במסמך",
+      "ai_extracted": "חולץ ע״י AI",
+      "mechanic_verified": "אומת ע״י מוסך",
+      "external_source": "מקור חיצוני"
+    },
+    "trustHelp": "תוויות אמון מתארות כיצד רשומת התקלה נוצרה או גובתה. הן אינן מעידות על מצב הרכב.",
+    "source": {
+      "label": "מקור"
+    },
+    "new": {
+      "title": "הוספת תקלה",
+      "subtitle": "תעד סימפטום או בעיה שהבחנת בה ברכב."
+    },
+    "edit": {
+      "title": "עריכת תקלה",
+      "action": "עריכה"
+    },
+    "resolve": {
+      "action": "סימון כטופל",
+      "title": "לסמן את התקלה כטופלה?",
+      "description": "אפשר להוסיף הערה אופציונלית על אופן הטיפול.",
+      "notesLabel": "הערות פתרון (אופציונלי)",
+      "notesPlaceholder": "מה נעשה, או התוצאה…",
+      "confirm": "סמן כטופל",
+      "pending": "מסמן…"
+    },
+    "delete": {
+      "action": "הסרה",
+      "title": "להסיר מהיסטוריית התקלות הפעילה?",
+      "description": "התקלה תוסתר מהיסטוריית התקלות הפעילה אך לא תימחק לצמיתות.",
+      "confirm": "הסר מהיסטוריית התקלות הפעילה",
+      "pending": "מסיר…"
+    },
+    "form": {
+      "create": "הוספת תקלה",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "cancel": "ביטול",
+      "errors": {
+        "required": "שדה חובה.",
+        "tooLong": "הערך ארוך מדי.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidMileage": "הזן קילומטראז' תקין.",
+        "saveFailed": "לא הצלחנו לשמור את התקלה. נסה שוב.",
+        "resolveFailed": "לא הצלחנו לסמן את התקלה כטופלה. נסה שוב.",
+        "deleteFailed": "לא הצלחנו להסיר את התקלה. נסה שוב."
+      }
+    }
+  },
+  "documents": {
+    "title": "מסמכים",
+    "uploadDocument": "העלאת מסמך",
+    "viewAll": "הצג הכל ({count})",
+    "backToVehicle": "חזרה לרכב",
+    "untitled": "מסמך",
+    "viewEdit": "צפייה / עריכה",
+    "privacyWarning": "מסמך זה עשוי להכיל מידע אישי. בדוק אותו בעיון לפני שיתופו בדרכון רכב.",
+    "trustHelp": "תוויות אמון מתארות כיצד רשומת המסמך נוצרה או גובתה. הן אינן מעידות על מצב הרכב.",
+    "empty": {
+      "title": "אין עדיין מסמכים",
+      "body": "העלה רישיון, ביטוח, חשבונית או דוח בדיקה כדי לשמור אותו עם הרכב."
+    },
+    "badges": {
+      "personalInfo": "מידע אישי",
+      "shareable": "ניתן לשיתוף"
+    },
+    "documentTypes": {
+      "invoice": "חשבונית / קבלה",
+      "registration": "רישוי",
+      "insurance": "ביטוח",
+      "inspection": "בדיקה",
+      "other": "אחר"
+    },
+    "trustLevels": {
+      "user_entered": "הוזן ע״י המשתמש",
+      "document_backed": "מגובה במסמך",
+      "ai_extracted": "חולץ ע״י AI",
+      "mechanic_verified": "אומת ע״י מוסך",
+      "external_source": "מקור חיצוני"
+    },
+    "fields": {
+      "file": "קובץ",
+      "fileHelp": "PDF, JPG, PNG או WebP. עד 5MB.",
+      "documentType": "סוג מסמך",
+      "documentDate": "תאריך המסמך",
+      "expiryDate": "תאריך תפוגה",
+      "vendor": "ספק",
+      "amount": "סכום",
+      "currency": "מטבע",
+      "containsPersonalInfo": "מסמך זה עשוי להכיל מידע אישי",
+      "shareAllowed": "אפשר שיתוף בדרכון רכב",
+      "trustLevel": "תווית אמון"
+    },
+    "preview": {
+      "title": "קובץ",
+      "open": "פתח מסמך",
+      "unavailable": "התצוגה המקדימה אינה זמינה.",
+      "expires": "הקישור המאובטח הזה יפוג לאחר מספר דקות."
+    },
+    "ai": {
+      "extract": "חילוץ באמצעות AI",
+      "help": "חילוץ AI יתווסף בהמשך. שדות שיחולצו יחייבו את אישורך לפני השמירה."
+    },
+    "new": {
+      "title": "העלאת מסמך",
+      "subtitle": "הוסף קובץ ואת פרטיו. הקבצים נשמרים באופן פרטי."
+    },
+    "edit": {
+      "title": "פרטי המסמך"
+    },
+    "delete": {
+      "action": "הסרה",
+      "title": "להסיר מהמסמכים הפעילים?",
+      "description": "המסמך יוסתר מהמסמכים הפעילים אך לא יימחק לצמיתות. הקובץ נשאר באחסון הפרטי.",
+      "confirm": "הסר מהמסמכים הפעילים",
+      "pending": "מסיר…"
+    },
+    "form": {
+      "upload": "העלאת מסמך",
+      "uploading": "מעלה…",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "cancel": "ביטול",
+      "errors": {
+        "required": "שדה חובה.",
+        "tooLong": "הערך ארוך מדי.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidAmount": "הזן סכום תקין.",
+        "fileRequired": "בחר קובץ להעלאה.",
+        "invalidFileType": "סוגים מותרים: PDF, JPG, PNG, WebP.",
+        "fileTooLarge": "הקובץ גדול מ-5MB.",
+        "uploadFailed": "לא הצלחנו להעלות את הקובץ. נסה שוב.",
+        "saveFailed": "לא הצלחנו לשמור את המסמך. נסה שוב.",
+        "deleteFailed": "לא הצלחנו להסיר את המסמך. נסה שוב."
+      }
+    }
+  }
+}

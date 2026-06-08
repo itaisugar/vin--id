@@ -1,0 +1,377 @@
+{
+  "common": {
+    "appName": "Vin.ID",
+    "tagline": "Your smart digital vehicle identity",
+    "loading": "Loading…",
+    "language": "Language",
+    "retry": "Try again",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "vehicles": "Vehicles",
+    "passport": "Passport",
+    "settings": "Settings"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to your Vin.ID account",
+    "signupTitle": "Create your account",
+    "signupSubtitle": "Start building your vehicle's digital identity",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "signUp": "Sign up",
+    "signingUp": "Creating account…",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createOne": "Create one",
+    "signInInstead": "Sign in instead",
+    "checkEmail": "Check your email to confirm your account, then sign in.",
+    "errors": {
+      "invalidEmail": "Please enter a valid email address.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "invalidCredentials": "Invalid email or password.",
+      "generic": "We couldn't complete that request. Please try again."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {email}",
+    "subtitle": "This is your Vin.ID home. Your vehicles and records will appear here.",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Once vehicles are added, you'll see their digital identity and history here.",
+    "comingSoon": "Coming soon"
+  },
+  "vehicles": {
+    "title": "Vehicles",
+    "addVehicle": "Add vehicle",
+    "untitled": "Untitled vehicle",
+    "noDetails": "No details yet",
+    "sections": {
+      "active": "Active",
+      "noActive": "No active vehicles.",
+      "archivedSold": "Archived & sold"
+    },
+    "empty": {
+      "title": "No vehicles yet",
+      "body": "Add your first vehicle to start building its digital identity and history."
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "sold": "Sold"
+    },
+    "units": {
+      "km": "km",
+      "miles": "miles"
+    },
+    "fields": {
+      "make": "Make",
+      "model": "Model",
+      "year": "Year",
+      "yearPlaceholder": "e.g. 2019",
+      "vin": "VIN",
+      "licensePlate": "License plate",
+      "mileage": "Mileage",
+      "mileageUnit": "Unit",
+      "photoUrl": "Photo URL",
+      "status": "Status",
+      "createdAt": "Added on"
+    },
+    "new": {
+      "title": "Add vehicle",
+      "subtitle": "Enter the basic details. You can add history and documents later."
+    },
+    "edit": {
+      "title": "Edit vehicle",
+      "action": "Edit"
+    },
+    "detail": {
+      "title": "Vehicle details",
+      "comingSoon": "Coming soon",
+      "placeholders": {
+        "maintenance": "Maintenance",
+        "issues": "Issues",
+        "documents": "Documents",
+        "reminders": "Reminders",
+        "passport": "Vehicle Passport"
+      }
+    },
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this vehicle?",
+      "description": "The vehicle and its history are kept, but it moves to your archived list. You can still view it later.",
+      "confirm": "Archive",
+      "pending": "Archiving…"
+    },
+    "notFound": {
+      "title": "Vehicle not found",
+      "body": "This vehicle doesn't exist or you don't have access to it.",
+      "back": "Back to vehicles"
+    },
+    "form": {
+      "create": "Add vehicle",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "This field is required.",
+        "tooLong": "This value is too long.",
+        "invalidYear": "Enter a valid year.",
+        "invalidMileage": "Enter a valid mileage.",
+        "invalidUrl": "Enter a valid URL.",
+        "saveFailed": "We couldn't save the vehicle. Please try again.",
+        "archiveFailed": "We couldn't archive the vehicle. Please try again."
+      }
+    }
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "addMaintenance": "Add maintenance",
+    "viewAll": "View all ({count})",
+    "backToVehicle": "Back to vehicle",
+    "untitled": "Maintenance record",
+    "empty": {
+      "title": "No maintenance yet",
+      "body": "Add a service record to start building this vehicle's maintenance history."
+    },
+    "fields": {
+      "date": "Date",
+      "mileage": "Mileage at service",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Oil change, Brakes",
+      "description": "Description",
+      "cost": "Cost",
+      "currency": "Currency",
+      "trustLevel": "Trust label"
+    },
+    "trustLevels": {
+      "user_entered": "User entered",
+      "document_backed": "Document backed",
+      "ai_extracted": "AI extracted",
+      "mechanic_verified": "Mechanic verified",
+      "external_source": "External source"
+    },
+    "trustHelp": "Trust labels describe how this record was created or supported. They do not certify the vehicle condition.",
+    "source": {
+      "label": "Source"
+    },
+    "new": {
+      "title": "Add maintenance",
+      "subtitle": "Record a service or repair for this vehicle."
+    },
+    "edit": {
+      "title": "Edit maintenance",
+      "action": "Edit"
+    },
+    "delete": {
+      "action": "Remove",
+      "title": "Remove from active history?",
+      "description": "This record is hidden from the active history but is not permanently deleted.",
+      "confirm": "Remove from active history",
+      "pending": "Removing…"
+    },
+    "form": {
+      "create": "Add maintenance",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "This field is required.",
+        "tooLong": "This value is too long.",
+        "invalidDate": "Enter a valid date.",
+        "invalidMileage": "Enter a valid mileage.",
+        "invalidCost": "Enter a valid cost.",
+        "saveFailed": "We couldn't save this record. Please try again.",
+        "deleteFailed": "We couldn't remove this record. Please try again."
+      }
+    }
+  },
+  "issues": {
+    "title": "Issues",
+    "addIssue": "Add issue",
+    "viewAll": "View all ({count})",
+    "backToVehicle": "Back to vehicle",
+    "resolutionPrefix": "Resolution",
+    "empty": {
+      "title": "No issues yet",
+      "body": "Log an issue to keep track of symptoms and how they were handled."
+    },
+    "fields": {
+      "date": "Date",
+      "mileage": "Mileage",
+      "symptoms": "Symptoms",
+      "symptomsPlaceholder": "Describe what you noticed (sounds, warning lights, behavior)…",
+      "status": "Status",
+      "severity": "Severity",
+      "resolutionNotes": "Resolution notes",
+      "resolutionNotesHelp": "Optional. What was done, or the outcome.",
+      "trustLevel": "Trust label"
+    },
+    "statuses": {
+      "open": "Open",
+      "monitoring": "Monitoring",
+      "resolved": "Resolved"
+    },
+    "severities": {
+      "info": "Info",
+      "monitor": "Monitor",
+      "diy_simple": "Simple DIY check",
+      "mechanic_recommended": "Mechanic recommended",
+      "urgent": "Urgent",
+      "stop_immediately": "Stop immediately"
+    },
+    "severityHelp": {
+      "info": "Informational — no action needed right now.",
+      "monitor": "Keep watching and note any changes.",
+      "diy_simple": "Looks like a simple DIY check.",
+      "mechanic_recommended": "Consider booking a mechanic to look into it.",
+      "urgent": "Consider handling soon and avoiding unnecessary driving.",
+      "stop_immediately": "Possible safety risk — consider not continuing to drive."
+    },
+    "trustLevels": {
+      "user_entered": "User entered",
+      "document_backed": "Document backed",
+      "ai_extracted": "AI extracted",
+      "mechanic_verified": "Mechanic verified",
+      "external_source": "External source"
+    },
+    "trustHelp": "Trust labels describe how this issue record was created or supported. They do not certify the vehicle condition.",
+    "source": {
+      "label": "Source"
+    },
+    "new": {
+      "title": "Add issue",
+      "subtitle": "Log a symptom or problem you noticed with this vehicle."
+    },
+    "edit": {
+      "title": "Edit issue",
+      "action": "Edit"
+    },
+    "resolve": {
+      "action": "Resolve",
+      "title": "Mark issue as resolved?",
+      "description": "You can add an optional note about how it was handled.",
+      "notesLabel": "Resolution notes (optional)",
+      "notesPlaceholder": "What was done, or the outcome…",
+      "confirm": "Mark resolved",
+      "pending": "Resolving…"
+    },
+    "delete": {
+      "action": "Remove",
+      "title": "Remove from active issue history?",
+      "description": "This issue is hidden from the active issue history but is not permanently deleted.",
+      "confirm": "Remove from active issue history",
+      "pending": "Removing…"
+    },
+    "form": {
+      "create": "Add issue",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "This field is required.",
+        "tooLong": "This value is too long.",
+        "invalidDate": "Enter a valid date.",
+        "invalidMileage": "Enter a valid mileage.",
+        "saveFailed": "We couldn't save this issue. Please try again.",
+        "resolveFailed": "We couldn't resolve this issue. Please try again.",
+        "deleteFailed": "We couldn't remove this issue. Please try again."
+      }
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "uploadDocument": "Upload document",
+    "viewAll": "View all ({count})",
+    "backToVehicle": "Back to vehicle",
+    "untitled": "Document",
+    "viewEdit": "View / edit",
+    "privacyWarning": "This document may contain personal information. Review it carefully before sharing it in a Vehicle Passport.",
+    "trustHelp": "Trust labels describe how this document record was created or supported. They do not certify the vehicle condition.",
+    "empty": {
+      "title": "No documents yet",
+      "body": "Upload a registration, insurance, invoice or inspection file to keep it with this vehicle."
+    },
+    "badges": {
+      "personalInfo": "Personal info",
+      "shareable": "Shareable"
+    },
+    "documentTypes": {
+      "invoice": "Invoice / receipt",
+      "registration": "Registration",
+      "insurance": "Insurance",
+      "inspection": "Inspection",
+      "other": "Other"
+    },
+    "trustLevels": {
+      "user_entered": "User entered",
+      "document_backed": "Document backed",
+      "ai_extracted": "AI extracted",
+      "mechanic_verified": "Mechanic verified",
+      "external_source": "External source"
+    },
+    "fields": {
+      "file": "File",
+      "fileHelp": "PDF, JPG, PNG or WebP. Up to 5 MB.",
+      "documentType": "Document type",
+      "documentDate": "Document date",
+      "expiryDate": "Expiry date",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "currency": "Currency",
+      "containsPersonalInfo": "This document may contain personal information",
+      "shareAllowed": "Allow sharing in a Vehicle Passport",
+      "trustLevel": "Trust label"
+    },
+    "preview": {
+      "title": "File",
+      "open": "Open document",
+      "unavailable": "Preview is unavailable.",
+      "expires": "This secure link expires after a few minutes."
+    },
+    "ai": {
+      "extract": "Extract with AI",
+      "help": "AI extraction will be added later. Extracted fields will require your confirmation before saving."
+    },
+    "new": {
+      "title": "Upload document",
+      "subtitle": "Add a file and its details. Files are stored privately."
+    },
+    "edit": {
+      "title": "Document details"
+    },
+    "delete": {
+      "action": "Remove",
+      "title": "Remove from active documents?",
+      "description": "This document is hidden from the active documents but is not permanently deleted. The file remains in private storage.",
+      "confirm": "Remove from active documents",
+      "pending": "Removing…"
+    },
+    "form": {
+      "upload": "Upload document",
+      "uploading": "Uploading…",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "This field is required.",
+        "tooLong": "This value is too long.",
+        "invalidDate": "Enter a valid date.",
+        "invalidAmount": "Enter a valid amount.",
+        "fileRequired": "Please choose a file to upload.",
+        "invalidFileType": "Allowed types: PDF, JPG, PNG, WebP.",
+        "fileTooLarge": "The file is larger than 5 MB.",
+        "uploadFailed": "We couldn't upload the file. Please try again.",
+        "saveFailed": "We couldn't save this document. Please try again.",
+        "deleteFailed": "We couldn't remove this document. Please try again."
+      }
+    }
+  }
+}
