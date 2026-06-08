@@ -58,6 +58,17 @@ export function SettingsIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function DiagnoseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M3 4v6a5 5 0 0 0 10 0V4" />
+      <path d="M3 4h2M11 4h2" />
+      <path d="M8 15v2a4 4 0 0 0 8 0v-1" />
+      <circle cx="18" cy="13" r="2.5" />
+    </Icon>
+  );
+}
+
 export function LogoutIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>

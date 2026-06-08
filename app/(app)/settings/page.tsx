@@ -1,0 +1,59 @@
+import { getTranslations } from "next-intl/server";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { LogoutButton } from "@/components/logout-button";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function SettingsPage() {
+  const t = await getTranslations("settings");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return (
+    <div className="mx-auto max-w-xl space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("account.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            {t("account.email")}
+          </p>
+          <p className="text-sm font-medium">{user?.email ?? "—"}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("language.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">{t("language.help")}</p>
+          <LanguageSwitcher />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("session.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LogoutButton />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

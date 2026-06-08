@@ -10,8 +10,23 @@
   "nav": {
     "dashboard": "Dashboard",
     "vehicles": "Vehicles",
-    "passport": "Passport",
+    "diagnose": "Diagnose",
     "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences.",
+    "account": {
+      "title": "Account",
+      "email": "Email"
+    },
+    "language": {
+      "title": "Language",
+      "help": "Choose your language."
+    },
+    "session": {
+      "title": "Session"
+    }
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -43,10 +58,25 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome, {email}",
-    "subtitle": "This is your Vin.ID home. Your vehicles and records will appear here.",
-    "emptyTitle": "Nothing here yet",
-    "emptyBody": "Once vehicles are added, you'll see their digital identity and history here.",
-    "comingSoon": "Coming soon"
+    "subtitle": "Your vehicles, history and Vehicle Passports in one place.",
+    "onboarding": {
+      "title": "Add your first vehicle to start building its digital history.",
+      "body": "Vin.ID keeps maintenance, issues, documents, reminders and a shareable Vehicle Passport together in one place.",
+      "cta": "Add vehicle"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "addVehicle": "Add vehicle",
+      "diagnose": "Diagnose",
+      "addMaintenance": "Add maintenance",
+      "uploadDocument": "Upload document",
+      "createPassport": "Create Passport"
+    },
+    "yourVehicles": {
+      "title": "Your vehicles",
+      "viewAll": "View all ({count})",
+      "noneActive": "No active vehicles."
+    }
   },
   "vehicles": {
     "title": "Vehicles",

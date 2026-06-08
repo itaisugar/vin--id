@@ -10,8 +10,23 @@
   "nav": {
     "dashboard": "לוח בקרה",
     "vehicles": "רכבים",
-    "passport": "דרכון",
+    "diagnose": "אבחון",
     "settings": "הגדרות"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "subtitle": "ניהול החשבון וההעדפות שלך.",
+    "account": {
+      "title": "חשבון",
+      "email": "אימייל"
+    },
+    "language": {
+      "title": "שפה",
+      "help": "בחר את השפה שלך."
+    },
+    "session": {
+      "title": "התחברות"
+    }
   },
   "auth": {
     "loginTitle": "ברוך שובך",
@@ -43,10 +58,25 @@
   "dashboard": {
     "title": "לוח בקרה",
     "welcome": "ברוך הבא, {email}",
-    "subtitle": "זהו הבית שלך ב-Vin.ID. הרכבים והרשומות שלך יופיעו כאן.",
-    "emptyTitle": "אין כאן עדיין כלום",
-    "emptyBody": "לאחר הוספת רכבים, תראה כאן את הזהות הדיגיטלית וההיסטוריה שלהם.",
-    "comingSoon": "בקרוב"
+    "subtitle": "הרכבים, ההיסטוריה ודרכוני הרכב שלך במקום אחד.",
+    "onboarding": {
+      "title": "הוסף את הרכב הראשון שלך כדי להתחיל לבנות את ההיסטוריה הדיגיטלית שלו.",
+      "body": "Vin.ID מרכז תחזוקה, תקלות, מסמכים, תזכורות ודרכון רכב הניתן לשיתוף — הכול במקום אחד.",
+      "cta": "הוספת רכב"
+    },
+    "quickActions": {
+      "title": "פעולות מהירות",
+      "addVehicle": "הוספת רכב",
+      "diagnose": "אבחון",
+      "addMaintenance": "הוספת תחזוקה",
+      "uploadDocument": "העלאת מסמך",
+      "createPassport": "יצירת דרכון"
+    },
+    "yourVehicles": {
+      "title": "הרכבים שלך",
+      "viewAll": "הצג הכל ({count})",
+      "noneActive": "אין רכבים פעילים."
+    }
   },
   "vehicles": {
     "title": "רכבים",
