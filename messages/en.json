@@ -372,6 +372,33 @@
         "saveFailed": "We couldn't save this document. Please try again.",
         "deleteFailed": "We couldn't remove this document. Please try again."
       }
+    },
+    "extraction": {
+      "extract": "Extract with AI",
+      "extracting": "Extracting…",
+      "mockNotice": "Mock extraction mode: this is a structured demo extraction, not a real AI/OCR result.",
+      "source": "mock",
+      "confidence": {
+        "low": "Low confidence",
+        "medium": "Medium confidence",
+        "high": "High confidence"
+      },
+      "review": {
+        "title": "Review extracted fields",
+        "help": "Extracted fields require your confirmation before saving. Nothing is saved automatically.",
+        "confirm": "Confirm and update document",
+        "confirming": "Saving…",
+        "discard": "Discard extraction",
+        "discarding": "Discarding…"
+      },
+      "errors": {
+        "extractFailed": "We couldn't run extraction. Please try again.",
+        "confirmFailed": "We couldn't save the confirmed fields. Please try again.",
+        "discardFailed": "We couldn't discard the extraction. Please try again.",
+        "invalidDate": "Enter a valid date.",
+        "invalidAmount": "Enter a valid amount.",
+        "tooLong": "This value is too long."
+      }
     }
   },
   "reminders": {

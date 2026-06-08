@@ -9,10 +9,14 @@ import {
 } from "@/components/ui/card";
 import { DocumentForm } from "@/components/documents/document-form";
 import { DeleteDocumentButton } from "@/components/documents/delete-document-button";
+import { ExtractWithAiButton } from "@/components/documents/extract-with-ai-button";
+import { ExtractionReview } from "@/components/documents/extraction-review";
 import {
   getDocument,
   getDocumentSignedUrl,
 } from "@/lib/documents/service";
+import { getLatestPendingExtraction } from "@/lib/documents/extraction-service";
+import { extractionResultSchema } from "@/lib/documents/extraction-types";
 import { documentToFormValues, isImageMime } from "@/lib/documents/types";
 import { getVehicleById } from "@/lib/vehicles/service";
 
@@ -30,6 +34,12 @@ export default async function DocumentDetailPage({
 
   const signedUrl = await getDocumentSignedUrl(id, documentId);
   const isImage = doc.mime_type ? isImageMime(doc.mime_type) : false;
+
+  // Pending mock extraction (if any) drives the review panel.
+  const pending = await getLatestPendingExtraction(documentId);
+  const pendingResult = pending
+    ? (extractionResultSchema.safeParse(pending.extracted_data).data ?? null)
+    : null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -78,19 +88,31 @@ export default async function DocumentDetailPage({
           )}
           <p className="text-xs text-muted-foreground">{t("preview.expires")}</p>
 
-          {/* AI extraction placeholder — not implemented yet. */}
-          <div className="rounded-md border border-dashed border-border p-3">
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md border border-border px-3 text-sm font-medium opacity-60"
-            >
-              {t("ai.extract")}
-            </button>
-            <p className="mt-2 text-xs text-muted-foreground">{t("ai.help")}</p>
-          </div>
+          {/* MOCK extraction — entry point only (review panel renders below). */}
+          {!pendingResult ? (
+            <ExtractWithAiButton vehicleId={id} documentId={documentId} />
+          ) : null}
         </CardContent>
       </Card>
+
+      {/* Extraction review (pending, requires confirmation) */}
+      {pending && pendingResult ? (
+        <ExtractionReview
+          vehicleId={id}
+          documentId={documentId}
+          extractionId={pending.id}
+          result={pendingResult}
+          fallback={{
+            document_type: doc.doc_type,
+            document_date: doc.document_date,
+            expiry_date: doc.expiry_date,
+            vendor: doc.vendor,
+            amount: doc.amount,
+            currency: doc.currency,
+          }}
+          containsPersonalInfo={doc.contains_personal_info}
+        />
+      ) : null}
 
       {/* Metadata edit */}
       <Card>
