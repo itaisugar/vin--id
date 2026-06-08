@@ -29,6 +29,7 @@ export default async function VehicleDetailPage({
   const { accepted } = await searchParams;
   const t = await getTranslations("vehicles");
   const tp = await getTranslations("passports.accept");
+  const tdiag = await getTranslations("diagnose");
   const locale = await getLocale();
 
   const vehicle = await getVehicleById(id);
@@ -79,7 +80,13 @@ export default async function VehicleDetailPage({
             <VehicleStatusBadge status={vehicle.status} />
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={`/diagnose?vehicle=${vehicle.id}`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            {tdiag("vehicleCta")}
+          </Link>
           <Link
             href={`/vehicles/${vehicle.id}/edit`}
             className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"

@@ -639,5 +639,98 @@
         "generic": "We couldn't accept this Passport. Please try again."
       }
     }
+  },
+  "diagnose": {
+    "title": "Diagnosis assistant",
+    "subtitle": "Describe a symptom to get cautious troubleshooting guidance.",
+    "safetyIntro": "This is a cautious troubleshooting guide. It helps you understand symptoms and decide when to contact a mechanic. It does not certify safety or replace a qualified mechanic.",
+    "mockNotice": "Mock diagnosis mode: this is a structured demo response, not a real AI analysis.",
+    "vehicleCta": "Diagnose",
+    "dashboardCta": {
+      "title": "Have a symptom or warning light?",
+      "body": "Get cautious troubleshooting guidance and save it as an issue.",
+      "action": "Diagnose"
+    },
+    "noVehicles": {
+      "title": "Add a vehicle before starting diagnosis",
+      "body": "You need at least one vehicle to start a diagnosis.",
+      "cta": "Add vehicle"
+    },
+    "history": {
+      "title": "Recent diagnoses",
+      "untitledVehicle": "Vehicle"
+    },
+    "status": {
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "form": {
+      "vehicle": "Vehicle",
+      "symptoms": "Describe the symptom",
+      "symptomsPlaceholder": "e.g. Squeaking when I brake; a ticking noise when cold; smell of fuel…",
+      "mileage": "Current mileage",
+      "start": "Get guidance",
+      "analyzing": "Analyzing…",
+      "cancel": "Cancel",
+      "errors": {
+        "vehicleRequired": "Please choose a vehicle.",
+        "symptomsRequired": "Please describe the symptom.",
+        "tooLong": "This is too long.",
+        "invalidMileage": "Enter a valid mileage.",
+        "diagnoseFailed": "We couldn't run the diagnosis. Please try again.",
+        "saveIssueFailed": "We couldn't save this as an issue. Please try again."
+      }
+    },
+    "safetyLevels": {
+      "info": "Info",
+      "monitor": "Monitor",
+      "diy_simple": "Simple DIY check",
+      "mechanic_recommended": "Mechanic recommended",
+      "urgent": "Urgent",
+      "stop_immediately": "Stop immediately"
+    },
+    "safetyBanner": {
+      "urgent": "Handle this soon and avoid unnecessary driving until it is checked.",
+      "stop_immediately": "Possible safety risk — consider not continuing to drive."
+    },
+    "safeToDrive": {
+      "label": "Safe to drive",
+      "yes": "Yes",
+      "no": "No",
+      "unknown": "Unknown"
+    },
+    "confidence": {
+      "label": "Confidence",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "likelihood": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "recommendation": {
+      "diy": "This may be something you can check yourself, carefully.",
+      "mechanic": "We recommend having a mechanic inspect this.",
+      "urgent": "Handle this soon and avoid unnecessary driving.",
+      "stop": "Consider not driving and contacting a mechanic or roadside assistance."
+    },
+    "sections": {
+      "causes": "Possible causes",
+      "checks": "Step-by-step checks",
+      "whenToContact": "When to stop and contact a mechanic",
+      "recommendation": "Recommendation"
+    },
+    "result": {
+      "title": "Diagnosis",
+      "yourMessage": "Your description",
+      "unavailable": "The diagnosis for this session is unavailable."
+    },
+    "saveIssue": {
+      "action": "Save as issue",
+      "pending": "Saving…",
+      "hint": "Saves this to the vehicle's issue history (marked as from the diagnosis assistant)."
+    }
   }
 }
