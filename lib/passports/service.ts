@@ -65,11 +65,21 @@ export interface PassportCounts {
   documentsNonShareable: number;
 }
 
+/**
+ * Base URL used to build Passport share links (`/p/{token}`).
+ * - APP_PUBLIC_URL: explicit override — set this to the stable production domain.
+ * - VERCEL_URL: automatic per-deployment host on Vercel (preview/prod), used so
+ *   the localhost fallback never leaks into a deployed environment.
+ * - localhost: local development only.
+ */
 function appPublicUrl(): string {
-  return (process.env.APP_PUBLIC_URL ?? "http://localhost:3000").replace(
-    /\/$/,
-    "",
-  );
+  if (process.env.APP_PUBLIC_URL) {
+    return process.env.APP_PUBLIC_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
 }
 
 async function getUserId(supabase: SupabaseClient): Promise<string> {
