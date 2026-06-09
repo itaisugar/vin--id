@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   confirmExtraction,
   discardExtraction,
@@ -28,6 +29,15 @@ export async function extractDocumentAction(
   } catch {
     return { error: "extractFailed" };
   }
+
+  await trackEvent({
+    eventName: "mock_document_extraction_started",
+    entityType: "document",
+    entityId: documentId,
+    vehicleId,
+    metadata: { mock_mode: true },
+  });
+
   revalidateDoc(vehicleId, documentId);
   return {};
 }
@@ -46,6 +56,15 @@ export async function confirmExtractionAction(
   } catch {
     return { error: "confirmFailed" };
   }
+
+  await trackEvent({
+    eventName: "mock_document_extraction_confirmed",
+    entityType: "document",
+    entityId: documentId,
+    vehicleId,
+    metadata: { mock_mode: true },
+  });
+
   revalidateDoc(vehicleId, documentId);
   revalidatePath(`/vehicles/${vehicleId}/documents`);
   return {};

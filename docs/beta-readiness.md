@@ -20,6 +20,9 @@ services, no AI keys.
 - **i18n** — English + Hebrew, RTL.
 - **Beta basics** — beta label, onboarding, in-app feedback, Privacy/Terms,
   friendly 404/error pages.
+- **Privacy-safe event tracking** — minimal first-party product events in
+  Supabase `app_events` (no third-party analytics). See
+  `docs/event-tracking.md`.
 
 ## What is still mock (must be communicated to testers)
 - **AI diagnosis** is a deterministic keyword-based mock — **not** real AI.
@@ -75,3 +78,7 @@ services, no AI keys.
 - Public preview exposes snapshot data only — no `storage_path`, no
   `owner_user_id`/`issuer_user_id`, no `token_hash`.
 - Storage bucket private; RLS enabled on every table; no public table policies.
+- Event tracking stores only non-sensitive metadata (counts/booleans/enums);
+  `app_events` is insert-only under RLS (no read), and the anonymous preview
+  event is written by a `SECURITY DEFINER` function that never stores the raw
+  token or its hash.

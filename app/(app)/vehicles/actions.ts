@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   archiveVehicle,
   createVehicle,
@@ -44,6 +45,13 @@ export async function createVehicleAction(
   } catch {
     return { error: "saveFailed" };
   }
+
+  await trackEvent({
+    eventName: "vehicle_created",
+    entityType: "vehicle",
+    entityId: newId,
+    vehicleId: newId,
+  });
 
   revalidatePath("/vehicles");
   redirect(`/vehicles/${newId}`);

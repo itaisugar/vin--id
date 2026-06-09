@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { trackEvent } from "@/lib/analytics/track";
 import { createClient } from "@/lib/supabase/server";
 import { sha256Hex } from "@/lib/passports/snapshot";
 
@@ -37,6 +38,11 @@ export async function acceptPassportAction(
 
   const envelope = data as { state: string; new_vehicle_id?: string };
   if (envelope.state === "ok" && envelope.new_vehicle_id) {
+    await trackEvent({
+      eventName: "passport_accepted",
+      entityType: "passport",
+      vehicleId: envelope.new_vehicle_id,
+    });
     revalidatePath("/vehicles");
     redirect(`/vehicles/${envelope.new_vehicle_id}?accepted=1`);
   }

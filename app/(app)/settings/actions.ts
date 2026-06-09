@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -58,6 +59,13 @@ export async function submitFeedbackAction(
     user_agent: userAgent,
   });
   if (error) return { error: "submitFailed" };
+
+  // Non-sensitive: only the feedback type enum, never the message/email.
+  await trackEvent({
+    eventName: "beta_feedback_submitted",
+    entityType: "feedback",
+    metadata: { type: parsed.data.type },
+  });
 
   return { success: true };
 }

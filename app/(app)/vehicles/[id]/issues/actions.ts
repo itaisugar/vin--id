@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   createIssue,
   resolveIssue,
@@ -50,6 +51,13 @@ export async function createIssueAction(
   } catch {
     return { error: "saveFailed" };
   }
+
+  await trackEvent({
+    eventName: "issue_created",
+    entityType: "issue",
+    vehicleId,
+    metadata: { severity: parsed.data.severity, status: parsed.data.status },
+  });
 
   revalidateVehicle(vehicleId);
   redirect(`/vehicles/${vehicleId}/issues`);

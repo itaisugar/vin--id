@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   createReminder,
   setReminderStatus,
@@ -51,6 +52,16 @@ export async function createReminderAction(
   } catch {
     return { error: "saveFailed" };
   }
+
+  await trackEvent({
+    eventName: "reminder_created",
+    entityType: "reminder",
+    vehicleId,
+    metadata: {
+      reminder_type: parsed.data.reminder_type,
+      urgency: parsed.data.urgency,
+    },
+  });
 
   revalidate(vehicleId);
   redirect(`/vehicles/${vehicleId}/reminders`);

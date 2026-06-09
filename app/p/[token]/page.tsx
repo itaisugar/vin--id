@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PublicError } from "@/components/passports/public-error";
 import { PublicPassportReport } from "@/components/passports/public-passport-report";
 import { PublicShell } from "@/components/passports/public-shell";
+import { trackPublicPreviewOpened } from "@/lib/analytics/track";
 import { getPublicPassport, isTokenOwner } from "@/lib/passports/public";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,6 +27,10 @@ export default async function PublicPassportPage({
     } = await supabase.auth.getUser();
     loggedIn = Boolean(user);
     isOwner = loggedIn ? await isTokenOwner(token) : false;
+
+    // Privacy-safe preview event (anonymous-safe; stores only passport_id via a
+    // SECURITY DEFINER fn). Best-effort — never blocks the page.
+    await trackPublicPreviewOpened(token);
   }
 
   return (

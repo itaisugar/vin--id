@@ -82,6 +82,7 @@
         "Public Passport links expose only the selected snapshot data, not your account or raw files.",
         "Documents are private by default and are shared only if you explicitly allow it.",
         "AI-style features run in mock mode (not real AI analysis) while MOCK_AI is enabled.",
+        "We log minimal product events during the beta (e.g. that a vehicle or Passport was created) to understand usage. These never include document contents, issue symptoms, diagnosis text, VIN, license plate, storage paths, or raw Passport tokens, and we do not use any third-party analytics provider.",
         "You can request deletion or export of your data; full self-service automation may come later."
       ],
       "betaNote": "This is a beta privacy summary, not a final legal document."

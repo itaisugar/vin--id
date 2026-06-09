@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -87,8 +88,14 @@ export async function signup(
 
   // If email confirmation is required, no session is returned yet.
   if (!data.session) {
+    // TODO(signup-confirm): no session = no auth.uid() yet, so user_signed_up
+    // can't be logged under insert-own RLS. Revisit if confirmation is enabled.
     return { success: true };
   }
+
+  // Session present (confirmation disabled): auth.uid() now resolves to the new
+  // user, so the insert-own RLS policy is satisfied.
+  await trackEvent({ eventName: "user_signed_up", entityType: "user" });
 
   redirect("/dashboard");
 }

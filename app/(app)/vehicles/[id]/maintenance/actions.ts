@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   createMaintenanceLog,
   softDeleteMaintenanceLog,
@@ -49,6 +50,13 @@ export async function createMaintenanceAction(
   } catch {
     return { error: "saveFailed" };
   }
+
+  await trackEvent({
+    eventName: "maintenance_created",
+    entityType: "maintenance",
+    vehicleId,
+    metadata: { trust_label: parsed.data.trust_label },
+  });
 
   revalidateVehicle(vehicleId);
   redirect(`/vehicles/${vehicleId}/maintenance`);

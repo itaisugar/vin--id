@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   createDiagnosis,
   saveSessionAsIssue,
@@ -45,6 +46,14 @@ export async function createDiagnosisAction(
     return { error: "diagnoseFailed" };
   }
 
+  await trackEvent({
+    eventName: "mock_diagnosis_completed",
+    entityType: "diagnosis_session",
+    entityId: sessionId,
+    vehicleId: parsed.data.vehicleId,
+    metadata: { mock_mode: true, language: locale },
+  });
+
   revalidatePath("/diagnose");
   redirect(`/diagnose/${sessionId}`);
 }
@@ -58,6 +67,13 @@ export async function saveAsIssueAction(
   } catch {
     return { error: "saveIssueFailed" };
   }
+
+  await trackEvent({
+    eventName: "mock_diagnosis_saved_as_issue",
+    entityType: "issue",
+    vehicleId,
+    metadata: { mock_mode: true },
+  });
 
   revalidatePath(`/vehicles/${vehicleId}`);
   revalidatePath(`/vehicles/${vehicleId}/issues`);

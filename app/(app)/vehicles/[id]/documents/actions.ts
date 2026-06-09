@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   createDocument,
   softDeleteDocument,
@@ -58,6 +59,18 @@ export async function createDocumentAction(
   } catch {
     return { error: "saveFailed" };
   }
+
+  // file_type is coarse (pdf/image) — never the filename, which may be personal.
+  await trackEvent({
+    eventName: "document_uploaded",
+    entityType: "document",
+    entityId: parsed.data.documentId,
+    vehicleId,
+    metadata: {
+      file_type: parsed.data.mime_type === "application/pdf" ? "pdf" : "image",
+      doc_type: parsed.data.document_type,
+    },
+  });
 
   revalidateVehicle(vehicleId);
   redirect(`/vehicles/${vehicleId}/documents`);

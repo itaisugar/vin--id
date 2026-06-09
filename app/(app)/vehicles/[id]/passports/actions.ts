@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { trackEvent } from "@/lib/analytics/track";
 import { createPassport, revokePassport } from "@/lib/passports/service";
 import { passportOptionsSchema } from "@/lib/passports/types";
 
@@ -35,6 +36,25 @@ export async function createPassportAction(
       vehicleId,
       parsed.data,
     );
+
+    const o = parsed.data;
+    await trackEvent({
+      eventName: "passport_created",
+      entityType: "passport",
+      entityId: passportId,
+      vehicleId,
+      passportId,
+      metadata: {
+        included_scopes_count: [
+          o.includeMaintenance,
+          o.includeIssues,
+          o.includeDocuments,
+          o.includeReminders,
+        ].filter(Boolean).length,
+        include_personal_docs: o.includePersonalDocs,
+      },
+    });
+
     revalidate(vehicleId, passportId);
     return { passportId, shareUrl };
   } catch {
