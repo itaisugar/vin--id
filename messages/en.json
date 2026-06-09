@@ -30,6 +30,99 @@
     "diagnose": "Diagnose",
     "settings": "Settings"
   },
+  "landing": {
+    "nav": {
+      "signIn": "Sign in",
+      "startBeta": "Start beta"
+    },
+    "hero": {
+      "badge": "Beta",
+      "headline": "Build a trusted digital history for your vehicle.",
+      "subheadline": "Track maintenance, issues, documents, reminders, and create a Vehicle Passport you can share when selling or transferring a vehicle.",
+      "primaryCta": "Start beta",
+      "secondaryCta": "How Vehicle Passport works"
+    },
+    "problem": {
+      "title": "Vehicle history is scattered",
+      "points": [
+        "Receipts, photos, chats, and memory — a vehicle's history lives in too many places.",
+        "Buyers need more context than a listing can give.",
+        "Sellers need a clean way to show what is actually documented."
+      ]
+    },
+    "features": {
+      "title": "What Vin.ID does",
+      "items": {
+        "history": {
+          "title": "Vehicle history",
+          "body": "One place for everything you know about your vehicle."
+        },
+        "maintenance": {
+          "title": "Maintenance logs",
+          "body": "Record services with dates, mileage, and trust labels."
+        },
+        "issues": {
+          "title": "Issue logs",
+          "body": "Track symptoms and how they were handled."
+        },
+        "documents": {
+          "title": "Documents",
+          "body": "Keep registration, insurance, and invoices — private by default."
+        },
+        "reminders": {
+          "title": "Reminders",
+          "body": "Stay ahead of service, inspection, and renewals."
+        },
+        "passport": {
+          "title": "Vehicle Passport",
+          "body": "A shareable, tamper-evident snapshot of selected history."
+        }
+      }
+    },
+    "passport": {
+      "title": "The Vehicle Passport",
+      "lead": "A shareable snapshot of the vehicle history you choose to include.",
+      "points": [
+        "Shows what is documented, what is missing, and what was shared.",
+        "Includes a Record Confidence Score that reflects documentation quality.",
+        "A buyer can preview it before deciding.",
+        "A buyer can accept it to copy the shared history into their account."
+      ],
+      "disclaimerTitle": "Careful by design",
+      "disclaimers": [
+        "A tamper-evident snapshot — not an official ownership document.",
+        "Not a mechanical certification or a guarantee of condition.",
+        "Record Confidence measures documentation quality, not the vehicle's condition."
+      ]
+    },
+    "beta": {
+      "title": "Vin.ID is in beta",
+      "points": [
+        "We're testing with early users — expect rough edges.",
+        "Please don't rely on Vin.ID for safety-critical decisions.",
+        "A Vehicle Passport should complement, not replace, a professional inspection."
+      ],
+      "mockNote": "AI diagnosis and document extraction are currently mock/demo — not real AI or OCR."
+    },
+    "privacy": {
+      "title": "Privacy & trust",
+      "points": [
+        "Your documents are private by default.",
+        "You control exactly what a Vehicle Passport shares.",
+        "A public Passport preview shows only the snapshot data you selected.",
+        "Original document files are not copied during a transfer in the current beta.",
+        "No third-party analytics provider is used."
+      ]
+    },
+    "cta": {
+      "title": "Start building your vehicle's digital history",
+      "subtitle": "Free during the beta.",
+      "startBeta": "Start beta",
+      "signIn": "Sign in"
+    },
+    "testerNote": "Testing Vin.ID beta? Send feedback from Settings inside the app.",
+    "footerTagline": "Your smart digital vehicle identity"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your account and preferences.",
