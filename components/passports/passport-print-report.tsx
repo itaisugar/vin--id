@@ -159,7 +159,11 @@ function Row({
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
-      <dd className={mono ? "break-all font-mono text-xs" : "text-sm font-medium"}>
+      <dd
+        className={
+          mono ? "break-all font-mono text-xs" : "break-words text-sm font-medium"
+        }
+      >
         {value}
       </dd>
     </div>

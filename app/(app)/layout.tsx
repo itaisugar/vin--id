@@ -45,8 +45,11 @@ export default async function AppLayout({
           <LogoutButton className="w-full justify-start" />
         </aside>
 
-        {/* Main content (extra bottom padding leaves room for mobile nav) */}
-        <main className="flex-1 p-4 pb-24 md:pb-8">{children}</main>
+        {/* Main content (extra bottom padding leaves room for the mobile nav,
+            including the iOS home-indicator safe area) */}
+        <main className="flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-8">
+          {children}
+        </main>
       </div>
 
       {/* Mobile bottom navigation */}

@@ -277,7 +277,7 @@ function Row({ label, value }: { label: string; value: string | null }) {
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
-      <dd className="text-sm font-medium">{value}</dd>
+      <dd className="break-words text-sm font-medium">{value}</dd>
     </div>
   );
 }

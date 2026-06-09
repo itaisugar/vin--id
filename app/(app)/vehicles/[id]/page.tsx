@@ -68,15 +68,15 @@ export default async function VehicleDetailPage({
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <Link
             href="/vehicles"
             className="text-sm text-muted-foreground hover:underline"
           >
             ← {t("title")}
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{title}</h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="break-words text-2xl font-bold">{title}</h1>
             <VehicleStatusBadge status={vehicle.status} />
           </div>
         </div>
@@ -178,7 +178,7 @@ function DetailRow({
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
-      <dd className="text-sm font-medium">{value}</dd>
+      <dd className="break-words text-sm font-medium">{value}</dd>
     </div>
   );
 }
