@@ -15,7 +15,16 @@ const emptyToUndefined = (v: unknown) =>
   typeof v === "string" && v.trim() === "" ? undefined : v;
 
 const feedbackSchema = z.object({
-  type: z.enum(["bug", "idea", "confusing", "other"]).default("other"),
+  type: z
+    .enum([
+      "bug",
+      "idea",
+      "confusing",
+      "trust_privacy",
+      "beta_test_result",
+      "other",
+    ])
+    .default("other"),
   message: z
     .string({ error: "messageRequired" })
     .trim()

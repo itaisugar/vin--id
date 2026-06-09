@@ -9,7 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-const TYPES = ["bug", "idea", "confusing", "other"] as const;
+const TYPES = [
+  "bug",
+  "idea",
+  "confusing",
+  "trust_privacy",
+  "beta_test_result",
+  "other",
+] as const;
 
 export function FeedbackForm({ defaultEmail }: { defaultEmail: string }) {
   const t = useTranslations("settings.feedback");

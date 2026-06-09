@@ -62,6 +62,9 @@ export default async function SettingsPage() {
           <CardTitle className="text-base">{t("feedback.title")}</CardTitle>
           <p className="text-sm font-medium">{t("feedback.betaPrompt")}</p>
           <p className="text-sm text-muted-foreground">{t("feedback.help")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("feedback.betaGuideNote")}
+          </p>
         </CardHeader>
         <CardContent>
           <FeedbackForm defaultEmail={user?.email ?? ""} />

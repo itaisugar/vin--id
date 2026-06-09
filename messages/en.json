@@ -66,11 +66,14 @@
       "title": "Send beta feedback",
       "help": "Vin.ID is in beta. Tell us what's broken, confusing, or missing.",
       "betaPrompt": "Using Vin.ID beta? Tell us what was confusing.",
+      "betaGuideNote": "Beta tester? Follow the test guide (docs/beta-test-script.md) and send your results here.",
       "type": {
         "label": "Type",
         "bug": "Bug",
         "idea": "Idea",
         "confusing": "Confusing",
+        "trust_privacy": "Trust / privacy concern",
+        "beta_test_result": "Beta test result",
         "other": "Other"
       },
       "message": "Message",

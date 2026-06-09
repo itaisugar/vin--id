@@ -66,11 +66,14 @@
       "title": "שליחת משוב בטא",
       "help": "Vin.ID בגרסת בטא. ספר לנו מה תקול, מבלבל או חסר.",
       "betaPrompt": "משתמש ב-Vin.ID בטא? ספר לנו מה היה מבלבל.",
+      "betaGuideNote": "בודק בטא? עקוב אחר מדריך הבדיקה (docs/beta-test-script.md) ושלח את התוצאות כאן.",
       "type": {
         "label": "סוג",
         "bug": "באג",
         "idea": "רעיון",
         "confusing": "מבלבל",
+        "trust_privacy": "חשש אמון / פרטיות",
+        "beta_test_result": "תוצאת בדיקת בטא",
         "other": "אחר"
       },
       "message": "הודעה",
