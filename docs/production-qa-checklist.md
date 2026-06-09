@@ -29,6 +29,16 @@ URLs, signed URLs, share links off-device). Legend: ☐ = to test.
 ## 2. Language / RTL
 - ☐ Switch EN ↔ HE; UI translates and flips LTR/RTL; choice persists.
 - ☐ No raw translation keys visible.
+- ☐ Hebrew: forms, badges, cards, and the public preview read right-to-left
+  (no stray left-aligned blocks).
+
+## 2b. Dashboard
+- ☐ With **no vehicles**: onboarding empty state + "Add vehicle".
+- ☐ With vehicles: quick actions (Add vehicle / Diagnose / Add maintenance /
+  Upload document / Create Passport) all link to a valid page.
+- ☐ "Your vehicles" cards + upcoming reminders render.
+- ☐ Bottom nav (Dashboard / Vehicles / Diagnose / Settings) — every item routes
+  to a real page; no dead/disabled items.
 
 ## 3. Vehicle CRUD
 - ☐ Create / view / edit a vehicle; archive (status → archived, not deleted).

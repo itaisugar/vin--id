@@ -31,6 +31,12 @@ APP_PUBLIC_URL                = https://<your-vercel-domain>.vercel.app
 MOCK_AI                       = true
 ```
 
+> **Set the `NEXT_PUBLIC_*` vars before the first build.** They are inlined into
+> the browser bundle at **build time**, so they must exist when Vercel builds
+> (Vercel exposes project env vars to the build by default). The build itself no
+> longer crashes if they're missing (env is validated lazily at request time),
+> but the app won't reach Supabase until they're set — add them, then redeploy.
+
 `APP_PUBLIC_URL` examples:
 - Local dev: `http://localhost:3000` (or `:3001` / `:3002` if the port differs).
 - Production: `https://<your-vercel-domain>.vercel.app` or your custom domain.
