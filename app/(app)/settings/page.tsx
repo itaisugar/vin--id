@@ -50,6 +50,7 @@ export default async function SettingsPage() {
       <Card>
         <CardHeader className="space-y-1">
           <CardTitle className="text-base">{t("feedback.title")}</CardTitle>
+          <p className="text-sm font-medium">{t("feedback.betaPrompt")}</p>
           <p className="text-sm text-muted-foreground">{t("feedback.help")}</p>
         </CardHeader>
         <CardContent>

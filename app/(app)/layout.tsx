@@ -25,7 +25,7 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       {/* Top bar */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-4 py-3 print:hidden">
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold">{t("appName")}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -40,7 +40,7 @@ export default async function AppLayout({
 
       <div className="mx-auto flex w-full max-w-6xl flex-1">
         {/* Desktop sidebar */}
-        <aside className="hidden w-60 shrink-0 border-e border-border p-4 md:flex md:flex-col md:justify-between">
+        <aside className="hidden w-60 shrink-0 border-e border-border p-4 md:flex md:flex-col md:justify-between print:hidden">
           <SidebarNav />
           <LogoutButton className="w-full justify-start" />
         </aside>
@@ -50,7 +50,9 @@ export default async function AppLayout({
       </div>
 
       {/* Mobile bottom navigation */}
-      <BottomNav />
+      <div className="print:hidden">
+        <BottomNav />
+      </div>
     </div>
   );
 }

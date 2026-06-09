@@ -21,9 +21,19 @@ export function ShareUrl({ url }: { url: string }) {
   };
 
   return (
-    <div className="flex gap-2">
-      <Input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
-      <Button type="button" variant="outline" onClick={copy}>
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <Input
+        readOnly
+        value={url}
+        onFocus={(e) => e.currentTarget.select()}
+        className="min-w-0 flex-1"
+      />
+      <Button
+        type="button"
+        variant="outline"
+        onClick={copy}
+        className="w-full sm:w-auto"
+      >
         {copied ? t("share.copied") : t("share.copy")}
       </Button>
     </div>

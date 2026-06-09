@@ -211,21 +211,49 @@ export async function PublicPassportReport({
         </CardContent>
       </Card>
 
+      {/* H2. Buyer guidance — only for non-owners (before the accept CTA) */}
+      {!isOwner ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              {t("public.buyerGuidance.title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">
+              <li>{t("public.buyerGuidance.review")}</li>
+              <li>{t("public.buyerGuidance.copies")}</li>
+              <li>{t("public.buyerGuidance.inspection")}</li>
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* I. Accept CTA — sign-in / owner / buyer */}
       <Card>
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
           {isOwner ? (
-            <p className="text-sm font-medium">{t("accept.ownerNote")}</p>
+            <p className="text-sm font-medium">
+              {t("accept.ownerCannotAccept")}
+            </p>
           ) : loggedIn ? (
-            <AcceptPassportButton token={token} />
+            <>
+              <AcceptPassportButton token={token} />
+              <p className="text-xs text-muted-foreground">
+                {t("accept.buyerOneTime")}
+              </p>
+            </>
           ) : (
             <>
               <Link
                 href={loginHref}
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 sm:w-auto"
               >
                 {t("accept.signInCta")}
               </Link>
+              <p className="text-xs text-muted-foreground">
+                {t("accept.previewFirst")}
+              </p>
               <p className="text-xs text-muted-foreground">
                 {t("accept.notOfficial")}
               </p>

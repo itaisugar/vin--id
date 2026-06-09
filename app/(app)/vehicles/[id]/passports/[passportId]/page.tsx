@@ -72,9 +72,22 @@ export default async function PassportDetailPage({
             <PassportStatusBadge status={status} />
           </div>
         </div>
-        {status === "active" ? (
-          <RevokePassportButton vehicleId={id} passportId={passportId} />
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/vehicles/${id}/passports/${passportId}/print`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            {t("print.exportCta")}
+          </Link>
+          {status === "active" ? (
+            <RevokePassportButton vehicleId={id} passportId={passportId} />
+          ) : null}
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">{t("print.exportHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("print.staticCopyNote")}</p>
       </div>
 
       {/* Meta + confidence */}
@@ -95,7 +108,13 @@ export default async function PassportDetailPage({
         <CardHeader>
           <CardTitle className="text-base">{t("share.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              {t("share.statusLabel")}
+            </span>
+            <PassportStatusBadge status={status} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {status === "active"
               ? t("share.activeNote", { date: fmt(passport.expires_at) })
@@ -104,9 +123,16 @@ export default async function PassportDetailPage({
           {status === "active" ? (
             <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
           ) : null}
-          <p className="text-xs text-muted-foreground">{t("share.tokenNote")}</p>
-          {/* TODO(public-preview): build public /p/[token] page. */}
-          {/* TODO(regenerate-link): allow re-issuing a share token. */}
+          <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">
+            {t("share.freshLinkNote")}
+          </p>
+          <Link
+            href={`/vehicles/${id}/passports/new`}
+            className="inline-flex h-9 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+          >
+            {t("share.createNewForLink")}
+          </Link>
+          {/* TODO(regenerate-link): allow re-issuing a share token in place. */}
         </CardContent>
       </Card>
 

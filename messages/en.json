@@ -44,6 +44,7 @@
     "feedback": {
       "title": "Send beta feedback",
       "help": "Vin.ID is in beta. Tell us what's broken, confusing, or missing.",
+      "betaPrompt": "Using Vin.ID beta? Tell us what was confusing.",
       "type": {
         "label": "Type",
         "bug": "Bug",
@@ -649,12 +650,24 @@
       "title": "Share link",
       "copy": "Copy",
       "copied": "Copied",
+      "share": "Share",
       "copyOnce": "This link is shown only once. Copy it now — for your security only a hash is stored, so it won't be shown here again.",
       "saveNote": "Save this link now — for your security only a hash is stored, so the full link won't be shown here again.",
       "terms": "This secure link expires in 72 hours and can be revoked by the owner. Accepting the Passport is a one-time action.",
       "activeNote": "Your share link is active until {date}. It can be opened multiple times until it expires, is revoked, or is accepted.",
       "inactiveNote": "This passport is no longer shareable.",
-      "tokenNote": "The full link is shown only at creation (only a hash is stored). Opening the preview does not use up the link."
+      "tokenNote": "The full link is shown only at creation (only a hash is stored). Opening the preview does not use up the link.",
+      "statusLabel": "Link status",
+      "freshLinkNote": "For security, the full share link is shown only immediately after creation. Create a new Passport if you need a fresh share link.",
+      "createNewForLink": "Create a new Passport for a fresh link"
+    },
+    "nextSteps": {
+      "title": "Next steps",
+      "copyLink": "Copy the secure link and send it to the buyer.",
+      "buyerPreview": "The buyer can preview the Passport before accepting.",
+      "oneTimeAccept": "Accepting the Passport is a one-time action.",
+      "revokeBefore": "You can revoke the Passport any time before it is accepted.",
+      "printCopy": "You can print or save a PDF copy for manual sharing."
     },
     "detail": {
       "title": "Vehicle Passport",
@@ -737,6 +750,12 @@
         "notCertification": "It does not certify the vehicle's mechanical condition.",
         "inspect": "Always inspect the vehicle and consult a qualified professional before buying."
       },
+      "buyerGuidance": {
+        "title": "Before you accept",
+        "review": "Review the history, document details, missing items, and recommendations before accepting.",
+        "copies": "Accepting copies the shared history into your account.",
+        "inspection": "This does not replace a professional inspection."
+      },
       "acceptCta": "Sign in to accept this Passport — coming soon",
       "acceptHint": "Accepting a Passport copies its history into your account. This is a one-time action and is coming soon.",
       "errors": {
@@ -752,6 +771,9 @@
       "signInCta": "Sign in to accept this Passport",
       "acceptCta": "Accept Passport into my account",
       "ownerNote": "You are the owner of this Passport.",
+      "ownerCannotAccept": "You can't accept your own Passport. Share the link with a buyer so they can accept it.",
+      "previewFirst": "You can preview the full Passport before signing in.",
+      "buyerOneTime": "This copies the shared history into your account and can be done once.",
       "notOfficial": "This is not an official ownership transfer document.",
       "reassurance": "Previewing this link does not use it. Accepting this Passport is a one-time action.",
       "confirmTitle": "Accept this Passport into your account?",
@@ -771,6 +793,16 @@
         "own_passport": "You are the owner of this Passport.",
         "generic": "We couldn't accept this Passport. Please try again."
       }
+    },
+    "print": {
+      "exportCta": "Export PDF",
+      "exportHint": "This creates a printable copy of the Passport snapshot.",
+      "staticCopyNote": "PDF/print is a static copy of the snapshot. It is not the same as accepting a Passport into an account, and it is not an official ownership document.",
+      "printButton": "Print / Save as PDF",
+      "back": "Back to passport",
+      "generated": "Printable copy of a tamper-evident vehicle history snapshot.",
+      "passportId": "Passport ID",
+      "shareNote": "The shareable link is shown only when the Passport is created and is not included here."
     }
   },
   "diagnose": {

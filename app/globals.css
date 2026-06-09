@@ -41,3 +41,28 @@ body {
     Arial,
     sans-serif;
 }
+
+/*
+ * Print: force a clean white/light report regardless of the on-screen theme
+ * (including OS dark mode), so Passport printouts / Save-as-PDF look right.
+ */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --muted: #f4f4f5;
+    --muted-foreground: #52525b;
+    --border: #d4d4d8;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+  }
+
+  body {
+    background: #ffffff;
+    color: #171717;
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ShareUrl } from "@/components/passports/share-url";
+import { WebShareButton } from "@/components/passports/web-share-button";
 import type { PassportCounts } from "@/lib/passports/service";
 import { cn } from "@/lib/utils";
 
@@ -80,40 +81,68 @@ export function CreatePassportForm({
 
   if (success) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("create.successTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {t("create.successBody")}
-          </p>
-          <div className="space-y-2">
-            <p className="text-sm font-medium">{t("share.title")}</p>
-            <ShareUrl url={success.shareUrl} />
-            <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
-              ⚠️ {t("share.copyOnce")}
+      <div className="space-y-5">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("create.successTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t("create.successBody")}
             </p>
-            <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={success.shareUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-            >
-              {t("create.openPreview")}
-            </a>
-            <Link
-              href={`/vehicles/${vehicleId}/passports/${success.passportId}`}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
-            >
-              {t("create.openPassport")}
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{t("share.title")}</p>
+              <ShareUrl url={success.shareUrl} />
+              <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                ⚠️ {t("share.copyOnce")}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <WebShareButton
+                url={success.shareUrl}
+                title={t("create.successTitle")}
+              />
+              <a
+                href={success.shareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+              >
+                {t("create.openPreview")}
+              </a>
+              <Link
+                href={`/vehicles/${vehicleId}/passports/${success.passportId}/print`}
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+              >
+                {t("print.exportCta")}
+              </Link>
+              <Link
+                href={`/vehicles/${vehicleId}/passports/${success.passportId}`}
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+              >
+                {t("create.openPassport")}
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Next steps */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("nextSteps.title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="list-decimal space-y-2 ps-5 text-sm text-muted-foreground">
+              <li>{t("nextSteps.copyLink")}</li>
+              <li>{t("nextSteps.buyerPreview")}</li>
+              <li>{t("nextSteps.oneTimeAccept")}</li>
+              <li>{t("nextSteps.revokeBefore")}</li>
+              <li>{t("nextSteps.printCopy")}</li>
+            </ol>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
