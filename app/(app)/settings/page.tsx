@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
+import { DataPrivacySection } from "@/components/settings/data-privacy";
 import { FeedbackForm } from "@/components/settings/feedback-form";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,6 +45,15 @@ export default async function SettingsPage() {
         <CardContent className="flex items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">{t("language.help")}</p>
           <LanguageSwitcher />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("dataPrivacy.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataPrivacySection />
         </CardContent>
       </Card>
 

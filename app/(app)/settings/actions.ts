@@ -69,3 +69,31 @@ export async function submitFeedbackAction(
 
   return { success: true };
 }
+
+/**
+ * Record an account-deletion *request* (no automated deletion in beta). Stored
+ * as a `beta_feedback` row with type='deletion_request'. We never delete account
+ * data, auth.users, or storage files here — the team follows up manually.
+ */
+export type DeletionRequestState = { error?: string; success?: boolean };
+
+export async function requestAccountDeletionAction(
+  pageUrl?: string,
+): Promise<DeletionRequestState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "submitFailed" };
+
+  const { error } = await supabase.from("beta_feedback").insert({
+    user_id: user.id,
+    email: user.email ?? null,
+    type: "deletion_request",
+    message: "Account deletion requested from Settings → Data & privacy.",
+    page_url: typeof pageUrl === "string" ? pageUrl.slice(0, 2048) : null,
+  });
+  if (error) return { error: "submitFailed" };
+
+  return { success: true };
+}

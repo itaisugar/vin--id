@@ -41,6 +41,27 @@
       "title": "Language",
       "help": "Choose your language."
     },
+    "dataPrivacy": {
+      "title": "Data & privacy",
+      "intro": "Your Vin.ID account may include vehicle history, documents metadata, Passport snapshots, reminders, diagnosis history, and beta feedback.",
+      "exportJson": "Download JSON export",
+      "exportMaintenance": "Download maintenance CSV",
+      "exportIssues": "Download issues CSV",
+      "exportHelp": "Exports include your account data and vehicle history, but not original uploaded document files.",
+      "exportWarning": "Keep exported files private. They may contain sensitive vehicle and personal information.",
+      "deletion": {
+        "title": "Account deletion",
+        "body": "Automated deletion is not enabled in beta yet. You can request deletion below (or send feedback) and we'll handle it manually. Your data is not deleted automatically.",
+        "request": "Request deletion",
+        "confirmTitle": "Request account deletion?",
+        "confirmBody": "This sends a deletion request to the Vin.ID team. Your data is NOT deleted automatically — we'll follow up to confirm.",
+        "confirm": "Send request",
+        "cancel": "Cancel",
+        "pending": "Sending…",
+        "done": "Deletion request sent. We'll follow up. Your data has not been deleted automatically.",
+        "error": "We couldn't send your request. Please try again."
+      }
+    },
     "feedback": {
       "title": "Send beta feedback",
       "help": "Vin.ID is in beta. Tell us what's broken, confusing, or missing.",
@@ -83,7 +104,8 @@
         "Documents are private by default and are shared only if you explicitly allow it.",
         "AI-style features run in mock mode (not real AI analysis) while MOCK_AI is enabled.",
         "We log minimal product events during the beta (e.g. that a vehicle or Passport was created) to understand usage. These never include document contents, issue symptoms, diagnosis text, VIN, license plate, storage paths, or raw Passport tokens, and we do not use any third-party analytics provider.",
-        "You can request deletion or export of your data; full self-service automation may come later."
+        "You can export your account data and vehicle history from Settings (JSON and CSV). Exports do not include your original uploaded document files, and may contain sensitive information — keep them private.",
+        "Automated account deletion is not enabled during the beta. You can request deletion from Settings and we will handle it manually; full self-service automation may come later."
       ],
       "betaNote": "This is a beta privacy summary, not a final legal document."
     },
