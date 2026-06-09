@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
+  const tc = await getTranslations("common");
 
   const supabase = await createClient();
   const {
@@ -79,6 +80,10 @@ export default async function SettingsPage() {
           <LogoutButton />
         </CardContent>
       </Card>
+
+      <p className="text-center text-xs text-muted-foreground">
+        {tc("appName")} · {tc("version")}
+      </p>
     </div>
   );
 }

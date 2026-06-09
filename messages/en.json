@@ -3,6 +3,7 @@
     "appName": "Vin.ID",
     "tagline": "Your smart digital vehicle identity",
     "beta": "Beta",
+    "version": "v0.1 beta",
     "loading": "Loading…",
     "language": "Language",
     "retry": "Try again",

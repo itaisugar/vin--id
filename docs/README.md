@@ -1,7 +1,16 @@
 # Vin.ID — Documentation Index
 
 Operational, safety, and beta docs for Vin.ID (Next.js + Supabase, free-tier,
-mock AI). Start here.
+mock AI). Start here. Current release: **v0.1-beta**.
+
+## Launch (v0.1-beta)
+- [beta-release-notes-v0.1.md](beta-release-notes-v0.1.md) — what's in the
+  release, what's mock, what's not included, what testers should focus on.
+- [final-beta-checklist.md](final-beta-checklist.md) — run before inviting
+  testers.
+- [beta-invitation-message.md](beta-invitation-message.md) — tester invite
+  (English + Hebrew).
+- [free-beta-freeze-policy.md](free-beta-freeze-policy.md) — scope freeze rules.
 
 ## Beta tester pack
 - [beta-tester-guide.md](beta-tester-guide.md) — what Vin.ID is, what to test,
