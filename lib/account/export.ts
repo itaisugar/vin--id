@@ -51,6 +51,10 @@ const INTERNAL = ["owner_user_id"];
 export async function buildUserExport() {
   const { supabase, user } = await requireUser();
 
+  // Soft-deleted rows are excluded everywhere else (vehicle pages, snapshots,
+  // CSVs) — keep the JSON export consistent by filtering deleted_at on every
+  // table that has it. diagnosis_messages, ownership_transfers, and profiles
+  // have no deleted_at column.
   const [
     profile,
     vehicles,
@@ -64,14 +68,14 @@ export async function buildUserExport() {
     transfers,
   ] = await Promise.all([
     supabase.from("profiles").select("*").maybeSingle(),
-    supabase.from("vehicles").select("*"),
-    supabase.from("maintenance_logs").select("*"),
-    supabase.from("issue_logs").select("*"),
-    supabase.from("vehicle_documents").select("*"),
-    supabase.from("reminders").select("*"),
-    supabase.from("diagnosis_sessions").select("*"),
+    supabase.from("vehicles").select("*").is("deleted_at", null),
+    supabase.from("maintenance_logs").select("*").is("deleted_at", null),
+    supabase.from("issue_logs").select("*").is("deleted_at", null),
+    supabase.from("vehicle_documents").select("*").is("deleted_at", null),
+    supabase.from("reminders").select("*").is("deleted_at", null),
+    supabase.from("diagnosis_sessions").select("*").is("deleted_at", null),
     supabase.from("diagnosis_messages").select("*"),
-    supabase.from("vehicle_passports").select("*"),
+    supabase.from("vehicle_passports").select("*").is("deleted_at", null),
     supabase.from("ownership_transfers").select("*"),
   ]);
 
