@@ -2,10 +2,27 @@
   "common": {
     "appName": "Vin.ID",
     "tagline": "Your smart digital vehicle identity",
+    "beta": "Beta",
     "loading": "Loading…",
     "language": "Language",
     "retry": "Try again",
-    "somethingWentWrong": "Something went wrong"
+    "somethingWentWrong": "Something went wrong",
+    "notFound": {
+      "title": "Page not found",
+      "body": "The page you're looking for doesn't exist or may have moved.",
+      "home": "Go to home"
+    },
+    "errorPage": {
+      "title": "Something went wrong",
+      "body": "An unexpected error occurred. Please try again.",
+      "retry": "Try again",
+      "home": "Go to home"
+    },
+    "footer": {
+      "label": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -24,8 +41,64 @@
       "title": "Language",
       "help": "Choose your language."
     },
+    "feedback": {
+      "title": "Send beta feedback",
+      "help": "Vin.ID is in beta. Tell us what's broken, confusing, or missing.",
+      "type": {
+        "label": "Type",
+        "bug": "Bug",
+        "idea": "Idea",
+        "confusing": "Confusing",
+        "other": "Other"
+      },
+      "message": "Message",
+      "messagePlaceholder": "What happened, or what would help?",
+      "email": "Email (optional)",
+      "send": "Send feedback",
+      "sending": "Sending…",
+      "thanks": "Thanks! Your feedback was sent.",
+      "errors": {
+        "messageRequired": "Please write a short message.",
+        "invalidEmail": "Enter a valid email.",
+        "tooLong": "This message is too long.",
+        "submitFailed": "We couldn't send your feedback. Please try again."
+      }
+    },
     "session": {
       "title": "Session"
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy",
+      "updated": "Beta — subject to change.",
+      "home": "Home",
+      "intro": "How Vin.ID handles your data during the beta.",
+      "points": [
+        "Vin.ID stores the vehicle data you provide (vehicles, maintenance, issues, documents, reminders).",
+        "Documents you upload may contain personal information. Review them carefully before sharing.",
+        "Vehicle Passport sharing is controlled by you — only the data you choose is included.",
+        "Public Passport links expose only the selected snapshot data, not your account or raw files.",
+        "Documents are private by default and are shared only if you explicitly allow it.",
+        "AI-style features run in mock mode (not real AI analysis) while MOCK_AI is enabled.",
+        "You can request deletion or export of your data; full self-service automation may come later."
+      ],
+      "betaNote": "This is a beta privacy summary, not a final legal document."
+    },
+    "terms": {
+      "title": "Terms",
+      "updated": "Beta — subject to change.",
+      "home": "Home",
+      "intro": "Please read these beta terms before using Vin.ID.",
+      "points": [
+        "Vin.ID is not an official ownership, title, or registration system.",
+        "A Vehicle Passport is not a mechanical certification or a guarantee of condition.",
+        "Diagnosis guidance is informational only and does not replace a qualified mechanic.",
+        "You are responsible for verifying vehicle information before buying or selling.",
+        "This is beta software and may contain bugs or change at any time.",
+        "Do not rely on Vin.ID for safety-critical decisions."
+      ],
+      "betaNote": "These are beta terms, not a final legal agreement."
     }
   },
   "auth": {
@@ -60,9 +133,12 @@
     "welcome": "Welcome, {email}",
     "subtitle": "Your vehicles, history and Vehicle Passports in one place.",
     "onboarding": {
-      "title": "Add your first vehicle to start building its digital history.",
-      "body": "Vin.ID keeps maintenance, issues, documents, reminders and a shareable Vehicle Passport together in one place.",
-      "cta": "Add vehicle"
+      "heading": "Welcome to Vin.ID",
+      "explainer": "Vin.ID helps you build a digital history for your vehicle.",
+      "step1": "Step 1: Add your first vehicle.",
+      "step2": "Step 2: Add maintenance or upload a document.",
+      "step3": "Step 3: Create a Vehicle Passport when you're ready to share.",
+      "cta": "Add first vehicle"
     },
     "quickActions": {
       "title": "Quick actions",

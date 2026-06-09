@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 /** Public chrome for /p/[token] — no authenticated app sidebar. */
 export async function PublicShell({ children }: { children: React.ReactNode }) {
@@ -17,8 +18,11 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto w-full max-w-3xl px-4 py-3 text-center text-xs text-muted-foreground">
-          {t("appName")} · {t("tagline")}
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-1 px-4 py-3 text-center text-xs text-muted-foreground">
+          <span>
+            {t("appName")} · {t("tagline")}
+          </span>
+          <LegalFooterLinks />
         </div>
       </footer>
     </div>

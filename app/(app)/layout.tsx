@@ -26,7 +26,12 @@ export default async function AppLayout({
     <div className="flex min-h-dvh flex-col">
       {/* Top bar */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-4 py-3">
-        <span className="text-lg font-bold">{t("appName")}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold">{t("appName")}</span>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("beta")}
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <LogoutButton className="hidden sm:inline-flex" />
