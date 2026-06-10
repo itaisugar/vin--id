@@ -1,6 +1,8 @@
-import { signup } from "../actions";
+import { signInWithGoogle, signup } from "../actions";
 import { AuthForm } from "../auth-form";
 
 export default function SignupPage() {
-  return <AuthForm mode="signup" action={signup} />;
+  return (
+    <AuthForm mode="signup" action={signup} googleAction={signInWithGoogle} />
+  );
 }
