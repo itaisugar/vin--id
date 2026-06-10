@@ -314,6 +314,16 @@
       "status": "Status",
       "createdAt": "Added on"
     },
+    "helpers": {
+      "make": "Choose from the list or type your own.",
+      "model": "Choose a model for the selected make, or type your own.",
+      "modelSelectMakeFirst": "Select a make first."
+    },
+    "combobox": {
+      "searchPlaceholder": "Search or type…",
+      "noResults": "No matches — your text will be saved.",
+      "clear": "Clear"
+    },
     "new": {
       "title": "Add vehicle",
       "subtitle": "Enter the basic details. You can add history and documents later."
