@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // `sharp` is a native module used server-side to downscale scanned images
+  // before sending them to the extraction provider. Keep it external so it is
+  // required at runtime rather than bundled.
+  serverExternalPackages: ["sharp"],
 };
 
 export default withNextIntl(nextConfig);

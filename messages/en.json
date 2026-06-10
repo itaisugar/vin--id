@@ -31,6 +31,13 @@
     "diagnose": "Diagnose",
     "settings": "Settings"
   },
+  "install": {
+    "title": "Add Vin.ID to your home screen",
+    "settingsTitle": "Install app",
+    "ios": "Tap the Share button, then \"Add to Home Screen\".",
+    "android": "Tap the browser menu, then \"Add to Home screen\" / \"Install app\".",
+    "generic": "Use your browser menu to add Vin.ID to your home screen."
+  },
   "landing": {
     "nav": {
       "signIn": "Sign in",
@@ -202,7 +209,8 @@
         "AI-style features run in mock mode (not real AI analysis) while MOCK_AI is enabled.",
         "We log minimal product events during the beta (e.g. that a vehicle or Passport was created) to understand usage. These never include document contents, issue symptoms, diagnosis text, VIN, license plate, storage paths, or raw Passport tokens, and we do not use any third-party analytics provider.",
         "You can export your account data and vehicle history from Settings (JSON and CSV). Exports do not include your original uploaded document files, and may contain sensitive information — keep them private.",
-        "Automated account deletion is not enabled during the beta. You can request deletion from Settings and we will handle it manually; full self-service automation may come later."
+        "Automated account deletion is not enabled during the beta. You can request deletion from Settings and we will handle it manually; full self-service automation may come later.",
+        "Document scanning is optional. When you scan a document, its image is sent to a third-party AI provider (Anthropic) for extraction; only the record you confirm is saved, and the scanned image itself is not stored."
       ],
       "betaNote": "This is a beta privacy summary, not a final legal document."
     },
@@ -245,10 +253,15 @@
     "createOne": "Create one",
     "signInInstead": "Sign in instead",
     "checkEmail": "Check your email to confirm your account, then sign in.",
+    "continueWithGoogle": "Continue with Google",
+    "googleStarting": "Connecting…",
+    "or": "or",
     "errors": {
       "invalidEmail": "Please enter a valid email address.",
       "passwordTooShort": "Password must be at least 8 characters.",
       "invalidCredentials": "Invalid email or password.",
+      "oauthStart": "We couldn't start Google sign-in. Please try again.",
+      "oauthConflict": "An account with this email may already exist. Please sign in with your original method, then connect Google later if supported.",
       "generic": "We couldn't complete that request. Please try again."
     }
   },
@@ -264,13 +277,43 @@
       "step3": "Step 3: Create a Vehicle Passport when you're ready to share.",
       "cta": "Add first vehicle"
     },
+    "checklist": {
+      "title": "Get started",
+      "explainer": "Vin.ID helps you build a digital history for your vehicle and turn it into a Vehicle Passport.",
+      "steps": {
+        "vehicle": {
+          "label": "Add your first vehicle",
+          "cta": "Add vehicle"
+        },
+        "maintenance": {
+          "label": "Add a maintenance record",
+          "cta": "Add maintenance"
+        },
+        "document": {
+          "label": "Upload a document",
+          "cta": "Upload document"
+        },
+        "passport": {
+          "label": "Create a Vehicle Passport",
+          "cta": "Create Passport"
+        },
+        "preview": {
+          "label": "Open and share the Passport preview",
+          "cta": "Open passports"
+        },
+        "install": {
+          "label": "Add Vin.ID to your phone home screen"
+        }
+      }
+    },
     "quickActions": {
       "title": "Quick actions",
       "addVehicle": "Add vehicle",
       "diagnose": "Diagnose",
       "addMaintenance": "Add maintenance",
       "uploadDocument": "Upload document",
-      "createPassport": "Create Passport"
+      "createPassport": "Create Passport",
+      "scanDocument": "Scan a document"
     },
     "yourVehicles": {
       "title": "Your vehicles",
@@ -1029,6 +1072,75 @@
       "action": "Save as issue",
       "pending": "Saving…",
       "hint": "Saves this to the vehicle's issue history (marked as from the diagnosis assistant)."
+    }
+  },
+  "scan": {
+    "title": "Scan a document",
+    "subtitle": "Photograph a service receipt or a note about a problem. We'll read it and pre-fill a record for you to review.",
+    "noVehicles": {
+      "title": "Add a vehicle first",
+      "body": "You need a vehicle before you can scan a document into its history.",
+      "cta": "Add a vehicle"
+    },
+    "fields": {
+      "vehicle": "Vehicle",
+      "file": "Document photo",
+      "fileHelp": "Use a clear photo of a single document (JPEG, PNG, or WebP).",
+      "recordType": "Record type",
+      "date": "Date",
+      "mileage": "Mileage",
+      "description": "Work description",
+      "symptoms": "Symptoms",
+      "category": "Service type",
+      "cost": "Cost",
+      "currency": "Currency",
+      "severity": "Severity",
+      "status": "Status"
+    },
+    "consent": {
+      "title": "Before you continue",
+      "body": "To read this document, its image is sent to a third-party AI provider (Anthropic) for processing. Don't scan documents with sensitive personal information you don't want processed externally.",
+      "checkbox": "I understand and want to process this document with the AI provider."
+    },
+    "actions": {
+      "scan": "Scan document",
+      "scanning": "Reading document…",
+      "confirm": "Confirm and save",
+      "saving": "Saving…",
+      "back": "Scan another",
+      "cancel": "Cancel"
+    },
+    "review": {
+      "title": "Review and confirm",
+      "help": "Check the pre-filled fields and edit anything that's wrong. Nothing is saved until you confirm.",
+      "mockNotice": "Mock extraction mode: this is a structured demo result, not a real AI/OCR reading.",
+      "aiNotice": "AI-extracted from your document. Please review every field before saving.",
+      "failedNotice": "We couldn't read the document automatically. You can enter the details manually below.",
+      "trustNote": "This record will be saved as “AI-extracted” (you confirmed it)."
+    },
+    "confidence": {
+      "low": "Low confidence",
+      "medium": "Medium confidence",
+      "high": "High confidence"
+    },
+    "recordTypes": {
+      "maintenance": "Maintenance record",
+      "issue": "Issue"
+    },
+    "errors": {
+      "required": "This field is required.",
+      "invalidDate": "Enter a valid date.",
+      "invalidMileage": "Enter a valid mileage.",
+      "invalidCost": "Enter a valid amount.",
+      "tooLong": "This value is too long.",
+      "extractFailed": "We couldn't read the document. Please enter the details manually.",
+      "fileRequired": "Choose or capture a document photo first.",
+      "consentRequired": "Please confirm the consent notice to continue.",
+      "invalidFileType": "Use a JPEG, PNG, or WebP image.",
+      "fileTooLarge": "That image is too large (max 10 MB).",
+      "vehicleRequired": "Choose a vehicle.",
+      "vehicleNotFound": "That vehicle could not be found.",
+      "saveFailed": "We couldn't save the record. Please try again."
     }
   }
 }
