@@ -71,7 +71,9 @@ short-lived signed URLs.
 
 ## 4. Supabase Auth URL settings (important)
 
-Auth is **email/password only** (no OAuth, no magic-link, no callback route).
+Auth is **email/password** plus optional **Google OAuth** (Supabase Auth; see
+[google-oauth-setup.md](google-oauth-setup.md)). OAuth uses the
+`/auth/callback` route, which is covered by the `/**` redirect allow-list below.
 The signup confirmation email links to the Supabase **Site URL**, so set:
 
 **Supabase → Authentication → URL Configuration**
@@ -85,8 +87,10 @@ The signup confirmation email links to the Supabase **Site URL**, so set:
   - `https://<your-custom-domain>/**` (when added)
 
 In-app post-login redirect (`?redirectTo=`) is internal-only and validated
-(no open redirects) — it is not a Supabase setting. Google/OAuth is **not**
-implemented; do not enable it for this MVP.
+(no open redirects) — it is not a Supabase setting. To enable **Google sign-in**,
+follow [google-oauth-setup.md](google-oauth-setup.md) (the Google **Client
+Secret** lives only in Supabase provider settings — never in app code or
+`NEXT_PUBLIC_*`).
 
 > If you don't want email confirmation during testing, you can disable
 > "Confirm email" in Supabase → Authentication → Providers → Email.

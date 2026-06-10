@@ -9,11 +9,13 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { DataPrivacySection } from "@/components/settings/data-privacy";
 import { FeedbackForm } from "@/components/settings/feedback-form";
+import { InstallInstructions } from "@/components/pwa/install-instructions";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
+  const ti = await getTranslations("install");
 
   const supabase = await createClient();
   const {
@@ -46,6 +48,15 @@ export default async function SettingsPage() {
         <CardContent className="flex items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">{t("language.help")}</p>
           <LanguageSwitcher />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{ti("settingsTitle")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InstallInstructions />
         </CardContent>
       </Card>
 

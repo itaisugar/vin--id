@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { localeDirection, type Locale } from "@/i18n/config";
@@ -7,6 +7,20 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Vin.ID",
   description: "Your smart digital vehicle identity",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Vin.ID",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E85D24",
 };
 
 export default async function RootLayout({
