@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CarIcon } from "@/components/icons";
 import { DashboardReminders } from "@/components/reminders/dashboard-reminders";
-import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
 import { createClient } from "@/lib/supabase/server";
 import { listVehicles } from "@/lib/vehicles/service";
@@ -29,33 +29,6 @@ export default async function DashboardPage() {
   const active = vehicles.filter((v) => v.status === "active");
   const primary = active[0] ?? null;
 
-  // Onboarding completion is derived from existing data (owner-scoped counts).
-  const [maintenance, documents, passports] = await Promise.all([
-    supabase
-      .from("maintenance_logs")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null),
-    supabase
-      .from("vehicle_documents")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null),
-    supabase
-      .from("vehicle_passports")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null),
-  ]);
-  const counts = {
-    vehicles: vehicles.length,
-    maintenance: maintenance.count ?? 0,
-    documents: documents.count ?? 0,
-    passports: passports.count ?? 0,
-  };
-  const onboarded =
-    counts.vehicles > 0 &&
-    counts.maintenance > 0 &&
-    counts.documents > 0 &&
-    counts.passports > 0;
-
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -68,14 +41,38 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      {!onboarded ? (
-        <OnboardingChecklist
-          counts={counts}
-          primaryVehicleId={primary?.id ?? null}
-        />
-      ) : null}
+      {vehicles.length === 0 ? (
+        /* First-time onboarding */
+        <div className="space-y-4 rounded-lg border border-border bg-background p-6">
+          <div className="flex items-start gap-3">
+            <CarIcon className="mt-0.5 h-8 w-8 shrink-0 text-muted-foreground" />
+            <div className="space-y-1">
+              <p className="text-base font-semibold">{t("onboarding.heading")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("onboarding.explainer")}
+              </p>
+            </div>
+          </div>
 
-      {vehicles.length > 0 ? (
+          <ol className="space-y-2">
+            {(["step1", "step2", "step3"] as const).map((step, i) => (
+              <li key={step} className="flex items-start gap-3 text-sm">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  {i + 1}
+                </span>
+                <span>{t(`onboarding.${step}`)}</span>
+              </li>
+            ))}
+          </ol>
+
+          <Link
+            href="/vehicles/new"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+          >
+            {t("onboarding.cta")}
+          </Link>
+        </div>
+      ) : (
         <>
           {/* Quick actions */}
           <Card>
@@ -148,7 +145,7 @@ export default async function DashboardPage() {
           {/* Upcoming/urgent reminders across active vehicles */}
           <DashboardReminders />
         </>
-      ) : null}
+      )}
     </div>
   );
 }
