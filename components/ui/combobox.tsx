@@ -201,11 +201,13 @@ export function Combobox({
               <li key={option} role="option" aria-selected={option === value}>
                 <button
                   type="button"
-                  // pointerdown fires before the input's blur, so selection wins.
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    commit(option);
-                  }}
+                  // Select on click, not pointerdown: touch-scrolling the list
+                  // starts with a pointerdown on an option, which previously
+                  // selected + closed it. Blur does not close the list, so a
+                  // genuine tap (click) still lands. preventDefault on mousedown
+                  // keeps input focus without blocking touch scroll.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => commit(option)}
                   onMouseEnter={() => setHighlight(i)}
                   className={cn(
                     "block w-full truncate px-3 py-2 text-start text-sm",
