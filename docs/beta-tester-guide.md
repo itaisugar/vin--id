@@ -78,6 +78,10 @@ questions are a great guide for what to tell us.
 
 - **Device**: a phone is ideal (test mobile layout + RTL); add desktop if you
   can.
+- **Sign in**: use email/password **or** "Continue with Google".
+- **Add to Home Screen**: install Vin.ID like an app — the onboarding checklist
+  and **Settings → Install app** show how (iOS: Share → Add to Home Screen;
+  Android: menu → Install app). No offline mode yet.
 - **Two accounts / a private window**: needed for the Passport transfer test
   (seller + buyer).
 

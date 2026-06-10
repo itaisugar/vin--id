@@ -25,6 +25,12 @@ mock AI). Start here. Current release: **v0.1-beta**.
 - [beta-share-flow.md](beta-share-flow.md) — how Passport sharing works today.
 - [pdf-export-notes.md](pdf-export-notes.md) — print/PDF export behavior.
 
+## Access & install
+- [google-oauth-setup.md](google-oauth-setup.md) — enable "Continue with Google"
+  (Google Cloud + Supabase; no secrets in code).
+- [pwa-install-notes.md](pwa-install-notes.md) — Add to Home Screen / standalone
+  PWA, icons, how to test.
+
 ## Deployment & QA
 - [deployment-notes.md](deployment-notes.md) — Vercel + Supabase deploy steps,
   env vars, auth redirect URLs.
