@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import * as z from "zod";
 import { trackEvent } from "@/lib/analytics/track";
@@ -98,6 +99,41 @@ export async function signup(
   await trackEvent({ eventName: "user_signed_up", entityType: "user" });
 
   redirect("/dashboard");
+}
+
+/**
+ * Begin the Google OAuth (PKCE) flow. Supabase returns a provider URL we
+ * redirect the browser to; Google then sends the user back to
+ * `/auth/callback`, which exchanges the code for a session.
+ *
+ * The callback origin is derived from the request `origin` header so the user
+ * is returned to the exact host they started on (localhost, preview, prod).
+ */
+export async function signInWithGoogle(
+  _prevState: AuthFormState | undefined,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const supabase = await createClient();
+  const headerStore = await headers();
+  const origin = headerStore.get("origin");
+  if (!origin) {
+    return { error: "generic" };
+  }
+
+  const next = safeRedirectPath(formData.get("redirectTo"));
+  const callbackUrl = new URL("/auth/callback", origin);
+  callbackUrl.searchParams.set("next", next);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: callbackUrl.toString() },
+  });
+
+  if (error || !data.url) {
+    return { error: "generic" };
+  }
+
+  redirect(data.url);
 }
 
 export async function logout() {
