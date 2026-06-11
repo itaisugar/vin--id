@@ -75,7 +75,7 @@ export function BottomNav() {
           const inner = (
             <span
               className={cn(
-                "flex flex-col items-center gap-1 py-2 text-xs font-medium",
+                "flex flex-col items-center gap-1 pb-2 pt-3 text-xs font-medium",
                 !enabled && "text-muted-foreground/40",
                 enabled && active && "text-primary",
                 enabled && !active && "text-muted-foreground",

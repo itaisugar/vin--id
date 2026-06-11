@@ -36,7 +36,31 @@
     "settingsTitle": "Install app",
     "ios": "Tap the Share button, then \"Add to Home Screen\".",
     "android": "Tap the browser menu, then \"Add to Home screen\" / \"Install app\".",
-    "generic": "Use your browser menu to add Vin.ID to your home screen."
+    "generic": "Use your browser menu to add Vin.ID to your home screen.",
+    "cardCta": "How to install",
+    "cardSubtitle": "Add Vin.ID to your home screen for quick, full-screen access.",
+    "dialogTitle": "Add Vin.ID to your home screen",
+    "dialogIntro": "Install Vin.ID like an app — quick, full-screen access, no app store needed.",
+    "iosSteps": [
+      "Open Vin.ID in Safari.",
+      "Tap the Share button (the square with an arrow) at the bottom of the screen.",
+      "Scroll down and tap \"Add to Home Screen\".",
+      "Tap \"Add\" in the top corner. The Vin.ID icon will appear on your home screen."
+    ],
+    "androidSteps": [
+      "Open Vin.ID in Chrome.",
+      "Tap the menu button (⋮) in the top corner.",
+      "Tap \"Add to Home screen\" or \"Install app\".",
+      "Tap \"Add\" / \"Install\" to confirm. The Vin.ID icon will appear on your home screen."
+    ],
+    "genericSteps": [
+      "Open Vin.ID in your phone's browser.",
+      "Open the browser menu.",
+      "Choose \"Add to Home screen\" or \"Install app\".",
+      "Confirm to add the Vin.ID icon to your home screen."
+    ],
+    "alreadyInstalled": "Vin.ID is already installed on your home screen.",
+    "close": "Got it"
   },
   "landing": {
     "nav": {
