@@ -34,13 +34,29 @@ export default async function DashboardPage() {
   const active = vehicles.filter((v) => v.status === "active");
   const primary = active[0] ?? null;
 
+  // Prefer the user's first name (from signup metadata, or Google's profile).
+  // Fall back to the email's local part so we never greet with the full email.
+  const meta = (user?.user_metadata ?? {}) as {
+    first_name?: string;
+    given_name?: string;
+    full_name?: string;
+    name?: string;
+  };
+  const firstName =
+    meta.first_name?.trim() ||
+    meta.given_name?.trim() ||
+    meta.full_name?.trim().split(/\s+/)[0] ||
+    meta.name?.trim().split(/\s+/)[0] ||
+    user?.email?.split("@")[0] ||
+    "";
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        {user?.email ? (
+        {firstName ? (
           <p className="text-muted-foreground">
-            {t("welcome", { email: user.email })}
+            {t("welcome", { name: firstName })}
           </p>
         ) : null}
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>

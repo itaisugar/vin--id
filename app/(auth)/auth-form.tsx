@@ -74,6 +74,8 @@ export function AuthForm({
   // Field/global errors come back as translation keys.
   const emailError = state?.fieldErrors?.email;
   const passwordError = state?.fieldErrors?.password;
+  const firstNameError = state?.fieldErrors?.firstName;
+  const lastNameError = state?.fieldErrors?.lastName;
 
   return (
     <div className="space-y-6">
@@ -127,6 +129,54 @@ export function AuthForm({
           <form action={formAction} className="space-y-4" noValidate>
           {isLogin && redirectTo ? (
             <input type="hidden" name="redirectTo" value={redirectTo} />
+          ) : null}
+
+          {!isLogin ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="firstName" className="text-sm font-medium">
+                  {t("firstName")}
+                </label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  placeholder={t("firstNamePlaceholder")}
+                  aria-invalid={Boolean(firstNameError)}
+                  aria-describedby={
+                    firstNameError ? "firstName-error" : undefined
+                  }
+                  required
+                />
+                {firstNameError ? (
+                  <p id="firstName-error" className="text-sm text-red-600">
+                    {t(`errors.${firstNameError}`)}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="lastName" className="text-sm font-medium">
+                  {t("lastName")}
+                </label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  placeholder={t("lastNamePlaceholder")}
+                  aria-invalid={Boolean(lastNameError)}
+                  aria-describedby={lastNameError ? "lastName-error" : undefined}
+                  required
+                />
+                {lastNameError ? (
+                  <p id="lastName-error" className="text-sm text-red-600">
+                    {t(`errors.${lastNameError}`)}
+                  </p>
+                ) : null}
+              </div>
+            </div>
           ) : null}
 
           <div className="space-y-1.5">

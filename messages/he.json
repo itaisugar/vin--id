@@ -259,6 +259,10 @@
     "loginSubtitle": "התחבר לחשבון ה-Vin.ID שלך",
     "signupTitle": "יצירת חשבון",
     "signupSubtitle": "התחל לבנות את הזהות הדיגיטלית של הרכב שלך",
+    "firstName": "שם פרטי",
+    "firstNamePlaceholder": "ישראל",
+    "lastName": "שם משפחה",
+    "lastNamePlaceholder": "כהן",
     "email": "אימייל",
     "emailPlaceholder": "you@example.com",
     "password": "סיסמה",
@@ -288,6 +292,9 @@
     "errors": {
       "invalidEmail": "נא להזין כתובת אימייל תקינה.",
       "passwordTooShort": "הסיסמה חייבת להכיל לפחות 8 תווים.",
+      "firstNameRequired": "נא להזין שם פרטי.",
+      "lastNameRequired": "נא להזין שם משפחה.",
+      "nameTooLong": "השם ארוך מדי.",
       "invalidCredentials": "אימייל או סיסמה שגויים.",
       "oauthStart": "לא הצלחנו להתחיל התחברות עם Google. נסה שוב.",
       "oauthConflict": "ייתכן שכבר קיים חשבון עם אימייל זה. התחבר בשיטה המקורית שלך, ואז חבר את Google מאוחר יותר אם נתמך.",
@@ -296,7 +303,7 @@
   },
   "dashboard": {
     "title": "לוח בקרה",
-    "welcome": "ברוך הבא, {email}",
+    "welcome": "ברוך הבא, {name}",
     "subtitle": "הרכבים, ההיסטוריה ודרכוני הרכב שלך במקום אחד.",
     "onboarding": {
       "heading": "ברוך הבא ל-Vin.ID",

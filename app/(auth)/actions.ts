@@ -16,6 +16,8 @@ export type AuthFormState = {
   fieldErrors?: {
     email?: string;
     password?: string;
+    firstName?: string;
+    lastName?: string;
   };
   success?: boolean;
 };
@@ -23,6 +25,19 @@ export type AuthFormState = {
 const credentialsSchema = z.object({
   email: z.email({ error: "invalidEmail" }),
   password: z.string().min(8, { error: "passwordTooShort" }),
+});
+
+const signupSchema = credentialsSchema.extend({
+  firstName: z
+    .string({ error: "firstNameRequired" })
+    .trim()
+    .min(1, { error: "firstNameRequired" })
+    .max(60, { error: "nameTooLong" }),
+  lastName: z
+    .string({ error: "lastNameRequired" })
+    .trim()
+    .min(1, { error: "lastNameRequired" })
+    .max(60, { error: "nameTooLong" }),
 });
 
 function safeRedirectPath(value: FormDataEntryValue | null): string {
@@ -40,14 +55,17 @@ function parseCredentials(formData: FormData) {
   });
 }
 
-function toFieldErrors(
-  error: z.ZodError<{ email: string; password: string }>,
-): AuthFormState {
-  const flattened = z.flattenError(error);
+function toFieldErrors(error: z.ZodError): AuthFormState {
+  const fieldErrors = z.flattenError(error).fieldErrors as Record<
+    string,
+    string[] | undefined
+  >;
   return {
     fieldErrors: {
-      email: flattened.fieldErrors.email?.[0],
-      password: flattened.fieldErrors.password?.[0],
+      email: fieldErrors.email?.[0],
+      password: fieldErrors.password?.[0],
+      firstName: fieldErrors.firstName?.[0],
+      lastName: fieldErrors.lastName?.[0],
     },
   };
 }
@@ -75,13 +93,29 @@ export async function signup(
   _prevState: AuthFormState | undefined,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const parsed = parseCredentials(formData);
+  const parsed = signupSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+  });
   if (!parsed.success) {
     return toFieldErrors(parsed.error);
   }
 
+  const { email, password, firstName, lastName } = parsed.data;
+  const fullName = `${firstName} ${lastName}`.trim();
+
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp(parsed.data);
+  // Store the name on the auth user (user_metadata) so it's available for the
+  // greeting regardless of email-confirmation state and for Google parity.
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { first_name: firstName, last_name: lastName, full_name: fullName },
+    },
+  });
 
   if (error) {
     return { error: "generic" };
@@ -90,12 +124,21 @@ export async function signup(
   // If email confirmation is required, no session is returned yet.
   if (!data.session) {
     // TODO(signup-confirm): no session = no auth.uid() yet, so user_signed_up
-    // can't be logged under insert-own RLS. Revisit if confirmation is enabled.
+    // can't be logged and the profile can't be updated under own-row RLS.
+    // Revisit if confirmation is enabled (the name still lives in user_metadata).
     return { success: true };
   }
 
   // Session present (confirmation disabled): auth.uid() now resolves to the new
-  // user, so the insert-own RLS policy is satisfied.
+  // user, so the own-row RLS policies are satisfied. Mirror the name onto the
+  // profile (best-effort — the greeting reads user_metadata either way).
+  if (data.user) {
+    await supabase
+      .from("profiles")
+      .update({ full_name: fullName })
+      .eq("id", data.user.id);
+  }
+
   await trackEvent({ eventName: "user_signed_up", entityType: "user" });
 
   redirect("/dashboard");

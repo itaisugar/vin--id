@@ -259,6 +259,10 @@
     "loginSubtitle": "Sign in to your Vin.ID account",
     "signupTitle": "Create your account",
     "signupSubtitle": "Start building your vehicle's digital identity",
+    "firstName": "First name",
+    "firstNamePlaceholder": "Alex",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Cohen",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
     "password": "Password",
@@ -288,6 +292,9 @@
     "errors": {
       "invalidEmail": "Please enter a valid email address.",
       "passwordTooShort": "Password must be at least 8 characters.",
+      "firstNameRequired": "Please enter your first name.",
+      "lastNameRequired": "Please enter your last name.",
+      "nameTooLong": "This name is too long.",
       "invalidCredentials": "Invalid email or password.",
       "oauthStart": "We couldn't start Google sign-in. Please try again.",
       "oauthConflict": "An account with this email may already exist. Please sign in with your original method, then connect Google later if supported.",
@@ -296,7 +303,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Welcome, {email}",
+    "welcome": "Welcome, {name}",
     "subtitle": "Your vehicles, history and Vehicle Passports in one place.",
     "onboarding": {
       "heading": "Welcome to Vin.ID",
