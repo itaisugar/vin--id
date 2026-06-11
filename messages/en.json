@@ -253,7 +253,6 @@
     "createOne": "Create one",
     "signInInstead": "Sign in instead",
     "checkEmail": "Check your email to confirm your account, then sign in.",
-    "continueWithGoogle": "Continue with Google",
     "googleStarting": "Connecting…",
     "or": "or",
     "errors": {
@@ -1140,7 +1139,8 @@
       "fileTooLarge": "That image is too large (max 10 MB).",
       "vehicleRequired": "Choose a vehicle.",
       "vehicleNotFound": "That vehicle could not be found.",
-      "saveFailed": "We couldn't save the record. Please try again."
+      "saveFailed": "We couldn't save the record. Please try again.",
+      "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP)."
     }
   }
 }

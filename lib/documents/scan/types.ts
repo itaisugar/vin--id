@@ -45,6 +45,77 @@ export function isScanImageMime(mime: string): mime is ScanImageMime {
 }
 
 /**
+ * Best-effort normalize a model-provided date to ISO yyyy-mm-dd. The model is
+ * asked for ISO but may echo the document's format (e.g. dd/mm/yyyy, common on
+ * Israeli receipts). Returns null when it can't be confidently parsed — never
+ * throws. The confirmation form keeps the date editable either way (it defaults
+ * to today when null), so a missed parse never blocks the user.
+ */
+export function normalizeToIsoDate(
+  raw: string | null | undefined,
+): string | null {
+  if (!raw) return null;
+  const s = raw.trim();
+  if (!s) return null;
+
+  // Build + validate an ISO string, rejecting impossible dates (e.g. 31/02).
+  const iso = (y: number, m: number, d: number): string | null => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (
+      dt.getUTCFullYear() !== y ||
+      dt.getUTCMonth() !== m - 1 ||
+      dt.getUTCDate() !== d
+    ) {
+      return null;
+    }
+    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  };
+
+  // Already ISO (optionally with a time suffix).
+  let mt = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (mt) return iso(+mt[1], +mt[2], +mt[3]);
+
+  // yyyy/mm/dd or yyyy.mm.dd
+  mt = s.match(/^(\d{4})[/.](\d{1,2})[/.](\d{1,2})$/);
+  if (mt) return iso(+mt[1], +mt[2], +mt[3]);
+
+  // dd/mm/yyyy or mm/dd/yyyy (4-digit year last). Prefer day-first (EN/HE);
+  // disambiguate when one component is > 12.
+  mt = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/);
+  if (mt) {
+    const a = +mt[1];
+    const b = +mt[2];
+    const y = +mt[3];
+    let day: number;
+    let month: number;
+    if (a > 12 && b <= 12) {
+      day = a;
+      month = b;
+    } else if (b > 12 && a <= 12) {
+      day = b;
+      month = a;
+    } else {
+      day = a; // ambiguous → day-first
+      month = b;
+    }
+    return iso(y, month, day);
+  }
+
+  // Textual formats ("March 12, 2026", "12 Mar 2026"): use local components so
+  // the calendar date isn't shifted by the timezone.
+  const parsed = new Date(s);
+  if (!Number.isNaN(parsed.getTime())) {
+    return iso(
+      parsed.getFullYear(),
+      parsed.getMonth() + 1,
+      parsed.getDate(),
+    );
+  }
+
+  return null;
+}
+
+/**
  * Schema the provider output is validated against (after stripping code fences
  * and JSON.parse). Loose-but-safe: out-of-range numbers are nulled rather than
  * rejected so a single bad field never fails the whole extraction.
@@ -53,7 +124,7 @@ export const scanExtractionSchema = z.object({
   date: z
     .string()
     .nullable()
-    .transform((v) => (v && !Number.isNaN(Date.parse(v)) ? v.slice(0, 10) : null)),
+    .transform((v) => normalizeToIsoDate(v)),
   service_or_work_description: z
     .string()
     .nullable()

@@ -253,7 +253,6 @@
     "createOne": "צור חשבון",
     "signInInstead": "התחבר במקום",
     "checkEmail": "בדוק את האימייל שלך כדי לאשר את החשבון, ואז התחבר.",
-    "continueWithGoogle": "המשך עם Google",
     "googleStarting": "מתחבר…",
     "or": "או",
     "errors": {
@@ -1140,7 +1139,8 @@
       "fileTooLarge": "התמונה גדולה מדי (עד 10MB).",
       "vehicleRequired": "בחר רכב.",
       "vehicleNotFound": "הרכב לא נמצא.",
-      "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב."
+      "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב.",
+      "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP)."
     }
   }
 }

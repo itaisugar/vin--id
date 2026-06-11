@@ -29,16 +29,14 @@ export interface DocumentExtractionProvider {
 }
 
 /**
- * Select the active provider. Defaults to the mock unless MOCK_AI is explicitly
- * "false" AND an ANTHROPIC_API_KEY is configured — so the app is safe by default
- * and never accidentally calls a paid API (per AGENTS.md).
+ * Select the active provider. The real Anthropic provider is used whenever an
+ * ANTHROPIC_API_KEY is configured; otherwise we fall back to the deterministic
+ * mock (so the app still works with no key). The MOCK_AI flag no longer gates
+ * this — extraction is "real whenever a key is present" per owner decision.
  */
 export function getExtractionProvider(): DocumentExtractionProvider {
-  const mockAi = process.env.MOCK_AI ?? "true";
   const hasKey = Boolean(process.env.ANTHROPIC_API_KEY);
-
-  if (mockAi !== "false" || !hasKey) {
-    return new MockExtractionProvider();
-  }
-  return new AnthropicExtractionProvider();
+  return hasKey
+    ? new AnthropicExtractionProvider()
+    : new MockExtractionProvider();
 }

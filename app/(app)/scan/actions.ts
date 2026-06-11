@@ -69,6 +69,9 @@ export async function scanExtractAction(
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, error: "fileRequired" };
   }
+  if (file.type === "application/pdf") {
+    return { ok: false, error: "pdfNotSupported" };
+  }
   if (!isScanImageMime(file.type)) {
     return { ok: false, error: "invalidFileType" };
   }
@@ -136,7 +139,7 @@ export async function createRecordFromScanAction(
     if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
     try {
-      await createMaintenanceLog(vehicleId, parsed.data);
+      await createMaintenanceLog(vehicleId, parsed.data, "document_scan");
     } catch {
       return { error: "saveFailed" };
     }
@@ -174,7 +177,7 @@ export async function createRecordFromScanAction(
   }
 
   try {
-    await createIssue(vehicleId, parsed.data);
+    await createIssue(vehicleId, parsed.data, "document_scan");
   } catch {
     return { error: "saveFailed" };
   }

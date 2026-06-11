@@ -88,6 +88,11 @@ export function ScanFlow({
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     setError(null);
+    if (f && f.type === "application/pdf") {
+      setError("pdfNotSupported");
+      selectFile(null);
+      return;
+    }
     if (f && !isScanImageMime(f.type)) {
       setError("invalidFileType");
       selectFile(null);

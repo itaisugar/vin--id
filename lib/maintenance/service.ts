@@ -101,10 +101,15 @@ export async function getMaintenanceLog(
   return (data as MaintenanceLog | null) ?? null;
 }
 
-/** Create a log after verifying the vehicle belongs to the user. */
+/**
+ * Create a log after verifying the vehicle belongs to the user. `sourceType`
+ * defaults to "user"; callers that originate elsewhere (e.g. document scan) may
+ * pass a different free-text origin label.
+ */
 export async function createMaintenanceLog(
   vehicleId: string,
   input: MaintenanceInput,
+  sourceType: string = "user",
 ): Promise<string> {
   const supabase = await createClient();
   const userId = await getUserId(supabase);
@@ -119,7 +124,7 @@ export async function createMaintenanceLog(
       ...maintenanceInputToRow(input),
       vehicle_id: vehicleId,
       owner_user_id: userId,
-      source_type: "user",
+      source_type: sourceType,
     })
     .select("id")
     .single();

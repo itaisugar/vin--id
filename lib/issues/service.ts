@@ -99,10 +99,15 @@ export async function getIssue(
   return (data as IssueLog | null) ?? null;
 }
 
-/** Create an issue after verifying the vehicle belongs to the user. */
+/**
+ * Create an issue after verifying the vehicle belongs to the user. `sourceType`
+ * defaults to "user"; callers that originate elsewhere (e.g. document scan) may
+ * pass a different free-text origin label.
+ */
 export async function createIssue(
   vehicleId: string,
   input: IssueInput,
+  sourceType: string = "user",
 ): Promise<string> {
   const supabase = await createClient();
   const userId = await getUserId(supabase);
@@ -120,7 +125,7 @@ export async function createIssue(
       resolved_at: resolvedAt,
       vehicle_id: vehicleId,
       owner_user_id: userId,
-      source_type: "user",
+      source_type: sourceType,
     })
     .select("id")
     .single();
