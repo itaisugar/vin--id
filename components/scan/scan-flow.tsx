@@ -175,14 +175,16 @@ export function ScanFlow({
         </Select>
       </div>
 
-      {/* File / camera */}
+      {/* File input — no forced `capture`, so mobile shows the native chooser
+          (Camera + Photo Library + Files). `accept="image/*"` keeps the picker
+          to images (incl. iOS HEIC, converted to JPEG on pick); the actual
+          jpeg/png/webp + size limits are enforced in onFileChange + server. */}
       <div className="space-y-1.5">
         <Label htmlFor="scan-file">{t("fields.file")}</Label>
         <Input
           id="scan-file"
           type="file"
-          accept="image/jpeg,image/png,image/webp"
-          capture="environment"
+          accept="image/*"
           onChange={onFileChange}
           className="h-auto py-2"
         />

@@ -1090,7 +1090,7 @@
     "fields": {
       "vehicle": "רכב",
       "file": "תמונת מסמך",
-      "fileHelp": "השתמש בתמונה ברורה של מסמך יחיד (JPEG, ‏PNG או WebP).",
+      "fileHelp": "צלם או בחר תמונה קיימת של מסמך יחיד (JPEG, ‏PNG או WebP).",
       "recordType": "סוג רשומה",
       "date": "תאריך",
       "mileage": "קילומטראז'",

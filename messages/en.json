@@ -1090,7 +1090,7 @@
     "fields": {
       "vehicle": "Vehicle",
       "file": "Document photo",
-      "fileHelp": "Use a clear photo of a single document (JPEG, PNG, or WebP).",
+      "fileHelp": "Take a photo or choose an existing image of a single document (JPEG, PNG, or WebP).",
       "recordType": "Record type",
       "date": "Date",
       "mileage": "Mileage",
