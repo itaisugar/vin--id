@@ -245,6 +245,12 @@
     "signingUp": "Creating account…",
     "signOut": "Sign out",
     "signingOut": "Signing out…",
+    "signOutConfirm": {
+      "title": "Sign out?",
+      "body": "You'll need to sign in again to access your vehicles.",
+      "confirm": "Sign out",
+      "cancel": "Cancel"
+    },
     "continueWithGoogle": "Continue with Google",
     "redirecting": "Redirecting…",
     "orContinueWith": "or",

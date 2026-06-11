@@ -245,6 +245,12 @@
     "signingUp": "יוצר חשבון…",
     "signOut": "התנתקות",
     "signingOut": "מתנתק…",
+    "signOutConfirm": {
+      "title": "להתנתק?",
+      "body": "תצטרך להתחבר מחדש כדי לגשת לרכבים שלך.",
+      "confirm": "התנתקות",
+      "cancel": "ביטול"
+    },
     "continueWithGoogle": "המשך עם Google",
     "redirecting": "מעביר…",
     "orContinueWith": "או",
