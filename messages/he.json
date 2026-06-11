@@ -1116,11 +1116,19 @@
       "file": "תמונת מסמך",
       "fileHelp": "צלם או בחר תמונה קיימת של מסמך יחיד (JPEG, ‏PNG או WebP).",
       "recordType": "סוג רשומה",
+      "category_label": "סוג מסמך",
       "date": "תאריך",
       "mileage": "קילומטראז'",
       "description": "תיאור העבודה",
       "symptoms": "תסמינים",
       "category": "סוג טיפול",
+      "serviceType": "סוג טיפול",
+      "garageName": "מוסך / חנות",
+      "insurerName": "חברת ביטוח",
+      "insuranceType": "סוג ביטוח",
+      "startDate": "תאריך התחלה",
+      "endDate": "תאריך סיום",
+      "notes": "הערות",
       "cost": "עלות",
       "currency": "מטבע",
       "severity": "חומרה",
@@ -1145,6 +1153,7 @@
       "mockNotice": "מצב הדגמה: זוהי תוצאה מובנית להדגמה, לא קריאה אמיתית של AI/OCR.",
       "aiNotice": "מולא על ידי AI מתוך המסמך שלך. אנא בדוק כל שדה לפני השמירה.",
       "failedNotice": "לא הצלחנו לקרוא את המסמך אוטומטית. אפשר להזין את הפרטים ידנית למטה.",
+      "unknownNotice": "לא הצלחנו לזהות איזה סוג מסמך זה. אנא בחר את סוג המסמך ומלא את הפרטים.",
       "trustNote": "הרשומה תישמר כ„מולא על ידי AI” (אישרת אותה)."
     },
     "confidence": {
@@ -1154,6 +1163,13 @@
     },
     "recordTypes": {
       "maintenance": "רשומת תחזוקה",
+      "issue": "תקלה"
+    },
+    "categories": {
+      "maintenance": "תחזוקה",
+      "insurance": "ביטוח",
+      "registration": "רישוי",
+      "inspection": "טסט",
       "issue": "תקלה"
     },
     "errors": {

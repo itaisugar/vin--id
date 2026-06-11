@@ -5,7 +5,11 @@ import type {
   DocumentExtractionInput,
   DocumentExtractionProvider,
 } from "@/lib/documents/scan/provider";
-import { scanExtractionSchema, type ScanExtraction } from "@/lib/documents/scan/types";
+import {
+  coerceCategory,
+  scanExtractionSchema,
+  type ScanExtraction,
+} from "@/lib/documents/scan/types";
 
 /**
  * Real document extraction via the Anthropic Messages API (server-side only).
@@ -29,24 +33,39 @@ const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
 // Static instruction block — kept byte-stable and marked cacheable so repeated
 // calls can reuse the prefix (prompt caching). Volatile content (the image and
 // the locale hint) goes after it.
-const INSTRUCTION = `You extract structured data from a photo of a vehicle-related document — typically a maintenance/service receipt or invoice, or a note describing a vehicle problem.
+const INSTRUCTION = `You read a photo of a vehicle-related document. Work in two steps:
+STEP 1 — CLASSIFY the document into exactly one "document_category":
+  - "maintenance"   : a service/repair receipt or invoice from a garage.
+  - "insurance"     : a vehicle insurance policy / certificate.
+  - "registration"  : a vehicle licensing / registration document.
+  - "inspection"    : a vehicle roadworthiness test / inspection report.
+  - "unknown"       : you cannot confidently tell.
+STEP 2 — EXTRACT ONLY that category's fields.
 
-Return ONLY a single JSON object. No prose, no explanation, no markdown, no code fences. The object must have exactly these keys:
-{
-  "date": string|null,                          // service/document date as ISO yyyy-mm-dd
-  "service_or_work_description": string|null,   // short description of the work done or the problem
-  "mileage": number|null,                       // odometer reading, plain number, if present
-  "cost": number|null,                          // total amount, plain number, if present
-  "vendor": string|null,                        // garage / shop / issuer name
-  "document_type_guess": "maintenance" | "issue" | "unknown",
-  "confidence": number                          // overall confidence from 0 to 1
-}
+Return ONLY a single JSON object. No prose, no explanation, no markdown, no code
+fences. Include "document_category", "confidence" (0..1), and ONLY the fields for
+the chosen category (omit the others):
+
+maintenance:
+  { "document_category": "maintenance", "date": string|null, "garage_name": string|null,
+    "mileage": number|null, "service_type": string|null, "service_details": string|null,
+    "confidence": number }
+insurance:
+  { "document_category": "insurance", "insurer_name": string|null, "start_date": string|null,
+    "end_date": string|null, "cost": number|null, "insurance_type": string|null,
+    "confidence": number }
+registration:
+  { "document_category": "registration", "start_date": string|null, "end_date": string|null,
+    "mileage": number|null, "notes": string|null, "confidence": number }
+inspection:
+  { "document_category": "inspection", "start_date": string|null, "end_date": string|null,
+    "mileage": number|null, "cost": number|null, "notes": string|null, "confidence": number }
+unknown:
+  { "document_category": "unknown", "confidence": number }
 
 Rules:
-- Never invent values. Use null for anything not clearly present in the image.
-- Use "maintenance" for receipts, invoices, and service/repair records.
-- Use "issue" for fault, problem, or complaint reports.
-- Use "unknown" if you cannot tell.
+- Never invent values. Use null for any field not clearly present in the image.
+- Dates as ISO yyyy-mm-dd. Numbers as plain numbers (no currency symbols or units).
 - Output the JSON object only.`;
 
 /** Remove ```json fences / stray prose around a JSON object. */
@@ -124,7 +143,9 @@ export class AnthropicExtractionProvider implements DocumentExtractionProvider {
       throw new ExtractionProviderError("invalid_json");
     }
 
-    const result = scanExtractionSchema.safeParse(parsed);
+    // Coerce an unexpected/missing category to "unknown" so a surprising
+    // classifier value degrades to manual entry instead of failing the parse.
+    const result = scanExtractionSchema.safeParse(coerceCategory(parsed));
     if (!result.success) throw new ExtractionProviderError("invalid_json");
     return result.data;
   }

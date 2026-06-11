@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { CURRENCIES, type Currency } from "@/lib/maintenance/types";
+import { CURRENCIES, TRUST_LEVELS, type Currency } from "@/lib/maintenance/types";
 import {
   ISSUE_SEVERITIES,
   ISSUE_STATUSES,
@@ -9,25 +9,28 @@ import {
 
 /**
  * Types for the "Scan a document" flow: a scanned image is sent (server-side)
- * to a DocumentExtractionProvider, which returns the structured shape below.
- * The user then confirms a PRE-FILLED, editable record before anything is saved.
+ * to a DocumentExtractionProvider, which FIRST classifies the document into one
+ * of four categories, THEN extracts only that category's fields. The user then
+ * confirms a PRE-FILLED, editable record before anything is saved.
  *
  * This is a separate concern from `lib/documents/extraction-*` (which fills
- * document METADATA). Here the confirmed result becomes a maintenance OR issue
- * record via the existing create flows.
+ * document METADATA). Here the confirmed result becomes a maintenance / issue /
+ * insurance / registration / inspection record via dedicated create flows.
  */
 
 // -----------------------------------------------------------------------------
-// The structured JSON the provider must return. `document_type_guess` classifies
-// the document to a target RECORD type. Unknown / absent values are null — the
-// provider must never invent values.
+// Classifier output. `document_category` decides which fields are extracted.
+// "unknown" routes the user to manual category selection. The provider must
+// never invent values — null for anything absent.
 // -----------------------------------------------------------------------------
-export const RECORD_TYPE_GUESSES = [
+export const DOCUMENT_CATEGORIES = [
   "maintenance",
-  "issue",
+  "insurance",
+  "registration",
+  "inspection",
   "unknown",
 ] as const;
-export type RecordTypeGuess = (typeof RECORD_TYPE_GUESSES)[number];
+export type DocumentCategory = (typeof DOCUMENT_CATEGORIES)[number];
 
 /** Image media types we send to the provider (PDF is not supported here). */
 export const SCAN_IMAGE_MIME_TYPES = [
@@ -48,8 +51,8 @@ export function isScanImageMime(mime: string): mime is ScanImageMime {
  * Best-effort normalize a model-provided date to ISO yyyy-mm-dd. The model is
  * asked for ISO but may echo the document's format (e.g. dd/mm/yyyy, common on
  * Israeli receipts). Returns null when it can't be confidently parsed — never
- * throws. The confirmation form keeps the date editable either way (it defaults
- * to today when null), so a missed parse never blocks the user.
+ * throws. The confirmation form keeps the date editable either way, so a missed
+ * parse never blocks the user.
  */
 export function normalizeToIsoDate(
   raw: string | null | undefined,
@@ -105,61 +108,139 @@ export function normalizeToIsoDate(
   // the calendar date isn't shifted by the timezone.
   const parsed = new Date(s);
   if (!Number.isNaN(parsed.getTime())) {
-    return iso(
-      parsed.getFullYear(),
-      parsed.getMonth() + 1,
-      parsed.getDate(),
-    );
+    return iso(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate());
   }
 
   return null;
 }
 
-/**
- * Schema the provider output is validated against (after stripping code fences
- * and JSON.parse). Loose-but-safe: out-of-range numbers are nulled rather than
- * rejected so a single bad field never fails the whole extraction.
- */
-export const scanExtractionSchema = z.object({
-  date: z
-    .string()
-    .nullable()
-    .transform((v) => normalizeToIsoDate(v)),
-  service_or_work_description: z
-    .string()
-    .nullable()
-    .transform((v) => (v ? v.slice(0, 2000) : null)),
-  mileage: z
-    .number()
-    .nullable()
-    .transform((v) =>
-      v != null && Number.isFinite(v) && v >= 0 && v <= 10_000_000
-        ? Math.round(v)
-        : null,
+// -----------------------------------------------------------------------------
+// Tolerant field coercion. The model is asked for the right types, but a single
+// odd value (a number as a string, a stray unit) must never fail the whole
+// extraction — we null bad/out-of-range values instead.
+// -----------------------------------------------------------------------------
+function toNumberOrNull(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string") {
+    const cleaned = v.replace(/[^0-9.\-]/g, "");
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function toStringOrNull(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  return s ? s : null;
+}
+
+const dateField = z
+  .any()
+  .transform((v) =>
+    normalizeToIsoDate(
+      typeof v === "string" ? v : v == null ? null : String(v),
     ),
-  cost: z
-    .number()
-    .nullable()
-    .transform((v) =>
-      v != null && Number.isFinite(v) && v >= 0 && v <= 100_000_000 ? v : null,
-    ),
-  vendor: z
-    .string()
-    .nullable()
-    .transform((v) => (v ? v.slice(0, 120) : null)),
-  document_type_guess: z
-    .enum(RECORD_TYPE_GUESSES)
-    .catch("unknown"),
-  confidence: z
-    .number()
-    .nullable()
-    .transform((v) =>
-      v != null && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : null,
-    ),
+  );
+
+const mileageField = z.any().transform((v) => {
+  const n = toNumberOrNull(v);
+  return n != null && n >= 0 && n <= 10_000_000 ? Math.round(n) : null;
 });
 
-/** Validated, normalized extraction result. */
+const costField = z.any().transform((v) => {
+  const n = toNumberOrNull(v);
+  return n != null && n >= 0 && n <= 100_000_000 ? n : null;
+});
+
+const textField = (max: number) =>
+  z.any().transform((v) => {
+    const s = toStringOrNull(v);
+    return s ? s.slice(0, max) : null;
+  });
+
+const confidenceField = z.any().transform((v) => {
+  const n = toNumberOrNull(v);
+  return n == null ? null : Math.min(1, Math.max(0, n));
+});
+
+// -----------------------------------------------------------------------------
+// Discriminated union on `document_category`. Each variant carries ONLY its own
+// fields. Validation never rejects on bad field types (fields are coerced); the
+// only hard requirement is a valid discriminator, which the providers ensure via
+// `coerceCategory` before parsing.
+// -----------------------------------------------------------------------------
+export const scanExtractionSchema = z.discriminatedUnion("document_category", [
+  z.object({
+    document_category: z.literal("maintenance"),
+    date: dateField,
+    garage_name: textField(120),
+    mileage: mileageField,
+    service_type: textField(120),
+    service_details: textField(2000),
+    confidence: confidenceField,
+  }),
+  z.object({
+    document_category: z.literal("insurance"),
+    insurer_name: textField(120),
+    start_date: dateField,
+    end_date: dateField,
+    cost: costField,
+    insurance_type: textField(120),
+    confidence: confidenceField,
+  }),
+  z.object({
+    document_category: z.literal("registration"),
+    start_date: dateField,
+    end_date: dateField,
+    mileage: mileageField,
+    notes: textField(2000),
+    confidence: confidenceField,
+  }),
+  z.object({
+    document_category: z.literal("inspection"),
+    start_date: dateField,
+    end_date: dateField,
+    mileage: mileageField,
+    cost: costField,
+    notes: textField(2000),
+    confidence: confidenceField,
+  }),
+  z.object({
+    document_category: z.literal("unknown"),
+    confidence: confidenceField,
+  }),
+]);
+
+/** Validated, normalized extraction result (one of the four categories). */
 export type ScanExtraction = z.infer<typeof scanExtractionSchema>;
+
+/**
+ * Coerce an unrecognized / missing `document_category` to "unknown" so the
+ * discriminated union always has a valid discriminator. Providers call this
+ * before parsing so a surprising classifier value degrades to manual entry
+ * instead of throwing.
+ */
+export function coerceCategory(raw: unknown): unknown {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const r = raw as Record<string, unknown>;
+    const cat = r.document_category;
+    if (
+      typeof cat !== "string" ||
+      !(DOCUMENT_CATEGORIES as readonly string[]).includes(cat)
+    ) {
+      return { ...r, document_category: "unknown" };
+    }
+  }
+  return raw;
+}
+
+/** Parse provider output, tolerating an unknown category. Throws on non-object. */
+export function parseScanExtraction(raw: unknown): ScanExtraction {
+  return scanExtractionSchema.parse(coerceCategory(raw));
+}
 
 /** What the extraction endpoint returns to the client. */
 export interface ScanExtractionResponse {
@@ -169,23 +250,43 @@ export interface ScanExtractionResponse {
 }
 
 // -----------------------------------------------------------------------------
-// Confirmation form — a single editable form covering both record types. On
-// submit it is mapped to the existing maintenance/issue input schemas server-side.
+// Confirmation form — a single editable form covering every category. The user
+// may CORRECT the category, which swaps the visible field set. On submit the
+// values are mapped to the matching create flow server-side. "issue" is kept as
+// a selectable category so the existing issue path stays reachable, even though
+// the classifier no longer auto-detects it.
 // -----------------------------------------------------------------------------
-export const SCAN_RECORD_TYPES = ["maintenance", "issue"] as const;
-export type ScanRecordType = (typeof SCAN_RECORD_TYPES)[number];
+export const SCAN_FORM_CATEGORIES = [
+  "maintenance",
+  "insurance",
+  "registration",
+  "inspection",
+  "issue",
+] as const;
+export type ScanFormCategory = (typeof SCAN_FORM_CATEGORIES)[number];
 
 export interface ScanConfirmFormValues {
-  record_type: ScanRecordType;
+  category: ScanFormCategory;
+  // maintenance + issue share a date / mileage / free-text body
   date: string;
   mileage: string;
-  /** Maps to maintenance.description OR issue.symptoms. */
+  /** maintenance service_details OR issue symptoms. */
   description: string;
-  // maintenance-only
-  category: string;
+  // maintenance
+  service_type: string;
+  garage_name: string;
+  // shared money (maintenance / insurance / inspection)
   cost: string;
   currency: Currency;
-  // issue-only
+  // insurance
+  insurer_name: string;
+  insurance_type: string;
+  // insurance / registration / inspection validity range
+  start_date: string;
+  end_date: string;
+  // registration / inspection
+  notes: string;
+  // issue
   severity: IssueSeverity;
   status: IssueStatus;
 }
@@ -194,34 +295,74 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function emptyForm(): ScanConfirmFormValues {
+  return {
+    category: "maintenance",
+    date: todayIso(),
+    mileage: "",
+    description: "",
+    service_type: "",
+    garage_name: "",
+    cost: "",
+    currency: "ILS",
+    insurer_name: "",
+    insurance_type: "",
+    start_date: "",
+    end_date: "",
+    notes: "",
+    severity: "monitor",
+    status: "open",
+  };
+}
+
+const numToStr = (n: number | null): string => (n != null ? String(n) : "");
+
 /**
- * Build pre-filled, fully-editable form defaults from an extraction. The vendor
- * is folded into the description (maintenance has no vendor column) so the
- * extracted value is preserved and editable rather than lost.
+ * Build pre-filled, fully-editable form defaults from an extraction. Only the
+ * detected category's fields are populated; "unknown" falls back to an empty
+ * maintenance form so the user can pick the right category manually.
  */
 export function extractionToScanForm(
   extraction: ScanExtraction,
 ): ScanConfirmFormValues {
-  const recordType: ScanRecordType =
-    extraction.document_type_guess === "issue" ? "issue" : "maintenance";
+  const form = emptyForm();
 
-  const baseDescription = extraction.service_or_work_description ?? "";
-  const description =
-    extraction.vendor && baseDescription
-      ? `${baseDescription} (${extraction.vendor})`
-      : (baseDescription || extraction.vendor || "");
-
-  return {
-    record_type: recordType,
-    date: extraction.date ?? todayIso(),
-    mileage: extraction.mileage != null ? String(extraction.mileage) : "",
-    description,
-    category: "",
-    cost: extraction.cost != null ? String(extraction.cost) : "",
-    currency: "ILS",
-    severity: "monitor",
-    status: "open",
-  };
+  switch (extraction.document_category) {
+    case "maintenance":
+      form.category = "maintenance";
+      form.date = extraction.date ?? todayIso();
+      form.mileage = numToStr(extraction.mileage);
+      form.service_type = extraction.service_type ?? "";
+      form.garage_name = extraction.garage_name ?? "";
+      form.description = extraction.service_details ?? "";
+      return form;
+    case "insurance":
+      form.category = "insurance";
+      form.insurer_name = extraction.insurer_name ?? "";
+      form.insurance_type = extraction.insurance_type ?? "";
+      form.start_date = extraction.start_date ?? "";
+      form.end_date = extraction.end_date ?? "";
+      form.cost = numToStr(extraction.cost);
+      return form;
+    case "registration":
+      form.category = "registration";
+      form.start_date = extraction.start_date ?? "";
+      form.end_date = extraction.end_date ?? "";
+      form.mileage = numToStr(extraction.mileage);
+      form.notes = extraction.notes ?? "";
+      return form;
+    case "inspection":
+      form.category = "inspection";
+      form.start_date = extraction.start_date ?? "";
+      form.end_date = extraction.end_date ?? "";
+      form.mileage = numToStr(extraction.mileage);
+      form.cost = numToStr(extraction.cost);
+      form.notes = extraction.notes ?? "";
+      return form;
+    case "unknown":
+    default:
+      return form; // empty maintenance default; UI prompts for a category
+  }
 }
 
 /** Confidence buckets for the UI badge (the provider returns a 0..1 number). */
@@ -236,5 +377,5 @@ export function confidenceBucket(
 
 // Re-export the enums the confirm form iterates over, so the client component
 // has a single import surface for this feature.
-export { ISSUE_SEVERITIES, ISSUE_STATUSES, CURRENCIES };
+export { ISSUE_SEVERITIES, ISSUE_STATUSES, CURRENCIES, TRUST_LEVELS };
 export type { IssueSeverity, IssueStatus, Currency };

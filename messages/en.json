@@ -1116,11 +1116,19 @@
       "file": "Document photo",
       "fileHelp": "Take a photo or choose an existing image of a single document (JPEG, PNG, or WebP).",
       "recordType": "Record type",
+      "category_label": "Document type",
       "date": "Date",
       "mileage": "Mileage",
       "description": "Work description",
       "symptoms": "Symptoms",
       "category": "Service type",
+      "serviceType": "Service type",
+      "garageName": "Garage / shop",
+      "insurerName": "Insurer",
+      "insuranceType": "Insurance type",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "notes": "Notes",
       "cost": "Cost",
       "currency": "Currency",
       "severity": "Severity",
@@ -1145,6 +1153,7 @@
       "mockNotice": "Mock extraction mode: this is a structured demo result, not a real AI/OCR reading.",
       "aiNotice": "AI-extracted from your document. Please review every field before saving.",
       "failedNotice": "We couldn't read the document automatically. You can enter the details manually below.",
+      "unknownNotice": "We couldn't tell what kind of document this is. Please choose the document type and fill in the details.",
       "trustNote": "This record will be saved as “AI-extracted” (you confirmed it)."
     },
     "confidence": {
@@ -1154,6 +1163,13 @@
     },
     "recordTypes": {
       "maintenance": "Maintenance record",
+      "issue": "Issue"
+    },
+    "categories": {
+      "maintenance": "Maintenance",
+      "insurance": "Insurance",
+      "registration": "Registration",
+      "inspection": "Inspection",
       "issue": "Issue"
     },
     "errors": {

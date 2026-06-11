@@ -10,16 +10,26 @@ import { maintenanceInputSchema } from "@/lib/maintenance/types";
 import { createIssue } from "@/lib/issues/service";
 import { issueInputSchema } from "@/lib/issues/types";
 import {
+  createInsurance,
+  createRegistration,
+  createInspection,
+} from "@/lib/vehicle-records/service";
+import {
+  insuranceInputSchema,
+  registrationInputSchema,
+  inspectionInputSchema,
+} from "@/lib/vehicle-records/types";
+import {
   extractFromScan,
   VehicleNotFoundError,
 } from "@/lib/documents/scan/service";
 import {
   isScanImageMime,
   MAX_SCAN_FILE_SIZE,
-  SCAN_RECORD_TYPES,
+  SCAN_FORM_CATEGORIES,
   type ScanConfirmFormValues,
   type ScanExtractionResponse,
-  type ScanRecordType,
+  type ScanFormCategory,
 } from "@/lib/documents/scan/types";
 
 /**
@@ -96,7 +106,7 @@ export async function scanExtractAction(
       vehicleId,
       metadata: {
         engine: response.engine,
-        guess: response.extraction.document_type_guess,
+        guess: response.extraction.document_category,
       },
     });
 
@@ -111,27 +121,38 @@ export async function scanExtractAction(
 }
 
 /**
- * Create the confirmed record via the existing create flow. `values` is the
- * editable confirmation form; `trust_label` is forced server-side to
- * `ai_extracted` (extracted from a document, user-confirmed). On success this
- * redirects and never returns.
+ * Create the confirmed record. `values` is the editable confirmation form;
+ * `trust_label` is forced server-side to `ai_extracted` (extracted from a
+ * document, user-confirmed) and `source_type` to `document_scan`. Maintenance
+ * and issue reuse the existing create flows unchanged; insurance / registration
+ * / inspection insert into their owner-scoped tables (ownership re-verified in
+ * the service). On success this redirects and never returns.
  */
 export async function createRecordFromScanAction(
   vehicleId: string,
-  recordType: ScanRecordType,
+  category: ScanFormCategory,
   values: ScanConfirmFormValues,
 ): Promise<ScanCreateState> {
   if (!vehicleId) return { error: "saveFailed" };
-  if (!(SCAN_RECORD_TYPES as readonly string[]).includes(recordType)) {
+  if (!(SCAN_FORM_CATEGORIES as readonly string[]).includes(category)) {
     return { error: "saveFailed" };
   }
 
-  if (recordType === "maintenance") {
+  if (category === "maintenance") {
+    // The garage name has no dedicated maintenance column; fold it into the
+    // description so the extracted value is preserved and editable.
+    const garage = values.garage_name.trim();
+    const details = values.description.trim();
+    const description =
+      garage && details
+        ? `${details} (${garage})`
+        : details || garage;
+
     const parsed = maintenanceInputSchema.safeParse({
       date: values.date,
       mileage: values.mileage,
-      category: values.category,
-      description: values.description,
+      category: values.service_type,
+      description,
       cost: values.cost,
       currency: values.currency,
       trust_label: "ai_extracted",
@@ -156,44 +177,127 @@ export async function createRecordFromScanAction(
     redirect(`/vehicles/${vehicleId}/maintenance`);
   }
 
-  // issue
-  const parsed = issueInputSchema.safeParse({
-    date: values.date,
-    mileage: values.mileage,
-    symptoms: values.description,
-    severity: values.severity,
-    status: values.status,
-    trust_label: "ai_extracted",
-  });
-  if (!parsed.success) {
-    const fieldErrors = toFieldErrors(parsed.error);
-    // The form binds the symptoms input to `description`; remap so the error
-    // shows on the right field.
-    if (fieldErrors.symptoms) {
-      fieldErrors.description = fieldErrors.symptoms;
-      delete fieldErrors.symptoms;
+  if (category === "issue") {
+    const parsed = issueInputSchema.safeParse({
+      date: values.date,
+      mileage: values.mileage,
+      symptoms: values.description,
+      severity: values.severity,
+      status: values.status,
+      trust_label: "ai_extracted",
+    });
+    if (!parsed.success) {
+      const fieldErrors = toFieldErrors(parsed.error);
+      // The form binds the symptoms input to `description`; remap so the error
+      // shows on the right field.
+      if (fieldErrors.symptoms) {
+        fieldErrors.description = fieldErrors.symptoms;
+        delete fieldErrors.symptoms;
+      }
+      return { fieldErrors };
     }
-    return { fieldErrors };
+
+    try {
+      await createIssue(vehicleId, parsed.data, "document_scan");
+    } catch {
+      return { error: "saveFailed" };
+    }
+
+    await trackEvent({
+      eventName: "issue_created",
+      entityType: "issue",
+      vehicleId,
+      metadata: {
+        severity: parsed.data.severity,
+        status: parsed.data.status,
+        source: "scan",
+      },
+    });
+
+    revalidatePath(`/vehicles/${vehicleId}`);
+    revalidatePath(`/vehicles/${vehicleId}/issues`);
+    redirect(`/vehicles/${vehicleId}/issues`);
   }
 
+  if (category === "insurance") {
+    const parsed = insuranceInputSchema.safeParse({
+      insurer_name: values.insurer_name,
+      start_date: values.start_date,
+      end_date: values.end_date,
+      cost: values.cost,
+      insurance_type: values.insurance_type,
+      trust_label: "ai_extracted",
+    });
+    if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+
+    try {
+      await createInsurance(vehicleId, parsed.data, "document_scan");
+    } catch {
+      return { error: "saveFailed" };
+    }
+
+    await trackEvent({
+      eventName: "insurance_created",
+      entityType: "vehicle_insurance",
+      vehicleId,
+      metadata: { trust_label: parsed.data.trust_label, source: "scan" },
+    });
+
+    revalidatePath(`/vehicles/${vehicleId}`);
+    redirect(`/vehicles/${vehicleId}`);
+  }
+
+  if (category === "registration") {
+    const parsed = registrationInputSchema.safeParse({
+      start_date: values.start_date,
+      end_date: values.end_date,
+      mileage: values.mileage,
+      notes: values.notes,
+      trust_label: "ai_extracted",
+    });
+    if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+
+    try {
+      await createRegistration(vehicleId, parsed.data, "document_scan");
+    } catch {
+      return { error: "saveFailed" };
+    }
+
+    await trackEvent({
+      eventName: "registration_created",
+      entityType: "vehicle_registration",
+      vehicleId,
+      metadata: { trust_label: parsed.data.trust_label, source: "scan" },
+    });
+
+    revalidatePath(`/vehicles/${vehicleId}`);
+    redirect(`/vehicles/${vehicleId}`);
+  }
+
+  // inspection
+  const parsed = inspectionInputSchema.safeParse({
+    start_date: values.start_date,
+    end_date: values.end_date,
+    mileage: values.mileage,
+    cost: values.cost,
+    notes: values.notes,
+    trust_label: "ai_extracted",
+  });
+  if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+
   try {
-    await createIssue(vehicleId, parsed.data, "document_scan");
+    await createInspection(vehicleId, parsed.data, "document_scan");
   } catch {
     return { error: "saveFailed" };
   }
 
   await trackEvent({
-    eventName: "issue_created",
-    entityType: "issue",
+    eventName: "inspection_created",
+    entityType: "vehicle_inspection",
     vehicleId,
-    metadata: {
-      severity: parsed.data.severity,
-      status: parsed.data.status,
-      source: "scan",
-    },
+    metadata: { trust_label: parsed.data.trust_label, source: "scan" },
   });
 
   revalidatePath(`/vehicles/${vehicleId}`);
-  revalidatePath(`/vehicles/${vehicleId}/issues`);
-  redirect(`/vehicles/${vehicleId}/issues`);
+  redirect(`/vehicles/${vehicleId}`);
 }

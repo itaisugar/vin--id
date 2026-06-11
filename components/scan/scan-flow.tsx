@@ -24,12 +24,7 @@ export interface ScanVehicleOption {
 
 /** Defaults used when extraction fails — the user falls back to manual entry. */
 const EMPTY_EXTRACTION: ScanExtraction = {
-  date: null,
-  service_or_work_description: null,
-  mileage: null,
-  cost: null,
-  vendor: null,
-  document_type_guess: "unknown",
+  document_category: "unknown",
   confidence: null,
 };
 
