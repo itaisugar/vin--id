@@ -34,6 +34,11 @@ import {
   type ScanConfirmFormValues,
   type ScanExtraction,
 } from "@/lib/documents/scan/types";
+import {
+  convertMileage,
+  MILEAGE_UNITS,
+  type MileageUnit,
+} from "@/lib/vehicles/types";
 
 const CONF_TONE = {
   low: "muted",
@@ -48,6 +53,7 @@ const CONF_TONE = {
  */
 export function ScanConfirmForm({
   vehicleId,
+  vehicleMileageUnit,
   extraction,
   engine,
   failed,
@@ -55,6 +61,7 @@ export function ScanConfirmForm({
   onBack,
 }: {
   vehicleId: string;
+  vehicleMileageUnit: MileageUnit;
   extraction: ScanExtraction;
   engine: "mock" | "anthropic" | "none";
   failed: boolean;
@@ -70,8 +77,13 @@ export function ScanConfirmForm({
   >({});
 
   const defaults = React.useMemo(
-    () => extractionToScanForm(extraction),
-    [extraction],
+    () => ({
+      ...extractionToScanForm(extraction),
+      // The mileage unit isn't extracted from the document — default it to the
+      // vehicle's own unit so the common case needs no conversion.
+      mileage_unit: vehicleMileageUnit,
+    }),
+    [extraction, vehicleMileageUnit],
   );
 
   const {
@@ -90,10 +102,36 @@ export function ScanConfirmForm({
   const onSubmit: SubmitHandler<ScanConfirmFormValues> = async (values) => {
     setServerError(null);
     setFieldErrors({});
+
+    // Validity ranges (insurance / registration / inspection) must not expire
+    // before they're issued. Guard client-side for instant feedback; the server
+    // schema enforces the same rule authoritatively.
+    const hasRange =
+      values.category === "insurance" ||
+      values.category === "registration" ||
+      values.category === "inspection";
+    if (
+      hasRange &&
+      values.start_date &&
+      values.end_date &&
+      values.start_date > values.end_date
+    ) {
+      setFieldErrors({ end_date: "expiryBeforeIssue" });
+      return;
+    }
+
+    // The mileage is entered in the chosen unit; persist it in the vehicle's
+    // canonical unit so it stays consistent with the vehicle's odometer.
+    const mileageNum = Number(values.mileage);
+    const normalizedMileage =
+      values.mileage.trim() !== "" && Number.isFinite(mileageNum)
+        ? String(convertMileage(mileageNum, values.mileage_unit, vehicleMileageUnit))
+        : values.mileage;
+
     const res = await createRecordFromScanAction(
       vehicleId,
       values.category,
-      values,
+      { ...values, mileage: normalizedMileage, mileage_unit: vehicleMileageUnit },
     );
     if (res?.fieldErrors) {
       setFieldErrors(res.fieldErrors as Record<string, string>);
@@ -164,13 +202,11 @@ export function ScanConfirmForm({
                   error={fieldErr("date")}
                   registration={register("date")}
                 />
-                <Field
-                  name="mileage"
-                  label={t("fields.mileage")}
-                  type="number"
-                  inputMode="numeric"
+                <MileageField
+                  t={t}
                   error={fieldErr("mileage")}
-                  registration={register("mileage")}
+                  mileageReg={register("mileage")}
+                  unitReg={register("mileage_unit")}
                 />
               </div>
               <Field
@@ -213,13 +249,11 @@ export function ScanConfirmForm({
                   error={fieldErr("date")}
                   registration={register("date")}
                 />
-                <Field
-                  name="mileage"
-                  label={t("fields.mileage")}
-                  type="number"
-                  inputMode="numeric"
+                <MileageField
+                  t={t}
                   error={fieldErr("mileage")}
-                  registration={register("mileage")}
+                  mileageReg={register("mileage")}
+                  unitReg={register("mileage_unit")}
                 />
               </div>
               <div className="space-y-1.5">
@@ -271,7 +305,7 @@ export function ScanConfirmForm({
                 error={fieldErr("insurance_type")}
                 registration={register("insurance_type")}
               />
-              <StartEndDates t={t} fieldErr={fieldErr} register={register} />
+              <IssueExpiryDates t={t} fieldErr={fieldErr} register={register} />
               <CostCurrency
                 t={t}
                 error={fieldErr("cost")}
@@ -284,14 +318,12 @@ export function ScanConfirmForm({
           {/* ---- registration ---- */}
           {category === "registration" ? (
             <>
-              <StartEndDates t={t} fieldErr={fieldErr} register={register} />
-              <Field
-                name="mileage"
-                label={t("fields.mileage")}
-                type="number"
-                inputMode="numeric"
+              <IssueExpiryDates t={t} fieldErr={fieldErr} register={register} />
+              <MileageField
+                t={t}
                 error={fieldErr("mileage")}
-                registration={register("mileage")}
+                mileageReg={register("mileage")}
+                unitReg={register("mileage_unit")}
               />
               <NotesField t={t} error={fieldErr("notes")} registration={register("notes")} />
             </>
@@ -300,14 +332,12 @@ export function ScanConfirmForm({
           {/* ---- inspection ---- */}
           {category === "inspection" ? (
             <>
-              <StartEndDates t={t} fieldErr={fieldErr} register={register} />
-              <Field
-                name="mileage"
-                label={t("fields.mileage")}
-                type="number"
-                inputMode="numeric"
+              <IssueExpiryDates t={t} fieldErr={fieldErr} register={register} />
+              <MileageField
+                t={t}
                 error={fieldErr("mileage")}
-                registration={register("mileage")}
+                mileageReg={register("mileage")}
+                unitReg={register("mileage_unit")}
               />
               <CostCurrency
                 t={t}
@@ -356,7 +386,7 @@ export function ScanConfirmForm({
 
 type Translate = ReturnType<typeof useTranslations>;
 
-function StartEndDates({
+function IssueExpiryDates({
   t,
   fieldErr,
   register,
@@ -369,18 +399,53 @@ function StartEndDates({
     <div className="grid gap-4 sm:grid-cols-2">
       <Field
         name="start_date"
-        label={t("fields.startDate")}
+        label={t("fields.issueDate")}
         type="date"
         error={fieldErr("start_date")}
         registration={register("start_date")}
       />
       <Field
         name="end_date"
-        label={t("fields.endDate")}
+        label={t("fields.expiryDate")}
         type="date"
         error={fieldErr("end_date")}
         registration={register("end_date")}
       />
+    </div>
+  );
+}
+
+function MileageField({
+  t,
+  error,
+  mileageReg,
+  unitReg,
+}: {
+  t: Translate;
+  error: string | null;
+  mileageReg: UseFormRegisterReturn;
+  unitReg: UseFormRegisterReturn;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="mileage">{t("fields.mileage")}</Label>
+      <div className="grid grid-cols-[1fr_auto] gap-2">
+        <Input
+          id="mileage"
+          type="number"
+          inputMode="numeric"
+          aria-invalid={Boolean(error)}
+          {...mileageReg}
+        />
+        <Select aria-label={t("fields.mileageUnit")} {...unitReg}>
+          {MILEAGE_UNITS.map((u) => (
+            <option key={u} value={u}>
+              {t(`units.${u}`)}
+            </option>
+          ))}
+        </Select>
+      </div>
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default async function ScanPage({ searchParams }: PageProps<"/scan">) {
     id: v.id,
     label:
       [v.make, v.model].filter(Boolean).join(" ").trim() || v.id.slice(0, 8),
+    mileageUnit: v.mileage_unit,
   }));
   const defaultVehicleId = typeof vehicle === "string" ? vehicle : undefined;
 

@@ -66,6 +66,10 @@ unknown:
 Rules:
 - Never invent values. Use null for any field not clearly present in the image.
 - Dates as ISO yyyy-mm-dd. Numbers as plain numbers (no currency symbols or units).
+- For a validity range, "start_date" is when the document/cover begins (issue or
+  "valid from") and "end_date" is when it ends or expires ("valid until"). A
+  "valid until" / expiry date is ALWAYS the end_date. "end_date" must be on or
+  after "start_date" — never output a range whose end precedes its start.
 - Output the JSON object only.`;
 
 /** Remove ```json fences / stray prose around a JSON object. */

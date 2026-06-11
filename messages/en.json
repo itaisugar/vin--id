@@ -1133,13 +1133,18 @@
       "garageName": "Garage / shop",
       "insurerName": "Insurer",
       "insuranceType": "Insurance type",
-      "startDate": "Start date",
-      "endDate": "End date",
+      "issueDate": "Issue date",
+      "expiryDate": "Expiry date",
+      "mileageUnit": "Unit",
       "notes": "Notes",
       "cost": "Cost",
       "currency": "Currency",
       "severity": "Severity",
       "status": "Status"
+    },
+    "units": {
+      "km": "km",
+      "miles": "miles"
     },
     "consent": {
       "title": "Before you continue",
@@ -1182,6 +1187,7 @@
     "errors": {
       "required": "This field is required.",
       "invalidDate": "Enter a valid date.",
+      "expiryBeforeIssue": "The expiry date must be on or after the issue date.",
       "invalidMileage": "Enter a valid mileage.",
       "invalidCost": "Enter a valid amount.",
       "tooLong": "This value is too long.",

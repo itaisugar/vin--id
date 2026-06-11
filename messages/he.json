@@ -1133,13 +1133,18 @@
       "garageName": "מוסך / חנות",
       "insurerName": "חברת ביטוח",
       "insuranceType": "סוג ביטוח",
-      "startDate": "תאריך התחלה",
-      "endDate": "תאריך סיום",
+      "issueDate": "תאריך הוצאה",
+      "expiryDate": "תאריך תפוגה",
+      "mileageUnit": "יחידה",
       "notes": "הערות",
       "cost": "עלות",
       "currency": "מטבע",
       "severity": "חומרה",
       "status": "סטטוס"
+    },
+    "units": {
+      "km": "ק\"מ",
+      "miles": "מייל"
     },
     "consent": {
       "title": "לפני שממשיכים",
@@ -1182,6 +1187,7 @@
     "errors": {
       "required": "שדה חובה.",
       "invalidDate": "הזן תאריך תקין.",
+      "expiryBeforeIssue": "תאריך התפוגה חייב להיות באותו יום או אחרי תאריך ההוצאה.",
       "invalidMileage": "הזן קילומטראז' תקין.",
       "invalidCost": "הזן סכום תקין.",
       "tooLong": "הערך ארוך מדי.",

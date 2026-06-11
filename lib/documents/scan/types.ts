@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { CURRENCIES, TRUST_LEVELS, type Currency } from "@/lib/maintenance/types";
+import type { MileageUnit } from "@/lib/vehicles/types";
 import {
   ISSUE_SEVERITIES,
   ISSUE_STATUSES,
@@ -214,6 +215,40 @@ export const scanExtractionSchema = z.discriminatedUnion("document_category", [
   }),
 ]);
 
+/**
+ * A validity range must never have its end before its start. The classifier
+ * occasionally swaps "valid from" / "valid until" (or echoes them in document
+ * order), which produced records whose end date preceded their start date.
+ * Used both to order the pre-filled form and as an authoritative save guard.
+ * Returns true when the range is valid or either date is absent.
+ */
+function isOrderedDateRange(v: {
+  start_date?: string | null;
+  end_date?: string | null;
+}): boolean {
+  if (!v.start_date || !v.end_date) return true;
+  const start = Date.parse(v.start_date);
+  const end = Date.parse(v.end_date);
+  if (Number.isNaN(start) || Number.isNaN(end)) return true;
+  return start <= end;
+}
+
+/**
+ * Order a validity range for pre-fill so the start is never after the end. When
+ * both dates are present and inverted we swap them (the most likely correction
+ * for a classifier that confused "valid from" / "valid until"); the user still
+ * reviews and can override. Missing dates become empty strings.
+ */
+function orderedRange(
+  start: string | null,
+  end: string | null,
+): { start: string; end: string } {
+  if (!isOrderedDateRange({ start_date: start, end_date: end })) {
+    return { start: end ?? "", end: start ?? "" };
+  }
+  return { start: start ?? "", end: end ?? "" };
+}
+
 /** Validated, normalized extraction result (one of the four categories). */
 export type ScanExtraction = z.infer<typeof scanExtractionSchema>;
 
@@ -270,6 +305,8 @@ export interface ScanConfirmFormValues {
   // maintenance + issue share a date / mileage / free-text body
   date: string;
   mileage: string;
+  /** Unit the entered mileage is in; converted to the vehicle's unit on save. */
+  mileage_unit: MileageUnit;
   /** maintenance service_details OR issue symptoms. */
   description: string;
   // maintenance
@@ -300,6 +337,7 @@ function emptyForm(): ScanConfirmFormValues {
     category: "maintenance",
     date: todayIso(),
     mileage: "",
+    mileage_unit: "km",
     description: "",
     service_type: "",
     garage_name: "",
@@ -336,29 +374,35 @@ export function extractionToScanForm(
       form.garage_name = extraction.garage_name ?? "";
       form.description = extraction.service_details ?? "";
       return form;
-    case "insurance":
+    case "insurance": {
       form.category = "insurance";
       form.insurer_name = extraction.insurer_name ?? "";
       form.insurance_type = extraction.insurance_type ?? "";
-      form.start_date = extraction.start_date ?? "";
-      form.end_date = extraction.end_date ?? "";
+      const range = orderedRange(extraction.start_date, extraction.end_date);
+      form.start_date = range.start;
+      form.end_date = range.end;
       form.cost = numToStr(extraction.cost);
       return form;
-    case "registration":
+    }
+    case "registration": {
       form.category = "registration";
-      form.start_date = extraction.start_date ?? "";
-      form.end_date = extraction.end_date ?? "";
+      const range = orderedRange(extraction.start_date, extraction.end_date);
+      form.start_date = range.start;
+      form.end_date = range.end;
       form.mileage = numToStr(extraction.mileage);
       form.notes = extraction.notes ?? "";
       return form;
-    case "inspection":
+    }
+    case "inspection": {
       form.category = "inspection";
-      form.start_date = extraction.start_date ?? "";
-      form.end_date = extraction.end_date ?? "";
+      const range = orderedRange(extraction.start_date, extraction.end_date);
+      form.start_date = range.start;
+      form.end_date = range.end;
       form.mileage = numToStr(extraction.mileage);
       form.cost = numToStr(extraction.cost);
       form.notes = extraction.notes ?? "";
       return form;
+    }
     case "unknown":
     default:
       return form; // empty maintenance default; UI prompts for a category

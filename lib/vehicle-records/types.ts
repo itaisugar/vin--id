@@ -50,17 +50,42 @@ const optionalText = (max: number) =>
 // Accept any known trust value; the scan flow forces 'ai_extracted' server-side.
 const trustLabel = z.enum(TRUST_LEVELS).default("user_entered");
 
+/**
+ * A document's expiry (end_date) must never fall before its issue date
+ * (start_date). Applied as a cross-field refine on every record that carries an
+ * issue/expiry pair so an inverted range (e.g. a scan that swapped "valid from"
+ * / "valid until") can never be saved. Passes when either date is absent or
+ * unparseable — those are caught (or allowed) by the per-field date validation.
+ */
+function isOrderedRange(v: {
+  start_date?: string;
+  end_date?: string;
+}): boolean {
+  if (!v.start_date || !v.end_date) return true;
+  const start = Date.parse(v.start_date);
+  const end = Date.parse(v.end_date);
+  if (Number.isNaN(start) || Number.isNaN(end)) return true;
+  return start <= end;
+}
+
+const orderedRangeError = {
+  error: "expiryBeforeIssue",
+  path: ["end_date"],
+};
+
 // -----------------------------------------------------------------------------
 // Insurance
 // -----------------------------------------------------------------------------
-export const insuranceInputSchema = z.object({
-  insurer_name: optionalText(120),
-  start_date: optionalDate,
-  end_date: optionalDate,
-  cost: optionalCost,
-  insurance_type: optionalText(120),
-  trust_label: trustLabel,
-});
+export const insuranceInputSchema = z
+  .object({
+    insurer_name: optionalText(120),
+    start_date: optionalDate,
+    end_date: optionalDate,
+    cost: optionalCost,
+    insurance_type: optionalText(120),
+    trust_label: trustLabel,
+  })
+  .refine(isOrderedRange, orderedRangeError);
 export type InsuranceInput = z.infer<typeof insuranceInputSchema>;
 
 export function insuranceInputToRow(input: InsuranceInput) {
@@ -77,13 +102,15 @@ export function insuranceInputToRow(input: InsuranceInput) {
 // -----------------------------------------------------------------------------
 // Registration (vehicle licensing)
 // -----------------------------------------------------------------------------
-export const registrationInputSchema = z.object({
-  start_date: optionalDate,
-  end_date: optionalDate,
-  mileage: optionalMileage,
-  notes: optionalText(2000),
-  trust_label: trustLabel,
-});
+export const registrationInputSchema = z
+  .object({
+    start_date: optionalDate,
+    end_date: optionalDate,
+    mileage: optionalMileage,
+    notes: optionalText(2000),
+    trust_label: trustLabel,
+  })
+  .refine(isOrderedRange, orderedRangeError);
 export type RegistrationInput = z.infer<typeof registrationInputSchema>;
 
 export function registrationInputToRow(input: RegistrationInput) {
@@ -99,14 +126,16 @@ export function registrationInputToRow(input: RegistrationInput) {
 // -----------------------------------------------------------------------------
 // Inspection (vehicle test)
 // -----------------------------------------------------------------------------
-export const inspectionInputSchema = z.object({
-  start_date: optionalDate,
-  end_date: optionalDate,
-  mileage: optionalMileage,
-  cost: optionalCost,
-  notes: optionalText(2000),
-  trust_label: trustLabel,
-});
+export const inspectionInputSchema = z
+  .object({
+    start_date: optionalDate,
+    end_date: optionalDate,
+    mileage: optionalMileage,
+    cost: optionalCost,
+    notes: optionalText(2000),
+    trust_label: trustLabel,
+  })
+  .refine(isOrderedRange, orderedRangeError);
 export type InspectionInput = z.infer<typeof inspectionInputSchema>;
 
 export function inspectionInputToRow(input: InspectionInput) {

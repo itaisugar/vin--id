@@ -16,10 +16,12 @@ import {
   MAX_SCAN_FILE_SIZE,
   type ScanExtraction,
 } from "@/lib/documents/scan/types";
+import type { MileageUnit } from "@/lib/vehicles/types";
 
 export interface ScanVehicleOption {
   id: string;
   label: string;
+  mileageUnit: MileageUnit;
 }
 
 /** Defaults used when extraction fails — the user falls back to manual entry. */
@@ -137,9 +139,11 @@ export function ScanFlow({
   };
 
   if (confirm) {
+    const selected = vehicles.find((v) => v.id === vehicleId);
     return (
       <ScanConfirmForm
         vehicleId={vehicleId}
+        vehicleMileageUnit={selected?.mileageUnit ?? "km"}
         extraction={confirm.extraction}
         engine={confirm.engine}
         failed={error === "extractFailed"}

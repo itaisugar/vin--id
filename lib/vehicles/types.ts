@@ -9,6 +9,24 @@ export type VehicleStatus = (typeof VEHICLE_STATUSES)[number];
 export const MILEAGE_UNITS = ["km", "miles"] as const;
 export type MileageUnit = (typeof MILEAGE_UNITS)[number];
 
+const KM_PER_MILE = 1.609344;
+
+/**
+ * Convert a mileage value between km and miles, rounded to a whole number.
+ * Mileage is stored per-vehicle in a single canonical unit (`mileage_unit`), so
+ * a reading entered in the other unit must be converted before it is persisted.
+ */
+export function convertMileage(
+  value: number,
+  from: MileageUnit,
+  to: MileageUnit,
+): number {
+  if (from === to) return value;
+  return from === "miles"
+    ? Math.round(value * KM_PER_MILE)
+    : Math.round(value / KM_PER_MILE);
+}
+
 const CURRENT_YEAR = new Date().getFullYear();
 const MAX_YEAR = CURRENT_YEAR + 1; // allow next model year
 
