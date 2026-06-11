@@ -15,7 +15,6 @@ import { createClient } from "@/lib/supabase/server";
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
-  const ti = await getTranslations("install");
 
   const supabase = await createClient();
   const {
@@ -51,14 +50,7 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{ti("settingsTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InstallInstructions />
-        </CardContent>
-      </Card>
+      <InstallInstructions />
 
       <Card>
         <CardHeader>
