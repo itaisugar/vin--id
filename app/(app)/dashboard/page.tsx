@@ -14,9 +14,6 @@ import { listVehicles } from "@/lib/vehicles/service";
 
 const VEHICLE_LIMIT = 4;
 
-const ACTION_CLASS =
-  "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted";
-
 // Prominent primary quick actions (same primary-CTA styling used elsewhere on
 // the dashboard). Taller for clear mobile tap targets.
 const PRIMARY_ACTION_CLASS =
@@ -102,12 +99,13 @@ export default async function DashboardPage() {
                 {t("quickActions.title")}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               {/* Primary actions — prominent, fixed order:
-                  Scan a document → Create passport → Add maintenance.
-                  Passport/maintenance need a vehicle, so they render only when
-                  an active vehicle exists; /scan handles its own vehicle pick. */}
-              <div className="grid gap-2 sm:grid-cols-3">
+                  Scan a document → Create passport → Add maintenance →
+                  Upload document. All but Scan need a vehicle, so they render
+                  only when an active vehicle exists; /scan handles its own
+                  vehicle pick. */}
+              <div className="grid gap-2 sm:grid-cols-2">
                 <Link href="/scan" className={PRIMARY_ACTION_CLASS}>
                   {t("quickActions.scanDocument")}
                 </Link>
@@ -125,25 +123,13 @@ export default async function DashboardPage() {
                     >
                       {t("quickActions.addMaintenance")}
                     </Link>
+                    <Link
+                      href={`/vehicles/${primary.id}/documents/new`}
+                      className={PRIMARY_ACTION_CLASS}
+                    >
+                      {t("quickActions.uploadDocument")}
+                    </Link>
                   </>
-                ) : null}
-              </div>
-
-              {/* Secondary actions */}
-              <div className="flex flex-wrap gap-2">
-                <Link href="/vehicles/new" className={ACTION_CLASS}>
-                  {t("quickActions.addVehicle")}
-                </Link>
-                <Link href="/diagnose" className={ACTION_CLASS}>
-                  {t("quickActions.diagnose")}
-                </Link>
-                {primary ? (
-                  <Link
-                    href={`/vehicles/${primary.id}/documents/new`}
-                    className={ACTION_CLASS}
-                  >
-                    {t("quickActions.uploadDocument")}
-                  </Link>
                 ) : null}
               </div>
             </CardContent>
