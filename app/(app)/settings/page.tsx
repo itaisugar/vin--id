@@ -83,14 +83,7 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("session.title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LogoutButton />
-        </CardContent>
-      </Card>
+      <LogoutButton />
 
       <p className="text-center text-xs text-muted-foreground">
         {tc("appName")} · {tc("version")}
