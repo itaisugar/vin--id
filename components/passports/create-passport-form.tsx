@@ -44,7 +44,7 @@ export function CreatePassportForm({
   });
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<{
-    shareUrl: string;
+    shareUrl: string | null;
     passportId: string;
   } | null>(null);
   const [isPending, startTransition] = React.useTransition();
@@ -73,8 +73,14 @@ export function CreatePassportForm({
         setError(result.error);
         return;
       }
-      if (result?.shareUrl && result?.passportId) {
-        setSuccess({ shareUrl: result.shareUrl, passportId: result.passportId });
+      // Enter the success state whenever the passport was created, even if the
+      // share URL couldn't be generated (misconfigured app URL) — the success
+      // card explains that case instead of showing a broken link.
+      if (result?.passportId) {
+        setSuccess({
+          shareUrl: result.shareUrl ?? null,
+          passportId: result.passportId,
+        });
       }
     });
   };
@@ -90,27 +96,43 @@ export function CreatePassportForm({
             <p className="text-sm text-muted-foreground">
               {t("create.successBody")}
             </p>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">{t("share.title")}</p>
-              <ShareUrl url={success.shareUrl} />
-              <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
-                ⚠️ {t("share.copyOnce")}
-              </p>
-              <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <WebShareButton
-                url={success.shareUrl}
-                title={t("create.successTitle")}
-              />
-              <a
-                href={success.shareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+            {success.shareUrl ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t("share.title")}</p>
+                <ShareUrl url={success.shareUrl} />
+                <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  ⚠️ {t("share.copyOnce")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("share.terms")}
+                </p>
+              </div>
+            ) : (
+              <p
+                role="alert"
+                className="rounded-md bg-amber-500/15 p-3 text-sm font-medium text-amber-700 dark:text-amber-400"
               >
-                {t("create.openPreview")}
-              </a>
+                ⚠️ {t("share.linkUnavailable")}
+              </p>
+            )}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {success.shareUrl ? (
+                <>
+                  <WebShareButton
+                    url={success.shareUrl}
+                    title={t("share.shareTitle")}
+                    text={t("share.shareText")}
+                  />
+                  <a
+                    href={success.shareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+                  >
+                    {t("create.openPreview")}
+                  </a>
+                </>
+              ) : null}
               <Link
                 href={`/vehicles/${vehicleId}/passports/${success.passportId}/print`}
                 className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"

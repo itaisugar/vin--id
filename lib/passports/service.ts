@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 import { listDocuments } from "@/lib/documents/service";
 import { listIssues } from "@/lib/issues/service";
@@ -65,23 +66,6 @@ export interface PassportCounts {
   documentsNonShareable: number;
 }
 
-/**
- * Base URL used to build Passport share links (`/p/{token}`).
- * - APP_PUBLIC_URL: explicit override — set this to the stable production domain.
- * - VERCEL_URL: automatic per-deployment host on Vercel (preview/prod), used so
- *   the localhost fallback never leaks into a deployed environment.
- * - localhost: local development only.
- */
-function appPublicUrl(): string {
-  if (process.env.APP_PUBLIC_URL) {
-    return process.env.APP_PUBLIC_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
-}
-
 async function getUserId(supabase: SupabaseClient): Promise<string> {
   const {
     data: { user },
@@ -114,11 +98,16 @@ export async function getPassportCounts(
   };
 }
 
-/** Create a frozen passport snapshot. Returns the id + one-time share URL. */
+/**
+ * Create a frozen passport snapshot. Returns the id + one-time share URL.
+ * `shareUrl` is `null` when the public base URL is not configured (production
+ * misconfiguration) — the passport + token are still created, so the UI can
+ * surface a clear message instead of showing a broken/localhost link.
+ */
 export async function createPassport(
   vehicleId: string,
   options: PassportOptions,
-): Promise<{ passportId: string; shareUrl: string }> {
+): Promise<{ passportId: string; shareUrl: string | null }> {
   const supabase = await createClient();
   const userId = await getUserId(supabase);
 
@@ -298,7 +287,17 @@ export async function createPassport(
   });
   if (tokenError) throw tokenError;
 
-  return { passportId, shareUrl: `${appPublicUrl()}/p/${token}` };
+  // Build the one-time share URL. If the public base URL is misconfigured we
+  // must NOT fail the whole creation (snapshot + token already exist) — return
+  // a null shareUrl and let the UI explain it. Never emit a localhost link.
+  let shareUrl: string | null = null;
+  try {
+    shareUrl = `${await getAppBaseUrl()}/p/${token}`;
+  } catch {
+    shareUrl = null;
+  }
+
+  return { passportId, shareUrl };
 }
 
 export async function listPassports(

@@ -41,6 +41,18 @@ MOCK_AI                       = true
 - Local dev: `http://localhost:3000` (or `:3001` / `:3002` if the port differs).
 - Production: `https://<your-vercel-domain>.vercel.app` or your custom domain.
 
+> **Set `APP_PUBLIC_URL` in Vercel to the production URL** (e.g.
+> `APP_PUBLIC_URL=https://your-vercel-domain.vercel.app`) and **redeploy** after
+> changing it. Passport share links are built as `APP_PUBLIC_URL + /p/{token}`.
+> If `APP_PUBLIC_URL` is unset, the app derives the base URL from the request
+> headers (`x-forwarded-host`/`x-forwarded-proto`) and then `VERCEL_URL`, so it
+> still works on Vercel — but setting it explicitly is the reliable, custom-domain
+> aware option. **If a share link shows `localhost` in production, `APP_PUBLIC_URL`
+> is misconfigured** (and headers were unavailable) — set it and redeploy. In
+> production the app never falls back to localhost: if no base URL can be resolved
+> it shows "share link could not be generated" instead of emitting a broken link
+> (the passport itself is still created).
+
 ## 2. Deploy from GitHub to Vercel
 
 1. Push the repo to GitHub (already wired: `itaisugar/vin--id`).

@@ -13,7 +13,8 @@ import { passportOptionsSchema } from "@/lib/passports/types";
 export type PassportActionState = {
   error?: string;
   passportId?: string;
-  shareUrl?: string;
+  /** One-time share URL. `null` when the app's public URL is misconfigured. */
+  shareUrl?: string | null;
 };
 
 function revalidate(vehicleId: string, passportId?: string) {
