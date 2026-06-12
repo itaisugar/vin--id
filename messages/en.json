@@ -160,7 +160,9 @@
     "subtitle": "Manage your account and preferences.",
     "account": {
       "title": "Account",
-      "email": "Email"
+      "fullName": "Full name",
+      "email": "Email",
+      "joinedAt": "Member since"
     },
     "language": {
       "title": "Language",

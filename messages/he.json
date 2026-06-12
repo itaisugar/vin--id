@@ -160,7 +160,9 @@
     "subtitle": "ניהול החשבון וההעדפות שלך.",
     "account": {
       "title": "חשבון",
-      "email": "אימייל"
+      "fullName": "שם מלא",
+      "email": "אימייל",
+      "joinedAt": "חבר/ה מאז"
     },
     "language": {
       "title": "שפה",

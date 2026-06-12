@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   Card,
   CardContent,
@@ -15,11 +15,34 @@ import { createClient } from "@/lib/supabase/server";
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
+  const locale = await getLocale();
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Reuse the signup/Google metadata fields used for the dashboard greeting.
+  const meta = (user?.user_metadata ?? {}) as {
+    full_name?: string;
+    name?: string;
+    first_name?: string;
+    last_name?: string;
+  };
+  const fullName =
+    meta.full_name?.trim() ||
+    meta.name?.trim() ||
+    [meta.first_name, meta.last_name]
+      .map((part) => part?.trim())
+      .filter(Boolean)
+      .join(" ") ||
+    "";
+
+  const joinedAt = user?.created_at
+    ? new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(
+        new Date(user.created_at),
+      )
+    : "";
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -32,11 +55,25 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">{t("account.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-1">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {t("account.email")}
-          </p>
-          <p className="text-sm font-medium">{user?.email ?? "—"}</p>
+        <CardContent className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {t("account.fullName")}
+            </p>
+            <p className="text-sm font-medium">{fullName || "—"}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {t("account.email")}
+            </p>
+            <p className="text-sm font-medium">{user?.email ?? "—"}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {t("account.joinedAt")}
+            </p>
+            <p className="text-sm font-medium">{joinedAt || "—"}</p>
+          </div>
         </CardContent>
       </Card>
 
