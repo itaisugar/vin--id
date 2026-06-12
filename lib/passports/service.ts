@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getAppBaseUrl } from "@/lib/app-url";
+import { resolveAppBaseUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 import { listDocuments } from "@/lib/documents/service";
 import { listIssues } from "@/lib/issues/service";
@@ -290,12 +290,24 @@ export async function createPassport(
   // Build the one-time share URL. If the public base URL is misconfigured we
   // must NOT fail the whole creation (snapshot + token already exist) — return
   // a null shareUrl and let the UI explain it. Never emit a localhost link.
-  let shareUrl: string | null = null;
-  try {
-    shareUrl = `${await getAppBaseUrl()}/p/${token}`;
-  } catch {
-    shareUrl = null;
+  const { url: baseUrl, source } = await resolveAppBaseUrl();
+
+  // Safe diagnostics: log only WHICH source produced the base URL (and the base
+  // URL itself in development). Never log the raw token, token_hash, or secrets.
+  if (process.env.NODE_ENV !== "production") {
+    console.info(
+      `[passport] share base URL source=${source ?? "none"} base=${baseUrl ?? "null"}`,
+    );
+  } else if (!baseUrl) {
+    console.warn(
+      "[passport] Share link not generated: no public base URL resolved. " +
+        "Set APP_PUBLIC_URL to the production domain in Vercel and redeploy.",
+    );
+  } else {
+    console.info(`[passport] share base URL source=${source}`);
   }
+
+  const shareUrl = baseUrl ? `${baseUrl}/p/${token}` : null;
 
   return { passportId, shareUrl };
 }

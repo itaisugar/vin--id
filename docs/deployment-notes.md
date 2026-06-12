@@ -48,10 +48,16 @@ MOCK_AI                       = true
 > headers (`x-forwarded-host`/`x-forwarded-proto`) and then `VERCEL_URL`, so it
 > still works on Vercel — but setting it explicitly is the reliable, custom-domain
 > aware option. **If a share link shows `localhost` in production, `APP_PUBLIC_URL`
-> is misconfigured** (and headers were unavailable) — set it and redeploy. In
-> production the app never falls back to localhost: if no base URL can be resolved
-> it shows "share link could not be generated" instead of emitting a broken link
-> (the passport itself is still created).
+> is misconfigured** — most often it was set to `http://localhost:3000` in Vercel
+> (don't do that; that value is for local dev only). In production the app is
+> strict: a `localhost` base URL from **any** source — including an
+> `APP_PUBLIC_URL` mistakenly set to localhost — is **rejected**, the next source
+> (request headers, then `VERCEL_URL`) is tried, and if none resolves the UI
+> shows "share link could not be generated" instead of a broken link (the
+> passport itself is still created). On Passport creation the server logs which
+> source was used (`[passport] share base URL source=…`) and warns when it ignores
+> a localhost value — check the **Vercel deployment logs** to confirm the source.
+> After changing `APP_PUBLIC_URL`, you **must redeploy** for it to take effect.
 
 ## 2. Deploy from GitHub to Vercel
 
