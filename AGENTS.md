@@ -176,3 +176,22 @@ Not allowed without explicit approval:
 - Mechanic verification
 - Major refactors
 - New paid services outside document extraction
+
+## Document Scan & AI Extraction (approved feature state)
+
+The "Scan a document" feature is an approved, shipped feature. This section records its current approved state and **supersedes the earlier "the scan image must not be stored automatically" line where they conflict** (image persistence is now an approved, owner-directed requirement). It does not change any other existing rule.
+
+- Scan/extraction is an approved use of the paid Anthropic API, **server-side only** (see **Paid API Scope** and **Provider Gating**).
+- Provider selection: real Anthropic extraction is used whenever `ANTHROPIC_API_KEY` is set (server-only env var); mock is the no-key fallback. `EXTRACTION_MODEL` selects the model (default `claude-haiku-4-5-20251001`).
+- Only a **downscaled JPEG** is sent to the provider (cost control). The user's original image is never sent at full resolution.
+- User confirmation before save is still required. Nothing is created until the user confirms the editable record; confirmed records may use `trust_label='ai_extracted'`.
+
+### Scan image persistence (approved — reverses the earlier "do not store" rule)
+
+- The **original** uploaded scan image **is now saved** through the existing private documents pipeline into the `vehicle-documents` bucket. The bucket stays **private**.
+- The saved document is linked to the created maintenance/issue record (nullable `document_id` FK) so it can be **opened later from the vehicle history**.
+- Files are opened only via **short-lived signed URLs generated server-side**. Never expose `storage_path` or file URLs to the browser.
+- Reuse the existing documents module (upload, signed-URL generation, soft delete, `contains_personal_info`, `share_allowed`). `share_allowed` defaults **false** and is never auto-enabled; `contains_personal_info` defaults **true** and stays user-editable.
+- Persistence is **best-effort**: if saving the document fails, the record is still created (just without an attached document). Images only; PDFs remain unsupported.
+- The "open document" path verifies the user owns the vehicle/document before issuing a signed URL.
+- Passport stays **metadata-only**: the attached document and `storage_path` must never leak into the Passport snapshot, public preview, or print.
