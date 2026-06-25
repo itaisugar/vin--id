@@ -53,14 +53,14 @@ export function InstallInstructions() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-3 rounded-md border border-border bg-background p-3 text-start transition-colors hover:bg-muted"
+        className="flex w-full items-center gap-3 rounded-md border border-line bg-surface p-3 text-start transition-colors hover:bg-surface-2"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
           <DownloadIcon className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium">{t("settingsTitle")}</span>
-          <span className="block text-xs text-muted-foreground">
+          <span className="block text-xs text-ink-2">
             {t("cardSubtitle")}
           </span>
         </span>
@@ -117,17 +117,17 @@ function InstallDialog({
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg">
+      <div className="relative w-full max-w-sm rounded-lg border border-line bg-surface p-5 shadow-lg">
         <h2 id="install-dialog-title" className="text-lg font-semibold">
           {title}
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">{intro}</p>
+        <p className="mt-2 text-sm text-ink-2">{intro}</p>
 
         {steps.length > 0 ? (
           <ol className="mt-4 space-y-3">
             {steps.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
                   {i + 1}
                 </span>
                 <span className="pt-0.5">{step}</span>

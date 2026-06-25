@@ -32,7 +32,7 @@ export async function PublicError({
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-sm">{t(`errors.${key}`)}</p>
-        <p className="text-xs text-muted-foreground">{t("errors.hint")}</p>
+        <p className="text-xs text-ink-2">{t("errors.hint")}</p>
       </CardContent>
     </Card>
   );

@@ -83,7 +83,7 @@ export default async function SettingsPage() {
           <CardTitle className="text-base">{t("language.title")}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">{t("language.help")}</p>
+          <p className="text-sm text-ink-2">{t("language.help")}</p>
           <LanguageSwitcher />
         </CardContent>
       </Card>
@@ -103,8 +103,8 @@ export default async function SettingsPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-base">{t("feedback.title")}</CardTitle>
           <p className="text-sm font-medium">{t("feedback.betaPrompt")}</p>
-          <p className="text-sm text-muted-foreground">{t("feedback.help")}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-ink-2">{t("feedback.help")}</p>
+          <p className="text-xs text-ink-2">
             {t("feedback.betaGuideNote")}
           </p>
         </CardHeader>
@@ -115,7 +115,7 @@ export default async function SettingsPage() {
 
       <LogoutButton />
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-ink-2">
         {tc("appName")} · {tc("version")}
       </p>
     </div>

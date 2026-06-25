@@ -93,7 +93,7 @@ export default async function DiagnosisSessionPage({
         <DiagnosisResultView result={result} isMock={isMockMode()} />
       ) : (
         <Card>
-          <CardContent className="p-4 text-sm text-muted-foreground">
+          <CardContent className="p-4 text-sm text-ink-2">
             {t("result.unavailable")}
           </CardContent>
         </Card>
@@ -103,7 +103,7 @@ export default async function DiagnosisSessionPage({
       {result && session.vehicle_id ? (
         <div className="space-y-2">
           <SaveAsIssueButton sessionId={session.id} />
-          <p className="text-xs text-muted-foreground">{t("saveIssue.hint")}</p>
+          <p className="text-xs text-ink-2">{t("saveIssue.hint")}</p>
         </div>
       ) : null}
     </div>

@@ -155,14 +155,14 @@ export function IssueForm({
           </Select>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-ink-2">
         {t(`severityHelp.${selectedSeverity}`)}
       </p>
 
       <div className="space-y-1.5">
         <Label htmlFor="resolution_notes">{t("fields.resolutionNotes")}</Label>
         <Textarea id="resolution_notes" {...register("resolution_notes")} />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-ink-2">
           {t("fields.resolutionNotesHelp")}
         </p>
       </div>
@@ -177,7 +177,7 @@ export function IssueForm({
             </option>
           ))}
         </Select>
-        <p className="text-xs text-muted-foreground">{t("trustHelp")}</p>
+        <p className="text-xs text-ink-2">{t("trustHelp")}</p>
       </div>
 
       {serverError ? (
@@ -197,7 +197,7 @@ export function IssueForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("form.cancel")}

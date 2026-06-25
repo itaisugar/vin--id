@@ -25,7 +25,7 @@ export function LogoutButton({ className }: { className?: string }) {
         disabled={isPending}
         onClick={() => setOpen(true)}
         className={cn(
-          "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50",
+          "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-ink-2 transition-colors hover:bg-surface-2 disabled:opacity-50",
           className,
         )}
       >

@@ -26,7 +26,7 @@ export function ExtractWithAiButton({
   };
 
   return (
-    <div className="rounded-md border border-dashed border-border p-3">
+    <div className="rounded-md border border-dashed border-line p-3">
       <Button
         type="button"
         variant="outline"
@@ -36,7 +36,7 @@ export function ExtractWithAiButton({
       >
         {isPending ? t("extracting") : t("extract")}
       </Button>
-      <p className="mt-2 text-xs text-muted-foreground">{t("mockNotice")}</p>
+      <p className="mt-2 text-xs text-ink-2">{t("mockNotice")}</p>
       {error ? (
         <p role="alert" className="mt-1 text-sm text-danger">
           {t(`errors.${error}`)}

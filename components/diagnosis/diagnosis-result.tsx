@@ -105,7 +105,7 @@ export function DiagnosisResultView({
           {result.step_by_step_checks.length > 0 ? (
             <section className="space-y-2">
               <h3 className="text-sm font-semibold">{t("sections.checks")}</h3>
-              <ol className="list-decimal space-y-1 ps-5 text-sm text-muted-foreground">
+              <ol className="list-decimal space-y-1 ps-5 text-sm text-ink-2">
                 {result.step_by_step_checks.map((step, idx) => (
                   <li key={idx}>{step}</li>
                 ))}
@@ -118,7 +118,7 @@ export function DiagnosisResultView({
             <h3 className="text-sm font-semibold">
               {t("sections.whenToContact")}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-2">
               {result.when_to_stop_and_contact_mechanic}
             </p>
           </section>

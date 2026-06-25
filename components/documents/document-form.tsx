@@ -199,7 +199,7 @@ export function DocumentForm({
             }}
             className="h-auto py-2"
           />
-          <p className="text-xs text-muted-foreground">{t("fields.fileHelp")}</p>
+          <p className="text-xs text-ink-2">{t("fields.fileHelp")}</p>
           {fileError ? (
             <p className="text-sm text-danger">{t(`form.errors.${fileError}`)}</p>
           ) : null}
@@ -267,7 +267,7 @@ export function DocumentForm({
       </div>
 
       {/* Privacy flags */}
-      <div className="space-y-2 rounded-md border border-border p-3">
+      <div className="space-y-2 rounded-md border border-line p-3">
         <label className="flex items-center gap-2 text-sm">
           <Checkbox {...register("contains_personal_info")} />
           {t("fields.containsPersonalInfo")}
@@ -293,7 +293,7 @@ export function DocumentForm({
             </option>
           ))}
         </Select>
-        <p className="text-xs text-muted-foreground">{t("trustHelp")}</p>
+        <p className="text-xs text-ink-2">{t("trustHelp")}</p>
       </div>
 
       {serverError ? (
@@ -315,7 +315,7 @@ export function DocumentForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("form.cancel")}

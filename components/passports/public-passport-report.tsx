@@ -101,7 +101,7 @@ export async function PublicPassportReport({
           {vehicleTitle ? (
             <p className="text-sm font-medium">{vehicleTitle}</p>
           ) : null}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-ink-2">
             {t("detail.created")}: {fmt(view.issued_at)} · {t("detail.expires")}:{" "}
             {fmt(view.expires_at)}
           </p>
@@ -154,8 +154,8 @@ export async function PublicPassportReport({
           <CardTitle className="text-base">{t("verification.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <p className="text-sm text-muted-foreground">{t("verification.text")}</p>
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="text-sm text-ink-2">{t("verification.text")}</p>
+          <p className="text-xs font-medium text-ink-2">
             {t("detail.hashLabel")}
           </p>
           <p
@@ -194,11 +194,11 @@ export async function PublicPassportReport({
         </CardHeader>
         <CardContent>
           {missingLines.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-2">
               {t("public.missing.none")}
             </p>
           ) : (
-            <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">
+            <ul className="list-disc space-y-1 ps-5 text-sm text-ink-2">
               {missingLines.map((line) => (
                 <li key={line}>{line}</li>
               ))}
@@ -209,7 +209,7 @@ export async function PublicPassportReport({
 
       {/* H. Disclaimers */}
       <Card>
-        <CardContent className="space-y-1 p-4 text-xs text-muted-foreground">
+        <CardContent className="space-y-1 p-4 text-xs text-ink-2">
           <p>{t("public.disclaimers.provided")}</p>
           <p>{t("public.disclaimers.notOwnership")}</p>
           <p>{t("public.disclaimers.notCertification")}</p>
@@ -226,7 +226,7 @@ export async function PublicPassportReport({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">
+            <ul className="list-disc space-y-1 ps-5 text-sm text-ink-2">
               <li>{t("public.buyerGuidance.review")}</li>
               <li>{t("public.buyerGuidance.copies")}</li>
               <li>{t("public.buyerGuidance.inspection")}</li>
@@ -245,7 +245,7 @@ export async function PublicPassportReport({
           ) : loggedIn ? (
             <>
               <AcceptPassportButton token={token} />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-ink-2">
                 {t("accept.buyerOneTime")}
               </p>
             </>
@@ -257,16 +257,16 @@ export async function PublicPassportReport({
               >
                 {t("accept.signInCta")}
               </Link>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-ink-2">
                 {t("accept.previewFirst")}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-ink-2">
                 {t("accept.notOfficial")}
               </p>
             </>
           )}
           {!isOwner ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink-2">
               {t("accept.reassurance")}
             </p>
           ) : null}

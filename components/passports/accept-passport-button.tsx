@@ -27,7 +27,7 @@ export function AcceptPassportButton({ token }: { token: string }) {
       <Button type="button" onClick={() => setOpen(true)}>
         {t("acceptCta")}
       </Button>
-      <p className="text-xs text-muted-foreground">{t("notOfficial")}</p>
+      <p className="text-xs text-ink-2">{t("notOfficial")}</p>
       {error ? (
         <p role="alert" className="text-sm text-danger">
           {t(`errors.${error}`)}

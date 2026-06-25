@@ -144,7 +144,7 @@ export function PassportTimeline({ snapshot }: { snapshot: PassportSnapshot }) {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
+      <h3 className="text-sm font-semibold text-ink-2">{title}</h3>
       <div className="grid gap-2">{children}</div>
     </section>
   );
@@ -152,7 +152,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 
 function Row({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-1 rounded-md border border-border p-3">
+    <div className="space-y-1 rounded-md border border-line p-3">
       {children}
     </div>
   );
@@ -176,12 +176,12 @@ function Line({
 
 function Body({ children }: { children: React.ReactNode }) {
   return (
-    <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+    <p className="whitespace-pre-wrap text-sm text-ink-2">
       {children}
     </p>
   );
 }
 
 function Empty({ text }: { text: string }) {
-  return <p className="text-sm text-muted-foreground">{text}</p>;
+  return <p className="text-sm text-ink-2">{text}</p>;
 }

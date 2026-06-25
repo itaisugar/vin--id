@@ -55,14 +55,14 @@ export function ConfirmDialog({
       />
       <div
         className={cn(
-          "relative w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg",
+          "relative w-full max-w-sm rounded-lg border border-line bg-surface p-5 shadow-lg",
         )}
       >
         <h2 id="confirm-dialog-title" className="text-lg font-semibold">
           {title}
         </h2>
         {description ? (
-          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+          <p className="mt-2 text-sm text-ink-2">{description}</p>
         ) : null}
         <div className="mt-5 flex justify-end gap-2">
           <Button

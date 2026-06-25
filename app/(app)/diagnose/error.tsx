@@ -18,7 +18,7 @@ export default function DiagnoseError({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-border p-12 text-center">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-line p-12 text-center">
       <p className="font-medium">{t("somethingWentWrong")}</p>
       <Button variant="outline" onClick={reset}>
         {t("retry")}

@@ -50,7 +50,7 @@ export function FeedbackForm({ defaultEmail }: { defaultEmail: string }) {
     return (
       <p
         role="status"
-        className="rounded-md border border-border bg-muted p-3 text-sm"
+        className="rounded-md border border-line bg-surface-2 p-3 text-sm"
       >
         {t("thanks")}
       </p>

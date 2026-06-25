@@ -11,7 +11,7 @@ export function LegalFooterLinks({ className }: { className?: string }) {
     <nav
       aria-label={t("label")}
       className={cn(
-        "flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground",
+        "flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-ink-2",
         className,
       )}
     >

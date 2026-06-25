@@ -24,29 +24,29 @@ export default async function DocumentsListPage({
         <div className="space-y-1">
           <Link
             href={`/vehicles/${id}`}
-            className="text-sm text-muted-foreground hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-ink-2 hover:text-ink"
           >
-            ← {vehicleTitle || t("backToVehicle")}
+            <span className="inline-block rtl:rotate-180">←</span> {vehicleTitle || t("backToVehicle")}
           </Link>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
         </div>
         <Link
           href={`/vehicles/${id}/documents/new`}
-          className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
         >
           {t("uploadDocument")}
         </Link>
       </div>
 
       {documents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-12 text-center">
           <p className="font-medium">{t("empty.title")}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="max-w-sm text-sm text-ink-2">
             {t("empty.body")}
           </p>
           <Link
             href={`/vehicles/${id}/documents/new`}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
           >
             {t("uploadDocument")}
           </Link>

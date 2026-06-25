@@ -129,7 +129,7 @@ export function ReminderForm({
           registration={register("due_mileage")}
         />
       </div>
-      <p className="-mt-3 text-xs text-muted-foreground">
+      <p className="-mt-3 text-xs text-ink-2">
         {t("fields.dueHint")}
       </p>
 
@@ -174,7 +174,7 @@ export function ReminderForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("form.cancel")}

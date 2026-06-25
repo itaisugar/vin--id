@@ -60,7 +60,7 @@ export async function DashboardReminders() {
         <CardTitle>{t("dashboard.title")}</CardTitle>
         <Link
           href="/vehicles"
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-sm font-medium text-accent hover:underline"
         >
           {t("dashboard.viewVehicles")}
         </Link>

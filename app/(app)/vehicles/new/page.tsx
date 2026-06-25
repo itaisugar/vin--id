@@ -9,7 +9,7 @@ export default async function NewVehiclePage() {
     <div className="mx-auto max-w-xl space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">{t("new.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("new.subtitle")}</p>
+        <p className="text-sm text-ink-2">{t("new.subtitle")}</p>
       </div>
       <VehicleForm
         mode="create"

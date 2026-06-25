@@ -165,7 +165,7 @@ export function MaintenanceForm({
             </option>
           ))}
         </Select>
-        <p className="text-xs text-muted-foreground">{t("trustHelp")}</p>
+        <p className="text-xs text-ink-2">{t("trustHelp")}</p>
       </div>
 
       {serverError ? (
@@ -185,7 +185,7 @@ export function MaintenanceForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("form.cancel")}

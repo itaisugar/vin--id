@@ -89,8 +89,8 @@ export default async function PassportDetailPage({
       </div>
 
       <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">{t("print.exportHint")}</p>
-        <p className="text-xs text-muted-foreground">{t("print.staticCopyNote")}</p>
+        <p className="text-xs text-ink-2">{t("print.exportHint")}</p>
+        <p className="text-xs text-ink-2">{t("print.staticCopyNote")}</p>
       </div>
 
       {/* Meta + confidence */}
@@ -113,25 +113,25 @@ export default async function PassportDetailPage({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs uppercase tracking-wide text-ink-2">
               {t("share.statusLabel")}
             </span>
             <PassportStatusBadge status={status} />
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-2">
             {status === "active"
               ? t("share.activeNote", { date: fmt(passport.expires_at) })
               : t("share.inactiveNote")}
           </p>
           {status === "active" ? (
-            <p className="text-xs text-muted-foreground">{t("share.terms")}</p>
+            <p className="text-xs text-ink-2">{t("share.terms")}</p>
           ) : null}
-          <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">
+          <p className="rounded-md bg-surface-2 p-2 text-xs text-ink-2">
             {t("share.freshLinkNote")}
           </p>
           <Link
             href={`/vehicles/${id}/passports/new`}
-            className="inline-flex h-9 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+            className="inline-flex h-9 w-full items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto"
           >
             {t("share.createNewForLink")}
           </Link>
@@ -146,7 +146,7 @@ export default async function PassportDetailPage({
         </CardHeader>
         <CardContent>
           {snapshot.included_scopes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("detail.noScopes")}</p>
+            <p className="text-sm text-ink-2">{t("detail.noScopes")}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {snapshot.included_scopes.map((scope: PassportScope) => (
@@ -185,9 +185,9 @@ export default async function PassportDetailPage({
           <CardTitle className="text-base">{t("verification.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">{t("verification.text")}</p>
+          <p className="text-sm text-ink-2">{t("verification.text")}</p>
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">
+            <p className="text-xs font-medium text-ink-2">
               {t("detail.hashLabel")}
             </p>
             <p
@@ -197,7 +197,7 @@ export default async function PassportDetailPage({
               {passport.snapshot_hash ?? "—"}
             </p>
           </div>
-          <div className="space-y-1 rounded-md border border-border p-3 text-xs text-muted-foreground">
+          <div className="space-y-1 rounded-md border border-line p-3 text-xs text-ink-2">
             <p>{t("disclaimers.notOwnership")}</p>
             <p>{t("disclaimers.notCertification")}</p>
             <p>{t("confidenceHelp")}</p>

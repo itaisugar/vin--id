@@ -149,7 +149,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
             {active.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-2">
                 {t("yourVehicles.noneActive")}
               </p>
             ) : (

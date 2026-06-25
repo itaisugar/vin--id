@@ -14,10 +14,10 @@ export default async function VehiclesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
         <Link
           href="/vehicles/new"
-          className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
         >
           {t("addVehicle")}
         </Link>
@@ -32,7 +32,7 @@ export default async function VehiclesPage() {
       ) : (
         <div className="space-y-8">
           <section className="space-y-3">
-            <h2 className="text-sm font-semibold text-muted-foreground">
+            <h2 className="text-sm font-semibold text-ink-2">
               {t("sections.active")} ({active.length})
             </h2>
             {active.length > 0 ? (
@@ -42,7 +42,7 @@ export default async function VehiclesPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-2">
                 {t("sections.noActive")}
               </p>
             )}
@@ -50,7 +50,7 @@ export default async function VehiclesPage() {
 
           {inactive.length > 0 ? (
             <section className="space-y-3">
-              <h2 className="text-sm font-semibold text-muted-foreground">
+              <h2 className="text-sm font-semibold text-ink-2">
                 {t("sections.archivedSold")} ({inactive.length})
               </h2>
               <div className="grid gap-3">
@@ -76,15 +76,15 @@ function EmptyState({
   cta: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-border p-12 text-center">
-      <CarIcon className="h-10 w-10 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-line p-12 text-center">
+      <CarIcon className="h-10 w-10 text-ink-2" />
       <div className="space-y-1">
         <p className="font-medium">{title}</p>
-        <p className="max-w-sm text-sm text-muted-foreground">{body}</p>
+        <p className="max-w-sm text-sm text-ink-2">{body}</p>
       </div>
       <Link
         href="/vehicles/new"
-        className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+        className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
       >
         {cta}
       </Link>

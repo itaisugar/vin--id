@@ -22,10 +22,10 @@ export default function AppError({
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-muted/30 p-6 text-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-surface-2/30 p-6 text-center">
       <div className="space-y-1">
         <p className="font-medium">{t("title")}</p>
-        <p className="max-w-sm text-sm text-muted-foreground">{t("body")}</p>
+        <p className="max-w-sm text-sm text-ink-2">{t("body")}</p>
       </div>
       <div className="flex gap-2">
         <Button type="button" onClick={reset}>
@@ -33,7 +33,7 @@ export default function AppError({
         </Button>
         <Link
           href="/"
-          className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2"
         >
           {t("home")}
         </Link>

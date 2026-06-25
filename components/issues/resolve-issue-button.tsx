@@ -66,11 +66,11 @@ export function ResolveIssueButton({
             className="absolute inset-0 bg-black/50"
             onClick={close}
           />
-          <div className="relative w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg">
+          <div className="relative w-full max-w-sm rounded-lg border border-line bg-surface p-5 shadow-lg">
             <h2 id="resolve-dialog-title" className="text-lg font-semibold">
               {t("resolve.title")}
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-ink-2">
               {t("resolve.description")}
             </p>
             <div className="mt-4 space-y-1.5">

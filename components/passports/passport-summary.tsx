@@ -15,7 +15,7 @@ export function PassportSummaryView({ summary }: { summary: PassportSummary }) {
   const hasAny = GROUPS.some((g) => (summary[g.field] ?? []).length > 0);
   if (!hasAny) {
     return (
-      <p className="text-sm text-muted-foreground">{t("summary.none")}</p>
+      <p className="text-sm text-ink-2">{t("summary.none")}</p>
     );
   }
 
@@ -29,7 +29,7 @@ export function PassportSummaryView({ summary }: { summary: PassportSummary }) {
             <h4 className="text-sm font-semibold">
               {t(`summary.groups.${key}`)}
             </h4>
-            <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">
+            <ul className="list-disc space-y-1 ps-5 text-sm text-ink-2">
               {items.map((code) => (
                 <li key={code}>{t(`summary.items.${code}`)}</li>
               ))}

@@ -16,7 +16,7 @@ export interface OnboardingCounts {
 }
 
 const ctaClass =
-  "inline-flex h-9 w-full items-center justify-center rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-muted sm:w-auto";
+  "inline-flex h-9 w-full items-center justify-center rounded-md border border-line px-3 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto";
 
 /**
  * Lightweight first-run checklist (not a wizard). Completion for the first four
@@ -66,7 +66,7 @@ export async function OnboardingChecklist({
     <Card>
       <CardHeader className="space-y-1">
         <CardTitle className="text-base">{t("title")}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t("explainer")}</p>
+        <p className="text-sm text-ink-2">{t("explainer")}</p>
       </CardHeader>
       <CardContent>
         <ol className="space-y-3">
@@ -77,7 +77,7 @@ export async function OnboardingChecklist({
                 <p
                   className={
                     step.done
-                      ? "text-sm font-medium text-muted-foreground line-through"
+                      ? "text-sm font-medium text-ink-2 line-through"
                       : "text-sm font-medium"
                   }
                 >
@@ -111,7 +111,7 @@ function StepMarker({ index, done }: { index: number; done: boolean }) {
     return (
       <span
         aria-hidden
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent"
       >
         ✓
       </span>
@@ -120,7 +120,7 @@ function StepMarker({ index, done }: { index: number; done: boolean }) {
   return (
     <span
       aria-hidden
-      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-xs font-semibold text-muted-foreground"
+      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-line text-xs font-semibold text-ink-2"
     >
       {index}
     </span>

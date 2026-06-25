@@ -32,7 +32,7 @@ export function PassportCard({
       href={`/vehicles/${vehicleId}/passports/${passport.id}`}
       className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
-      <Card className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted">
+      <Card className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-surface-2">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-center gap-2">
             <PassportStatusBadge status={status} />
@@ -40,12 +40,12 @@ export function PassportCard({
               {t("card.created")}: {created}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-ink-2">
             {expires ? `${t("card.expires")}: ${expires} · ` : ""}
             {t("confidence.short")}: {passport.record_confidence_score ?? 0}/100
           </p>
         </div>
-        <span aria-hidden className="text-muted-foreground">
+        <span aria-hidden className="text-ink-2">
           →
         </span>
       </Card>

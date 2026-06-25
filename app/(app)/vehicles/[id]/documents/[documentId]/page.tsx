@@ -46,11 +46,11 @@ export default async function DocumentDetailPage({
       <div className="space-y-1">
         <Link
           href={`/vehicles/${id}/documents`}
-          className="text-sm text-muted-foreground hover:underline"
+          className="inline-flex items-center gap-1 text-sm text-ink-2 hover:text-ink"
         >
-          ← {t("title")}
+          <span className="inline-block rtl:rotate-180">←</span> {t("title")}
         </Link>
-        <h1 className="truncate text-2xl font-bold">
+        <h1 className="truncate text-2xl font-extrabold tracking-tight">
           {doc.file_name ?? t("untitled")}
         </h1>
       </div>
@@ -68,7 +68,7 @@ export default async function DocumentDetailPage({
                 <img
                   src={signedUrl}
                   alt={doc.file_name ?? ""}
-                  className="max-h-96 w-full rounded-md border border-border object-contain"
+                  className="max-h-96 w-full rounded-xl border border-line object-contain"
                 />
               </a>
             ) : (
@@ -76,17 +76,17 @@ export default async function DocumentDetailPage({
                 href={signedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition-colors hover:bg-surface active:scale-[.98]"
               >
                 {t("preview.open")}
               </a>
             )
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-2">
               {t("preview.unavailable")}
             </p>
           )}
-          <p className="text-xs text-muted-foreground">{t("preview.expires")}</p>
+          <p className="text-xs text-ink-2">{t("preview.expires")}</p>
 
           {/* MOCK extraction — entry point only (review panel renders below). */}
           {!pendingResult ? (

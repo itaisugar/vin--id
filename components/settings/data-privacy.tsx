@@ -41,7 +41,7 @@ export function DataPrivacySection() {
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">{t("intro")}</p>
+      <p className="text-sm text-ink-2">{t("intro")}</p>
 
       {/* Exports */}
       <div className="space-y-2">
@@ -51,26 +51,26 @@ export function DataPrivacySection() {
               key={key}
               href={href}
               download
-              className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+              className="inline-flex h-10 w-full items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto"
             >
               {t(key)}
             </a>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">{t("exportHelp")}</p>
+        <p className="text-xs text-ink-2">{t("exportHelp")}</p>
         <p className="rounded-md bg-warn/12 p-2 text-xs font-medium text-warn">
           ⚠️ {t("exportWarning")}
         </p>
       </div>
 
       {/* Account deletion (request only) */}
-      <div className="space-y-2 border-t border-border pt-4">
+      <div className="space-y-2 border-t border-line pt-4">
         <h3 className="text-sm font-semibold">{t("deletion.title")}</h3>
-        <p className="text-sm text-muted-foreground">{t("deletion.body")}</p>
+        <p className="text-sm text-ink-2">{t("deletion.body")}</p>
         {done ? (
           <p
             role="status"
-            className="rounded-md border border-border bg-muted p-3 text-sm"
+            className="rounded-md border border-line bg-surface-2 p-3 text-sm"
           >
             {t("deletion.done")}
           </p>

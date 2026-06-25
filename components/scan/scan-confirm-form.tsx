@@ -201,18 +201,18 @@ export function ScanConfirmForm({
     <Card className="border-accent/40">
       <CardHeader className="space-y-2">
         <CardTitle className="text-base">{t("review.title")}</CardTitle>
-        <p className="text-xs text-muted-foreground">{t("review.help")}</p>
+        <p className="text-xs text-ink-2">{t("review.help")}</p>
 
         {failed ? (
           <p className="rounded-lg bg-warn/12 px-2 py-1 text-xs text-warn">
             {t("review.failedNotice")}
           </p>
         ) : engine === "mock" ? (
-          <p className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+          <p className="rounded-md bg-surface-2 px-2 py-1 text-xs text-ink-2">
             {t("review.mockNotice")}
           </p>
         ) : engine === "anthropic" ? (
-          <p className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+          <p className="rounded-md bg-surface-2 px-2 py-1 text-xs text-ink-2">
             {t("review.aiNotice")}
           </p>
         ) : null}
@@ -400,7 +400,7 @@ export function ScanConfirmForm({
             </>
           ) : null}
 
-          <p className="text-xs text-muted-foreground">{t("review.trustNote")}</p>
+          <p className="text-xs text-ink-2">{t("review.trustNote")}</p>
 
           {serverError ? (
             <p role="alert" className="text-sm text-danger">

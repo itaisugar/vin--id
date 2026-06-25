@@ -115,8 +115,8 @@ export function ExtractionReview({
     <Card className="border-primary/40">
       <CardHeader className="space-y-1">
         <CardTitle className="text-base">{t("review.title")}</CardTitle>
-        <p className="text-xs text-muted-foreground">{t("review.help")}</p>
-        <p className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+        <p className="text-xs text-ink-2">{t("review.help")}</p>
+        <p className="rounded-md bg-surface-2 px-2 py-1 text-xs text-ink-2">
           {t("mockNotice")}
         </p>
         {containsPersonalInfo ? (

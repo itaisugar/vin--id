@@ -19,7 +19,7 @@ export default async function NewPassportPage({
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">{t("create.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("create.subtitle")}</p>
+        <p className="text-sm text-ink-2">{t("create.subtitle")}</p>
       </div>
       <CreatePassportForm
         vehicleId={id}

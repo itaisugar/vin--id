@@ -93,7 +93,7 @@ export function CreatePassportForm({
             <CardTitle>{t("create.successTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-2">
               {t("create.successBody")}
             </p>
             {success.shareUrl ? (
@@ -103,7 +103,7 @@ export function CreatePassportForm({
                 <p className="rounded-md bg-warn/12 p-2 text-xs font-medium text-warn">
                   ⚠️ {t("share.copyOnce")}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-ink-2">
                   {t("share.terms")}
                 </p>
               </div>
@@ -127,7 +127,7 @@ export function CreatePassportForm({
                     href={success.shareUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto"
                   >
                     {t("create.openPreview")}
                   </a>
@@ -135,13 +135,13 @@ export function CreatePassportForm({
               ) : null}
               <Link
                 href={`/vehicles/${vehicleId}/passports/${success.passportId}/print`}
-                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto"
               >
                 {t("print.exportCta")}
               </Link>
               <Link
                 href={`/vehicles/${vehicleId}/passports/${success.passportId}`}
-                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:w-auto"
               >
                 {t("create.openPassport")}
               </Link>
@@ -155,7 +155,7 @@ export function CreatePassportForm({
             <CardTitle className="text-base">{t("nextSteps.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="list-decimal space-y-2 ps-5 text-sm text-muted-foreground">
+            <ol className="list-decimal space-y-2 ps-5 text-sm text-ink-2">
               <li>{t("nextSteps.copyLink")}</li>
               <li>{t("nextSteps.buyerPreview")}</li>
               <li>{t("nextSteps.oneTimeAccept")}</li>
@@ -228,7 +228,7 @@ export function CreatePassportForm({
             <PreviewStat label={t("scopes.reminders")} value={preview.reminders} />
           </ul>
 
-          <div className="space-y-1.5 text-xs text-muted-foreground">
+          <div className="space-y-1.5 text-xs text-ink-2">
             {counts.documentsNonShareable > 0 ? (
               <Warning>
                 {t("warnings.nonShareableExcluded", {
@@ -262,7 +262,7 @@ export function CreatePassportForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("create.cancel")}
@@ -289,15 +289,15 @@ function ScopeRow({
         <Checkbox checked={checked} onChange={onChange} />
         {label}
       </span>
-      <span className="text-xs text-muted-foreground">{count}</span>
+      <span className="text-xs text-ink-2">{count}</span>
     </label>
   );
 }
 
 function PreviewStat({ label, value }: { label: string; value: number }) {
   return (
-    <li className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-      <span className="text-muted-foreground">{label}</span>
+    <li className="flex items-center justify-between rounded-md border border-line px-3 py-2">
+      <span className="text-ink-2">{label}</span>
       <span className="font-semibold tabular-nums">{value}</span>
     </li>
   );

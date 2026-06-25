@@ -153,9 +153,9 @@ export function Combobox({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         className={cn(
-          "h-10 w-full rounded-md border border-border bg-background px-3 pe-9 text-sm",
-          "placeholder:text-muted-foreground",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          "h-11 w-full rounded-xl border border-line bg-surface-2 px-3 pe-9 text-sm text-ink",
+          "placeholder:text-ink-3",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
       />
@@ -171,7 +171,7 @@ export function Combobox({
             inputRef.current?.focus();
             setOpen(true);
           }}
-          className="absolute inset-y-0 end-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground"
+          className="absolute inset-y-0 end-0 flex w-9 items-center justify-center text-ink-3 hover:text-ink"
         >
           <svg
             viewBox="0 0 20 20"
@@ -193,7 +193,7 @@ export function Combobox({
           role="listbox"
           className={cn(
             "absolute z-50 mt-1 max-h-60 w-full overflow-y-auto overscroll-contain",
-            "rounded-md border border-border bg-background py-1 shadow-md",
+            "rounded-xl border border-line bg-surface py-1 cockpit-lift",
           )}
         >
           {filtered.length > 0 ? (
@@ -211,8 +211,8 @@ export function Combobox({
                   onMouseEnter={() => setHighlight(i)}
                   className={cn(
                     "block w-full truncate px-3 py-2 text-start text-sm",
-                    i === highlight ? "bg-muted" : "hover:bg-muted",
-                    option === value ? "font-medium" : "",
+                    i === highlight ? "bg-surface-2" : "hover:bg-surface-2",
+                    option === value ? "font-medium text-accent" : "",
                   )}
                 >
                   {option}
@@ -222,7 +222,7 @@ export function Combobox({
           ) : (
             <li
               role="presentation"
-              className="px-3 py-2 text-sm text-muted-foreground"
+              className="px-3 py-2 text-sm text-ink-2"
             >
               {noResultsLabel}
             </li>

@@ -25,19 +25,19 @@ export default async function ScanPage({ searchParams }: PageProps<"/scan">) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-ink-2">{t("subtitle")}</p>
       </div>
 
       {options.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-12 text-center">
           <p className="font-medium">{t("noVehicles.title")}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="max-w-sm text-sm text-ink-2">
             {t("noVehicles.body")}
           </p>
           <Link
             href="/vehicles/new"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
           >
             {t("noVehicles.cta")}
           </Link>

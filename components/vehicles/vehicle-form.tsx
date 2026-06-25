@@ -243,7 +243,7 @@ export function VehicleForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium transition-colors hover:bg-surface-2",
           )}
         >
           {t("form.cancel")}
@@ -309,7 +309,7 @@ function ComboField({
           {error}
         </p>
       ) : helper ? (
-        <p id={helperId} className="text-sm text-muted-foreground">
+        <p id={helperId} className="text-sm text-ink-2">
           {helper}
         </p>
       ) : null}
