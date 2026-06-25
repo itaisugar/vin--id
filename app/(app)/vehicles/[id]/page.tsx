@@ -56,45 +56,63 @@ export default async function VehicleDetailPage({
     <div className="space-y-6">
       {/* Passport accepted banner (Phase 3C) */}
       {accepted === "1" ? (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
-          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-            {tp("bannerTitle")}
-          </p>
-          <p className="mt-1 text-xs text-emerald-700/90 dark:text-emerald-400/90">
-            {tp("bannerNote")}
-          </p>
+        <div className="rounded-2xl border border-ok/25 bg-ok/10 p-4">
+          <p className="text-sm font-semibold text-ok">{tp("bannerTitle")}</p>
+          <p className="mt-1 text-xs text-ok/80">{tp("bannerNote")}</p>
         </div>
       ) : null}
 
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
+      {/* Header — back + actions, then a centered vehicle identity block. */}
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/vehicles"
-            className="text-sm text-muted-foreground hover:underline"
+            className="text-sm text-ink-2 transition-colors hover:text-ink"
           >
-            ← {t("title")}
+            <span aria-hidden className="inline-block rtl:rotate-180">←</span>{" "}
+            {t("title")}
           </Link>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h1 className="break-words text-2xl font-bold">{title}</h1>
-            <VehicleStatusBadge status={vehicle.status} />
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/diagnose?vehicle=${vehicle.id}`}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
+            >
+              {tdiag("vehicleCta")}
+            </Link>
+            <Link
+              href={`/vehicles/${vehicle.id}/edit`}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
+            >
+              {t("edit.action")}
+            </Link>
+            {vehicle.status === "active" ? (
+              <ArchiveVehicleButton vehicleId={vehicle.id} />
+            ) : null}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/diagnose?vehicle=${vehicle.id}`}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
-          >
-            {tdiag("vehicleCta")}
-          </Link>
-          <Link
-            href={`/vehicles/${vehicle.id}/edit`}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
-          >
-            {t("edit.action")}
-          </Link>
-          {vehicle.status === "active" ? (
-            <ArchiveVehicleButton vehicleId={vehicle.id} />
+
+        <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <h1 className="break-words text-2xl font-extrabold tracking-tight">
+              {title}
+            </h1>
+            <VehicleStatusBadge status={vehicle.status} />
+          </div>
+          {vehicle.license_plate || vehicle.year != null ? (
+            <p className="num text-sm text-ink-2">
+              {[vehicle.license_plate, vehicle.year].filter(Boolean).join(" · ")}
+            </p>
+          ) : null}
+
+          {vehicle.current_mileage != null ? (
+            <div className="mt-1 inline-flex items-baseline gap-2 rounded-2xl border border-line bg-surface-3 px-6 py-3 glow-accent">
+              <span className="num text-3xl font-bold text-accent text-glow-accent">
+                {vehicle.current_mileage.toLocaleString(locale)}
+              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+                {t(`units.${vehicle.mileage_unit}`)}
+              </span>
+            </div>
           ) : null}
         </div>
       </div>
@@ -111,11 +129,13 @@ export default async function VehicleDetailPage({
             <DetailRow
               label={t("fields.year")}
               value={vehicle.year != null ? String(vehicle.year) : null}
+              mono
             />
-            <DetailRow label={t("fields.vin")} value={vehicle.vin} />
+            <DetailRow label={t("fields.vin")} value={vehicle.vin} mono />
             <DetailRow
               label={t("fields.licensePlate")}
               value={vehicle.license_plate}
+              mono
             />
             <DetailRow
               label={t("fields.mileage")}
@@ -124,12 +144,13 @@ export default async function VehicleDetailPage({
                   ? `${vehicle.current_mileage.toLocaleString(locale)} ${t(`units.${vehicle.mileage_unit}`)}`
                   : null
               }
+              mono
             />
             <DetailRow
               label={t("fields.status")}
               value={t(`status.${vehicle.status}`)}
             />
-            <DetailRow label={t("fields.createdAt")} value={createdAt} />
+            <DetailRow label={t("fields.createdAt")} value={createdAt} mono />
           </dl>
         </CardContent>
       </Card>
@@ -168,17 +189,23 @@ export default async function VehicleDetailPage({
 function DetailRow({
   label,
   value,
+  mono = false,
 }: {
   label: string;
   value: string | null;
+  mono?: boolean;
 }) {
   if (!value) return null;
   return (
-    <div className="flex flex-col">
-      <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-[11px] uppercase tracking-[0.14em] text-ink-3">
         {label}
       </dt>
-      <dd className="break-words text-sm font-medium">{value}</dd>
+      <dd
+        className={`break-words text-sm font-medium ${mono ? "num text-ink" : "text-ink"}`}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
