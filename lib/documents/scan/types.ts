@@ -300,6 +300,24 @@ export const SCAN_FORM_CATEGORIES = [
 ] as const;
 export type ScanFormCategory = (typeof SCAN_FORM_CATEGORIES)[number];
 
+/**
+ * Descriptor for the ORIGINAL uploaded scan image, persisted via the existing
+ * documents pipeline. The client uploads the original file straight to Storage
+ * (same browser-upload pattern as the documents module, to avoid the
+ * server-action body limit), then passes this descriptor to the create action
+ * which inserts the vehicle_documents row and links the record to it.
+ *
+ * `storage_path` is only ever produced/consumed server-side and inside the
+ * authenticated client upload; it is never rendered in the UI.
+ */
+export interface ScanDocumentDescriptor {
+  documentId: string;
+  storage_path: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+}
+
 export interface ScanConfirmFormValues {
   category: ScanFormCategory;
   // maintenance + issue share a date / mileage / free-text body

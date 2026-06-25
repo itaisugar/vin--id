@@ -35,12 +35,17 @@ async function getUserId(): Promise<string> {
   return user.id;
 }
 
-/** Insert a row into a vehicle-scoped record table after an ownership check. */
+/**
+ * Insert a row into a vehicle-scoped record table after an ownership check.
+ * `documentId` optionally links the record to a saved vehicle_documents row
+ * (e.g. the persisted scan image).
+ */
 async function createVehicleRecord(
   table: "vehicle_insurance" | "vehicle_registration" | "vehicle_inspection",
   vehicleId: string,
   row: Record<string, unknown>,
   sourceType: string,
+  documentId: string | null,
 ): Promise<string> {
   const supabase = await createClient();
   const userId = await getUserId();
@@ -56,6 +61,7 @@ async function createVehicleRecord(
       vehicle_id: vehicleId,
       owner_user_id: userId,
       source_type: sourceType,
+      document_id: documentId,
     })
     .select("id")
     .single();
@@ -68,12 +74,14 @@ export function createInsurance(
   vehicleId: string,
   input: InsuranceInput,
   sourceType: string = "user",
+  documentId: string | null = null,
 ): Promise<string> {
   return createVehicleRecord(
     "vehicle_insurance",
     vehicleId,
     insuranceInputToRow(input),
     sourceType,
+    documentId,
   );
 }
 
@@ -81,12 +89,14 @@ export function createRegistration(
   vehicleId: string,
   input: RegistrationInput,
   sourceType: string = "user",
+  documentId: string | null = null,
 ): Promise<string> {
   return createVehicleRecord(
     "vehicle_registration",
     vehicleId,
     registrationInputToRow(input),
     sourceType,
+    documentId,
   );
 }
 
@@ -94,11 +104,13 @@ export function createInspection(
   vehicleId: string,
   input: InspectionInput,
   sourceType: string = "user",
+  documentId: string | null = null,
 ): Promise<string> {
   return createVehicleRecord(
     "vehicle_inspection",
     vehicleId,
     inspectionInputToRow(input),
     sourceType,
+    documentId,
   );
 }

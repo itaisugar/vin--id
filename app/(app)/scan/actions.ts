@@ -28,9 +28,15 @@ import {
   MAX_SCAN_FILE_SIZE,
   SCAN_FORM_CATEGORIES,
   type ScanConfirmFormValues,
+  type ScanDocumentDescriptor,
   type ScanExtractionResponse,
   type ScanFormCategory,
 } from "@/lib/documents/scan/types";
+import { createDocument } from "@/lib/documents/service";
+import {
+  documentCreateSchema,
+  type DocumentType,
+} from "@/lib/documents/types";
 
 /**
  * Server actions for the "Scan a document" flow.
@@ -120,18 +126,105 @@ export async function scanExtractAction(
   }
 }
 
+/** Map a scan form category to the document's `doc_type`. */
+function scanCategoryToDocType(category: ScanFormCategory): DocumentType {
+  switch (category) {
+    case "insurance":
+      return "insurance";
+    case "registration":
+      return "registration";
+    case "inspection":
+      return "inspection";
+    case "maintenance":
+      return "invoice";
+    default:
+      return "other"; // issue
+  }
+}
+
+/**
+ * Best-effort: persist the ORIGINAL scan image as a vehicle document through the
+ * EXISTING documents pipeline, returning the new document id (or null on any
+ * failure). Persistence must NEVER block record creation, so every failure is
+ * swallowed here and surfaced as a null link instead.
+ *
+ * Privacy defaults follow the documents module: contains_personal_info=true
+ * (scans often hold personal info; user-editable on the document later),
+ * share_allowed=false (never auto-enabled). trust_label='ai_extracted' matches
+ * the record. The downscaled JPEG sent to the AI provider is NOT what gets
+ * stored — the client uploads the original file to Storage and passes only this
+ * descriptor.
+ */
+async function persistScanDocument(
+  vehicleId: string,
+  category: ScanFormCategory,
+  values: ScanConfirmFormValues,
+  document: ScanDocumentDescriptor,
+): Promise<string | null> {
+  // Document date: maintenance/issue use the event date; the validity-range
+  // categories use the issue (start) date.
+  const documentDate =
+    category === "maintenance" || category === "issue"
+      ? values.date
+      : values.start_date;
+
+  // Vendor: only categories that carry a party name; folded into doc metadata.
+  const vendor =
+    category === "maintenance"
+      ? values.garage_name
+      : category === "insurance"
+        ? values.insurer_name
+        : "";
+
+  // Amount: only categories that capture a cost.
+  const hasCost =
+    category === "maintenance" ||
+    category === "insurance" ||
+    category === "inspection";
+  const amount = hasCost && values.cost.trim() !== "" ? values.cost : undefined;
+
+  const parsed = documentCreateSchema.safeParse({
+    document_type: scanCategoryToDocType(category),
+    document_date: documentDate.trim() !== "" ? documentDate : undefined,
+    vendor: vendor.trim() !== "" ? vendor : undefined,
+    amount,
+    currency: values.currency,
+    contains_personal_info: true,
+    share_allowed: false,
+    trust_label: "ai_extracted",
+    documentId: document.documentId,
+    storage_path: document.storage_path,
+    file_name: document.file_name,
+    mime_type: document.mime_type,
+    file_size: document.file_size,
+  });
+  if (!parsed.success) return null;
+
+  try {
+    // createDocument re-verifies vehicle ownership and that the storage path is
+    // inside the user's own folder, so a forged descriptor can't link a file.
+    return await createDocument(vehicleId, parsed.data);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Create the confirmed record. `values` is the editable confirmation form;
  * `trust_label` is forced server-side to `ai_extracted` (extracted from a
  * document, user-confirmed) and `source_type` to `document_scan`. Maintenance
  * and issue reuse the existing create flows unchanged; insurance / registration
  * / inspection insert into their owner-scoped tables (ownership re-verified in
- * the service). On success this redirects and never returns.
+ * the service). When `document` is provided (the original scan image the client
+ * already uploaded to Storage), it is persisted as a vehicle document and linked
+ * to the record so it can be opened later from the vehicle history. On success
+ * this redirects and never returns.
  */
 export async function createRecordFromScanAction(
   vehicleId: string,
   category: ScanFormCategory,
   values: ScanConfirmFormValues,
+  document?: ScanDocumentDescriptor,
 ): Promise<ScanCreateState> {
   if (!vehicleId) return { error: "saveFailed" };
   if (!(SCAN_FORM_CATEGORIES as readonly string[]).includes(category)) {
@@ -159,8 +252,18 @@ export async function createRecordFromScanAction(
     });
     if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
+    // Persist the original image (best-effort) so the record carries the link.
+    const documentId = document
+      ? await persistScanDocument(vehicleId, category, values, document)
+      : null;
+
     try {
-      await createMaintenanceLog(vehicleId, parsed.data, "document_scan");
+      await createMaintenanceLog(
+        vehicleId,
+        parsed.data,
+        "document_scan",
+        documentId,
+      );
     } catch {
       return { error: "saveFailed" };
     }
@@ -197,8 +300,12 @@ export async function createRecordFromScanAction(
       return { fieldErrors };
     }
 
+    const documentId = document
+      ? await persistScanDocument(vehicleId, category, values, document)
+      : null;
+
     try {
-      await createIssue(vehicleId, parsed.data, "document_scan");
+      await createIssue(vehicleId, parsed.data, "document_scan", documentId);
     } catch {
       return { error: "saveFailed" };
     }
@@ -230,8 +337,12 @@ export async function createRecordFromScanAction(
     });
     if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
+    const documentId = document
+      ? await persistScanDocument(vehicleId, category, values, document)
+      : null;
+
     try {
-      await createInsurance(vehicleId, parsed.data, "document_scan");
+      await createInsurance(vehicleId, parsed.data, "document_scan", documentId);
     } catch {
       return { error: "saveFailed" };
     }
@@ -257,8 +368,17 @@ export async function createRecordFromScanAction(
     });
     if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
+    const documentId = document
+      ? await persistScanDocument(vehicleId, category, values, document)
+      : null;
+
     try {
-      await createRegistration(vehicleId, parsed.data, "document_scan");
+      await createRegistration(
+        vehicleId,
+        parsed.data,
+        "document_scan",
+        documentId,
+      );
     } catch {
       return { error: "saveFailed" };
     }
@@ -285,8 +405,12 @@ export async function createRecordFromScanAction(
   });
   if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
+  const documentId = document
+    ? await persistScanDocument(vehicleId, category, values, document)
+    : null;
+
   try {
-    await createInspection(vehicleId, parsed.data, "document_scan");
+    await createInspection(vehicleId, parsed.data, "document_scan", documentId);
   } catch {
     return { error: "saveFailed" };
   }

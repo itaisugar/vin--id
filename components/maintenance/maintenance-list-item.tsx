@@ -68,6 +68,14 @@ export function MaintenanceListItem({
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          {log.document_id ? (
+            <Link
+              href={`/vehicles/${vehicleId}/documents/${log.document_id}`}
+              className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+            >
+              {t("viewDocument")}
+            </Link>
+          ) : null}
           <Link
             href={`/vehicles/${vehicleId}/maintenance/${log.id}/edit`}
             className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"

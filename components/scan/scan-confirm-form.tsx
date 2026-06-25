@@ -32,6 +32,7 @@ import {
   ISSUE_STATUSES,
   SCAN_FORM_CATEGORIES,
   type ScanConfirmFormValues,
+  type ScanDocumentDescriptor,
   type ScanExtraction,
 } from "@/lib/documents/scan/types";
 import {
@@ -39,6 +40,13 @@ import {
   MILEAGE_UNITS,
   type MileageUnit,
 } from "@/lib/vehicles/types";
+import { createClient } from "@/lib/supabase/client";
+import {
+  DOCUMENTS_BUCKET,
+  isAllowedMime,
+  MAX_FILE_SIZE,
+  sanitizeFilename,
+} from "@/lib/documents/types";
 
 const CONF_TONE = {
   low: "muted",
@@ -56,6 +64,7 @@ export function ScanConfirmForm({
   vehicleMileageUnit,
   extraction,
   engine,
+  file,
   failed,
   cancelHref,
   onBack,
@@ -64,6 +73,8 @@ export function ScanConfirmForm({
   vehicleMileageUnit: MileageUnit;
   extraction: ScanExtraction;
   engine: "mock" | "anthropic" | "none";
+  /** The ORIGINAL uploaded image — persisted as a vehicle document on confirm. */
+  file: File | null;
   failed: boolean;
   cancelHref: string;
   onBack: () => void;
@@ -128,11 +139,51 @@ export function ScanConfirmForm({
         ? String(convertMileage(mileageNum, values.mileage_unit, vehicleMileageUnit))
         : values.mileage;
 
+    // Persist the ORIGINAL image as a vehicle document, reusing the documents
+    // module's browser-upload pattern (straight to the private bucket, to avoid
+    // the server-action body limit). Best-effort: if it can't be saved (too
+    // large for the 5 MB document limit, unsupported type, or an upload error)
+    // we still create the record — just without an attached document.
+    let document: ScanDocumentDescriptor | undefined;
+    if (file && isAllowedMime(file.type) && file.size <= MAX_FILE_SIZE) {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const documentId = crypto.randomUUID();
+        const path = `${user.id}/${vehicleId}/${documentId}/${sanitizeFilename(file.name)}`;
+        const { error: uploadError } = await supabase.storage
+          .from(DOCUMENTS_BUCKET)
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (!uploadError) {
+          document = {
+            documentId,
+            storage_path: path,
+            file_name: file.name,
+            mime_type: file.type,
+            file_size: file.size,
+          };
+        }
+      }
+    }
+
     const res = await createRecordFromScanAction(
       vehicleId,
       values.category,
       { ...values, mileage: normalizedMileage, mileage_unit: vehicleMileageUnit },
+      document,
     );
+
+    // Success redirects (never returns). Reaching here means it failed, so clean
+    // up the just-uploaded original to avoid orphaning a file in Storage.
+    if ((res?.error || res?.fieldErrors) && document) {
+      const supabase = createClient();
+      await supabase.storage
+        .from(DOCUMENTS_BUCKET)
+        .remove([document.storage_path]);
+    }
+
     if (res?.fieldErrors) {
       setFieldErrors(res.fieldErrors as Record<string, string>);
     }

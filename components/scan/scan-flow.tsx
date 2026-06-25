@@ -146,6 +146,7 @@ export function ScanFlow({
         vehicleMileageUnit={selected?.mileageUnit ?? "km"}
         extraction={confirm.extraction}
         engine={confirm.engine}
+        file={file}
         failed={error === "extractFailed"}
         cancelHref={cancelHref}
         onBack={() => {

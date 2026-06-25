@@ -38,13 +38,15 @@ export interface MaintenanceLog {
   currency: string;
   trust_label: TrustLevel;
   source_type: string;
+  /** Optional link to the saved scan/source document (vehicle_documents.id). */
+  document_id: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 }
 
 export const MAINTENANCE_COLUMNS =
-  "id, owner_user_id, vehicle_id, performed_at, mileage, service_type, description, cost, currency, trust_label, source_type, created_at, updated_at, deleted_at";
+  "id, owner_user_id, vehicle_id, performed_at, mileage, service_type, description, cost, currency, trust_label, source_type, document_id, created_at, updated_at, deleted_at";
 
 // -----------------------------------------------------------------------------
 // Validation — error messages are translation keys (under `maintenance.form.errors`).

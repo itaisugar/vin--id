@@ -236,7 +236,7 @@
         "We log minimal product events during the beta (e.g. that a vehicle or Passport was created) to understand usage. These never include document contents, issue symptoms, diagnosis text, VIN, license plate, storage paths, or raw Passport tokens, and we do not use any third-party analytics provider.",
         "You can export your account data and vehicle history from Settings (JSON and CSV). Exports do not include your original uploaded document files, and may contain sensitive information — keep them private.",
         "Automated account deletion is not enabled during the beta. You can request deletion from Settings and we will handle it manually; full self-service automation may come later.",
-        "Document scanning is optional. When you scan a document, its image is sent to a third-party AI provider (Anthropic) for extraction; only the record you confirm is saved, and the scanned image itself is not stored."
+        "Document scanning is optional. When you scan a document, its image is sent to a third-party AI provider (Anthropic) for extraction, and the original image is saved to your private vehicle documents (private by default) and linked to the record you confirm so you can open it later."
       ],
       "betaNote": "This is a beta privacy summary, not a final legal document."
     },
@@ -483,6 +483,7 @@
     "source": {
       "label": "Source"
     },
+    "viewDocument": "View document",
     "new": {
       "title": "Add maintenance",
       "subtitle": "Record a service or repair for this vehicle."
@@ -567,6 +568,7 @@
     "source": {
       "label": "Source"
     },
+    "viewDocument": "View document",
     "new": {
       "title": "Add issue",
       "subtitle": "Log a symptom or problem you noticed with this vehicle."
@@ -1154,8 +1156,8 @@
     },
     "consent": {
       "title": "Before you continue",
-      "body": "To read this document, its image is sent to a third-party AI provider (Anthropic) for processing. Don't scan documents with sensitive personal information you don't want processed externally.",
-      "checkbox": "I understand and want to process this document with the AI provider."
+      "body": "To read this document, its image is sent to a third-party AI provider (Anthropic) for processing, and the original image is saved to your private vehicle documents so you can open it later. Don't scan documents with sensitive personal information you don't want processed externally or stored.",
+      "checkbox": "I understand and want to process this document with the AI provider and save it to my private vehicle documents."
     },
     "actions": {
       "scan": "Scan document",

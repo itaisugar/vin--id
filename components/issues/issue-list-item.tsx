@@ -70,6 +70,14 @@ export function IssueListItem({
             <ResolveIssueButton vehicleId={vehicleId} issueId={issue.id} />
           ) : null}
           <div className="flex items-center gap-1">
+            {issue.document_id ? (
+              <Link
+                href={`/vehicles/${vehicleId}/documents/${issue.document_id}`}
+                className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+              >
+                {t("viewDocument")}
+              </Link>
+            ) : null}
             <Link
               href={`/vehicles/${vehicleId}/issues/${issue.id}/edit`}
               className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
