@@ -113,6 +113,29 @@ body {
   box-shadow: 0 0 44px -8px rgba(56, 211, 159, 0.5);
 }
 
+/* Score/health ring draw-in (CSS-only; print renders the held final state). */
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-circ);
+  }
+  to {
+    stroke-dashoffset: var(--ring-target);
+  }
+}
+.animate-ring {
+  animation: ring-draw 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-ring {
+    animation: none;
+  }
+}
+@media print {
+  .animate-ring {
+    animation: none;
+  }
+}
+
 /* Live status dot pulse ("מחובר", "עודכן היום"). */
 @keyframes cockpit-pulse {
   0%,

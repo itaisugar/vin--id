@@ -63,19 +63,22 @@ export default async function PassportDetailPage({
         <div className="space-y-1">
           <Link
             href={`/vehicles/${id}`}
-            className="text-sm text-muted-foreground hover:underline"
+            className="text-sm text-ink-2 transition-colors hover:text-ink"
           >
-            ← {t("title")}
+            <span aria-hidden className="inline-block rtl:rotate-180">←</span>{" "}
+            {t("title")}
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{t("detail.title")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              {t("detail.title")}
+            </h1>
             <PassportStatusBadge status={status} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={`/vehicles/${id}/passports/${passportId}/print`}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted"
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
           >
             {t("print.exportCta")}
           </Link>
@@ -188,7 +191,7 @@ export default async function PassportDetailPage({
               {t("detail.hashLabel")}
             </p>
             <p
-              className="break-all rounded-md bg-muted p-2 font-mono text-xs"
+              className="break-all rounded-lg border border-line bg-surface-3 p-2 font-mono text-xs text-ink-2"
               title={passport.snapshot_hash ?? ""}
             >
               {passport.snapshot_hash ?? "—"}
@@ -208,8 +211,8 @@ export default async function PassportDetailPage({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{value}</dd>
+      <dt className="text-ink-2">{label}</dt>
+      <dd className="num font-medium text-ink">{value}</dd>
     </div>
   );
 }

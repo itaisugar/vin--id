@@ -120,9 +120,14 @@ export async function PublicPassportReport({
             <Row
               label={tv("fields.year")}
               value={vehicle.year != null ? String(vehicle.year) : null}
+              mono
             />
-            <Row label={tv("fields.vin")} value={vehicle.vin} />
-            <Row label={tv("fields.licensePlate")} value={vehicle.license_plate} />
+            <Row label={tv("fields.vin")} value={vehicle.vin} mono />
+            <Row
+              label={tv("fields.licensePlate")}
+              value={vehicle.license_plate}
+              mono
+            />
             <Row
               label={tv("fields.mileage")}
               value={
@@ -130,6 +135,7 @@ export async function PublicPassportReport({
                   ? `${vehicle.current_mileage.toLocaleString(locale)} ${tv(`units.${vehicle.mileage_unit}`)}`
                   : null
               }
+              mono
             />
           </dl>
         </CardContent>
@@ -153,7 +159,7 @@ export async function PublicPassportReport({
             {t("detail.hashLabel")}
           </p>
           <p
-            className="break-all rounded-md bg-muted p-2 font-mono text-xs"
+            className="break-all rounded-lg border border-line bg-surface-3 p-2 font-mono text-xs text-ink-2"
             title={view.snapshot_hash ?? ""}
           >
             {view.snapshot_hash ?? "—"}
@@ -247,7 +253,7 @@ export async function PublicPassportReport({
             <>
               <Link
                 href={loginHref}
-                className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 sm:w-auto"
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98] sm:w-auto"
               >
                 {t("accept.signInCta")}
               </Link>
@@ -270,14 +276,24 @@ export async function PublicPassportReport({
   );
 }
 
-function Row({ label, value }: { label: string; value: string | null }) {
+function Row({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string | null;
+  mono?: boolean;
+}) {
   if (!value) return null;
   return (
-    <div className="flex flex-col">
-      <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-[11px] uppercase tracking-[0.14em] text-ink-3">
         {label}
       </dt>
-      <dd className="break-words text-sm font-medium">{value}</dd>
+      <dd className={`break-words text-sm font-medium ${mono ? "num" : ""}`}>
+        {value}
+      </dd>
     </div>
   );
 }
