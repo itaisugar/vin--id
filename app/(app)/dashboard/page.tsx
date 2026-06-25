@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { CarIcon } from "@/components/icons";
+  CarIcon,
+  DocumentIcon,
+  PassportIcon,
+  ScanIcon,
+  WrenchIcon,
+} from "@/components/icons";
 import { DashboardReminders } from "@/components/reminders/dashboard-reminders";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
 import { createClient } from "@/lib/supabase/server";
@@ -14,10 +14,13 @@ import { listVehicles } from "@/lib/vehicles/service";
 
 const VEHICLE_LIMIT = 4;
 
-// Prominent primary quick actions (same primary-CTA styling used elsewhere on
-// the dashboard). Taller for clear mobile tap targets.
-const PRIMARY_ACTION_CLASS =
-  "inline-flex h-12 items-center justify-center rounded-md bg-primary px-4 text-center text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90";
+// COCKPIT quick-action tile: icon over label. The leading "Scan" tile is the
+// amber primary action; the rest are raised surface controls.
+const ACTION_TILE_BASE =
+  "flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 text-center text-xs font-bold transition active:scale-[.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
+const ACTION_TILE_PRIMARY = "bg-accent text-on-accent glow-accent";
+const ACTION_TILE_SECONDARY =
+  "border border-line bg-surface-2 text-ink hover:bg-surface";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
@@ -50,32 +53,28 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
         {firstName ? (
-          <p className="text-muted-foreground">
-            {t("welcome", { name: firstName })}
-          </p>
+          <p className="text-sm text-ink-2">{t("welcome", { name: firstName })}</p>
         ) : null}
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-ink-3">{t("subtitle")}</p>
       </div>
 
       {vehicles.length === 0 ? (
         /* First-time onboarding */
-        <div className="space-y-4 rounded-lg border border-border bg-background p-6">
+        <div className="space-y-4 rounded-2xl border border-line bg-surface p-6 cockpit-lift">
           <div className="flex items-start gap-3">
-            <CarIcon className="mt-0.5 h-8 w-8 shrink-0 text-muted-foreground" />
+            <CarIcon className="mt-0.5 h-8 w-8 shrink-0 text-ink-3" />
             <div className="space-y-1">
               <p className="text-base font-semibold">{t("onboarding.heading")}</p>
-              <p className="text-sm text-muted-foreground">
-                {t("onboarding.explainer")}
-              </p>
+              <p className="text-sm text-ink-2">{t("onboarding.explainer")}</p>
             </div>
           </div>
 
           <ol className="space-y-2">
             {(["step1", "step2", "step3"] as const).map((step, i) => (
               <li key={step} className="flex items-start gap-3 text-sm">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/12 text-xs font-semibold text-accent">
                   {i + 1}
                 </span>
                 <span>{t(`onboarding.${step}`)}</span>
@@ -85,65 +84,66 @@ export default async function DashboardPage() {
 
           <Link
             href="/vehicles/new"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98]"
           >
             {t("onboarding.cta")}
           </Link>
         </div>
       ) : (
         <>
-          {/* Quick actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {t("quickActions.title")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Primary actions — prominent, fixed order:
-                  Scan a document → Create passport → Add maintenance →
-                  Upload document. All but Scan need a vehicle, so they render
-                  only when an active vehicle exists; /scan handles its own
-                  vehicle pick. */}
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Link href="/scan" className={PRIMARY_ACTION_CLASS}>
-                  {t("quickActions.scanDocument")}
-                </Link>
-                {primary ? (
-                  <>
-                    <Link
-                      href={`/vehicles/${primary.id}/passports/new`}
-                      className={PRIMARY_ACTION_CLASS}
-                    >
-                      {t("quickActions.createPassport")}
-                    </Link>
-                    <Link
-                      href={`/vehicles/${primary.id}/maintenance/new`}
-                      className={PRIMARY_ACTION_CLASS}
-                    >
-                      {t("quickActions.addMaintenance")}
-                    </Link>
-                    <Link
-                      href={`/vehicles/${primary.id}/documents/new`}
-                      className={PRIMARY_ACTION_CLASS}
-                    >
-                      {t("quickActions.uploadDocument")}
-                    </Link>
-                  </>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Quick actions — fixed order: Scan a document (amber primary) →
+              Create passport → Add maintenance → Upload document. All but Scan
+              need a vehicle, so they render only when an active vehicle exists;
+              /scan handles its own vehicle pick. */}
+          <section className="space-y-3">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
+              {t("quickActions.title")}
+            </h2>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              <Link
+                href="/scan"
+                className={`${ACTION_TILE_BASE} ${ACTION_TILE_PRIMARY}`}
+              >
+                <ScanIcon className="h-6 w-6" />
+                {t("quickActions.scanDocument")}
+              </Link>
+              {primary ? (
+                <>
+                  <Link
+                    href={`/vehicles/${primary.id}/passports/new`}
+                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
+                  >
+                    <PassportIcon className="h-6 w-6 text-accent" />
+                    {t("quickActions.createPassport")}
+                  </Link>
+                  <Link
+                    href={`/vehicles/${primary.id}/maintenance/new`}
+                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
+                  >
+                    <WrenchIcon className="h-6 w-6 text-accent" />
+                    {t("quickActions.addMaintenance")}
+                  </Link>
+                  <Link
+                    href={`/vehicles/${primary.id}/documents/new`}
+                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
+                  >
+                    <DocumentIcon className="h-6 w-6 text-accent" />
+                    {t("quickActions.uploadDocument")}
+                  </Link>
+                </>
+              ) : null}
+            </div>
+          </section>
 
           {/* Your vehicles */}
           <section className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-muted-foreground">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
                 {t("yourVehicles.title")}
               </h2>
               <Link
                 href="/vehicles"
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-sm font-medium text-accent hover:underline"
               >
                 {t("yourVehicles.viewAll", { count: vehicles.length })}
               </Link>

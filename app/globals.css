@@ -1,16 +1,51 @@
 @import "tailwindcss";
 
+/*
+ * COCKPIT visual language — dark "instrument cluster" theme.
+ * The app is dark by default (no light mode); print flips to a clean light
+ * palette for Passport PDFs (see @media print at the bottom).
+ *
+ * The existing semantic tokens (background/foreground/muted/border/primary) are
+ * remapped onto COCKPIT values so every legacy `bg-background` / `text-primary`
+ * / `border-border` utility adopts the new look with no markup change. New
+ * screens use the richer COCKPIT tokens (surface / ink / ok / accent / …).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
+  /* Legacy semantic tokens (kept so existing class names just work) */
+  --background: #0c0e11;
+  --foreground: #f2f4f7;
+  --muted: #1a1e24;
+  --muted-foreground: #8a929d;
+  --border: rgba(255, 255, 255, 0.07);
+  --primary: #ff8a2b;
+  --primary-foreground: #1a1207;
+
+  /* COCKPIT surfaces */
+  --bg: #0c0e11;
+  --surface: #15181d;
+  --surface-2: #1a1e24;
+  --surface-3: #101317;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.12);
+
+  /* COCKPIT text */
+  --ink: #f2f4f7;
+  --ink-2: #8a929d;
+  --ink-3: #6b7280;
+  --on-accent: #1a1207;
+
+  /* COCKPIT accents */
+  --accent: #ff8a2b;
+  --accent-deep: #e0701a;
+  --ok: #38d39f;
+  --warn: #ffb23e;
+  --danger: #f1604d;
+  --info: #7fb4ff;
+  --track: #2a2f37;
 }
 
 @theme inline {
+  /* Legacy names */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -18,33 +53,89 @@
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #18181b;
-    --muted-foreground: #a1a1aa;
-    --border: #27272a;
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
-  }
+  /* COCKPIT names */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-on-accent: var(--on-accent);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-track: var(--track);
+
+  --font-sans: var(--font-heebo), system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, monospace;
 }
 
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* Numbers that read as data (odometer, scores, km, ₪, dates, plate, counts). */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* COCKPIT helpers ---------------------------------------------------------- */
+
+/* Card lift shadow + 1px inner top highlight. */
+.cockpit-lift {
+  box-shadow:
+    0 18px 36px -22px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Amber glow (FAB, odometer, primary CTA). */
+.glow-accent {
+  box-shadow: 0 0 22px -6px rgba(255, 138, 43, 0.6);
+}
+.text-glow-accent {
+  text-shadow: 0 0 16px rgba(255, 138, 43, 0.45);
+}
+
+/* Green "healthy" glow (health ring, verified). */
+.glow-ok {
+  box-shadow: 0 0 44px -8px rgba(56, 211, 159, 0.5);
+}
+
+/* Live status dot pulse ("מחובר", "עודכן היום"). */
+@keyframes cockpit-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.animate-pulse-dot {
+  animation: cockpit-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-dot {
+    animation: none;
+  }
 }
 
 /*
- * Print: force a clean white/light report regardless of the on-screen theme
- * (including OS dark mode), so Passport printouts / Save-as-PDF look right.
+ * Print: force a clean white/light report regardless of the dark theme, so
+ * Passport printouts / Save-as-PDF look right.
  */
 @media print {
   :root {
@@ -53,8 +144,25 @@ body {
     --muted: #f4f4f5;
     --muted-foreground: #52525b;
     --border: #d4d4d8;
-    --primary: #2563eb;
+    --primary: #b45309;
     --primary-foreground: #ffffff;
+
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f4f5;
+    --surface-3: #f4f4f5;
+    --line: #d4d4d8;
+    --line-strong: #d4d4d8;
+    --ink: #171717;
+    --ink-2: #52525b;
+    --ink-3: #71717a;
+    --on-accent: #ffffff;
+    --accent: #b45309;
+    --accent-deep: #b45309;
+    --ok: #047857;
+    --warn: #b45309;
+    --danger: #b91c1c;
+    --track: #e4e4e7;
   }
 
   body {

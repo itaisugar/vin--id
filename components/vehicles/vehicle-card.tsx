@@ -13,10 +13,10 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   return (
     <Link
       href={`/vehicles/${vehicle.id}`}
-      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
-      <Card className="flex items-center gap-4 p-4 transition-colors hover:bg-muted">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
+      <Card className="flex items-center gap-4 p-4 transition active:scale-[.99] hover:bg-surface-2">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-2">
           {vehicle.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -25,28 +25,35 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <CarIcon className="h-6 w-6 text-muted-foreground" />
+            <CarIcon className="h-6 w-6 text-ink-3" />
           )}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate font-medium">
-              {title || t("untitled")}
-            </p>
+            <p className="truncate font-semibold">{title || t("untitled")}</p>
             <VehicleStatusBadge status={vehicle.status} />
           </div>
-          <p className="truncate text-sm text-muted-foreground">
-            {[
-              vehicle.year ?? null,
-              vehicle.current_mileage != null
-                ? `${vehicle.current_mileage.toLocaleString()} ${t(`units.${vehicle.mileage_unit}`)}`
-                : null,
-            ]
-              .filter(Boolean)
-              .join(" · ") || t("noDetails")}
+          <p className="truncate text-sm text-ink-2">
+            {vehicle.year != null ? <span className="num">{vehicle.year}</span> : null}
+            {vehicle.year != null && vehicle.current_mileage != null ? " · " : null}
+            {vehicle.current_mileage != null ? (
+              <>
+                <span className="num">
+                  {vehicle.current_mileage.toLocaleString()}
+                </span>{" "}
+                {t(`units.${vehicle.mileage_unit}`)}
+              </>
+            ) : null}
+            {vehicle.year == null && vehicle.current_mileage == null
+              ? t("noDetails")
+              : null}
           </p>
         </div>
+
+        <span aria-hidden className="shrink-0 text-ink-3 rtl:rotate-180">
+          ›
+        </span>
       </Card>
     </Link>
   );
