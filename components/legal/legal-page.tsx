@@ -16,15 +16,17 @@ export async function LegalPage({ ns }: { ns: "privacy" | "terms" }) {
         <div className="space-y-1">
           <Link
             href="/"
-            className="text-sm text-muted-foreground hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-ink-2 hover:text-ink"
           >
-            ← {t("home")}
+            <span className="inline-block rtl:rotate-180">←</span> {t("home")}
           </Link>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-xs text-muted-foreground">{t("updated")}</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {t("title")}
+          </h1>
+          <p className="text-xs text-ink-3">{t("updated")}</p>
         </div>
 
-        <p className="text-sm text-muted-foreground">{t("intro")}</p>
+        <p className="text-sm text-ink-2">{t("intro")}</p>
 
         <ul className="list-disc space-y-2 ps-5 text-sm">
           {points.map((point, i) => (
@@ -32,7 +34,7 @@ export async function LegalPage({ ns }: { ns: "privacy" | "terms" }) {
           ))}
         </ul>
 
-        <p className="rounded-md border border-border bg-muted p-3 text-xs text-muted-foreground">
+        <p className="rounded-xl border border-line bg-surface-2 p-3 text-xs text-ink-2">
           {t("betaNote")}
         </p>
       </article>

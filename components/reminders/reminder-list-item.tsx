@@ -62,12 +62,12 @@ export function ReminderListItem({
             {reminder.title ?? t("untitled")}
           </p>
           {reminder.description ? (
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+            <p className="whitespace-pre-wrap text-sm text-ink-2">
               {reminder.description}
             </p>
           ) : null}
           {meta.length > 0 ? (
-            <p className="text-xs text-muted-foreground">{meta.join(" · ")}</p>
+            <p className="text-xs text-ink-2">{meta.join(" · ")}</p>
           ) : null}
         </div>
 
@@ -81,7 +81,7 @@ export function ReminderListItem({
           <div className="flex items-center gap-1">
             <Link
               href={`/vehicles/${vehicleId}/reminders/${reminder.id}/edit`}
-              className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+              className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
             >
               {t("edit.action")}
             </Link>

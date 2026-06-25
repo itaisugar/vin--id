@@ -80,10 +80,10 @@ export function AuthForm({
   return (
     <div className="space-y-6">
       <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-extrabold tracking-tight">
           {isLogin ? t("loginTitle") : t("signupTitle")}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-ink-2">
           {isLogin ? t("loginSubtitle") : t("signupSubtitle")}
         </p>
       </div>
@@ -91,7 +91,7 @@ export function AuthForm({
       {state?.success ? (
         <p
           role="status"
-          className="rounded-md border border-border bg-muted p-3 text-center text-sm"
+          className="rounded-xl border border-line bg-surface-2 p-3 text-center text-sm"
         >
           {t("checkEmail")}
         </p>
@@ -119,11 +119,11 @@ export function AuthForm({
           ) : null}
 
           <div className="flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-line" />
+            <span className="text-xs text-ink-3">
               {t("orContinueWith")}
             </span>
-            <span className="h-px flex-1 bg-border" />
+            <span className="h-px flex-1 bg-line" />
           </div>
 
           <form action={formAction} className="space-y-4" noValidate>
@@ -240,11 +240,11 @@ export function AuthForm({
         </div>
       )}
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-ink-2">
         {isLogin ? t("noAccount") : t("haveAccount")}{" "}
         <Link
           href={isLogin ? "/signup" : "/login"}
-          className="font-medium text-primary hover:underline"
+          className="font-medium text-accent hover:underline"
         >
           {isLogin ? t("createOne") : t("signInInstead")}
         </Link>

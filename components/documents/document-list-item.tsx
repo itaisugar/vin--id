@@ -64,9 +64,7 @@ export function DocumentListItem({
             </p>
           </Link>
           {meta.length > 0 ? (
-            <p className="truncate text-xs text-muted-foreground">
-              {meta.join(" · ")}
-            </p>
+            <p className="truncate text-xs text-ink-2">{meta.join(" · ")}</p>
           ) : null}
           {showPrivacyWarning ? (
             <p className="text-xs text-warn">
@@ -78,7 +76,7 @@ export function DocumentListItem({
         <div className="flex shrink-0 items-center gap-1">
           <Link
             href={detailHref}
-            className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+            className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
           >
             {t("viewEdit")}
           </Link>

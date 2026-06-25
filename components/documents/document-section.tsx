@@ -28,14 +28,14 @@ export async function DocumentSection({
         <CardTitle>{t("title")}</CardTitle>
         <Link
           href={`/vehicles/${vehicleId}/documents/new`}
-          className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+          className="inline-flex h-9 shrink-0 items-center justify-center rounded-xl bg-accent px-3 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
         >
           {t("uploadDocument")}
         </Link>
       </CardHeader>
       <CardContent className="space-y-3">
         {recent.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ink-2">
             {t("empty.body")}
           </p>
         ) : (
@@ -51,7 +51,7 @@ export async function DocumentSection({
             </div>
             <Link
               href={`/vehicles/${vehicleId}/documents`}
-              className="inline-block text-sm font-medium text-primary hover:underline"
+              className="inline-block text-sm font-medium text-accent hover:underline"
             >
               {t("viewAll", { count: documents.length })}
             </Link>

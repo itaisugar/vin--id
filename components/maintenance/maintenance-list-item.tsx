@@ -55,13 +55,13 @@ export function MaintenanceListItem({
             <TrustLabelBadge level={log.trust_label} />
           </div>
           {log.description ? (
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+            <p className="whitespace-pre-wrap text-sm text-ink-2">
               {log.description}
             </p>
           ) : null}
-          {cost ? <p className="text-sm font-medium">{cost}</p> : null}
+          {cost ? <p className="num text-sm font-medium">{cost}</p> : null}
           {log.source_type && log.source_type !== "user" ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink-3">
               {t("source.label")}: {log.source_type}
             </p>
           ) : null}
@@ -71,14 +71,14 @@ export function MaintenanceListItem({
           {log.document_id ? (
             <Link
               href={`/vehicles/${vehicleId}/documents/${log.document_id}`}
-              className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+              className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
             >
               {t("viewDocument")}
             </Link>
           ) : null}
           <Link
             href={`/vehicles/${vehicleId}/maintenance/${log.id}/edit`}
-            className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+            className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
           >
             {t("edit.action")}
           </Link>

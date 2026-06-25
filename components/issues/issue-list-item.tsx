@@ -47,19 +47,19 @@ export function IssueListItem({
             <TrustLabelBadge level={issue.trust_label} />
           </div>
           {meta.length > 0 ? (
-            <p className="text-xs text-muted-foreground">{meta.join(" · ")}</p>
+            <p className="text-xs text-ink-2">{meta.join(" · ")}</p>
           ) : null}
           {issue.title ? (
             <p className="whitespace-pre-wrap text-sm">{issue.title}</p>
           ) : null}
           {issue.status === "resolved" && issue.resolution_notes ? (
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+            <p className="whitespace-pre-wrap text-sm text-ink-2">
               <span className="font-medium">{t("resolutionPrefix")}: </span>
               {issue.resolution_notes}
             </p>
           ) : null}
           {issue.source_type && issue.source_type !== "user" ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink-3">
               {t("source.label")}: {issue.source_type}
             </p>
           ) : null}
@@ -73,14 +73,14 @@ export function IssueListItem({
             {issue.document_id ? (
               <Link
                 href={`/vehicles/${vehicleId}/documents/${issue.document_id}`}
-                className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+                className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
               >
                 {t("viewDocument")}
               </Link>
             ) : null}
             <Link
               href={`/vehicles/${vehicleId}/issues/${issue.id}/edit`}
-              className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+              className="inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
             >
               {t("edit.action")}
             </Link>
