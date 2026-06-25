@@ -100,7 +100,7 @@ export function CreatePassportForm({
               <div className="space-y-2">
                 <p className="text-sm font-medium">{t("share.title")}</p>
                 <ShareUrl url={success.shareUrl} />
-                <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                <p className="rounded-md bg-warn/12 p-2 text-xs font-medium text-warn">
                   ⚠️ {t("share.copyOnce")}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -110,7 +110,7 @@ export function CreatePassportForm({
             ) : (
               <p
                 role="alert"
-                className="rounded-md bg-amber-500/15 p-3 text-sm font-medium text-amber-700 dark:text-amber-400"
+                className="rounded-md bg-warn/12 p-3 text-sm font-medium text-warn"
               >
                 ⚠️ {t("share.linkUnavailable")}
               </p>
@@ -202,7 +202,7 @@ export function CreatePassportForm({
           />
 
           {opts.includeDocuments && counts.documentsPersonalShareable > 0 ? (
-            <label className="flex items-center gap-2 rounded-md bg-amber-500/15 p-2 text-xs text-amber-700 dark:text-amber-400">
+            <label className="flex items-center gap-2 rounded-md bg-warn/12 p-2 text-xs text-warn">
               <Checkbox
                 checked={opts.includePersonalDocs}
                 onChange={set("includePersonalDocs")}
@@ -250,7 +250,7 @@ export function CreatePassportForm({
       </Card>
 
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`errors.${error}`)}
         </p>
       ) : null}

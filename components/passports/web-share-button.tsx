@@ -69,7 +69,7 @@ export function WebShareButton({
         {label}
       </Button>
       {status === "error" ? (
-        <p role="alert" className="mt-1 text-xs text-red-600">
+        <p role="alert" className="mt-1 text-xs text-danger">
           {t("copyFailed")}
         </p>
       ) : null}

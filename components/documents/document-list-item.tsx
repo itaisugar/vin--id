@@ -69,7 +69,7 @@ export function DocumentListItem({
             </p>
           ) : null}
           {showPrivacyWarning ? (
-            <p className="text-xs text-amber-700 dark:text-amber-400">
+            <p className="text-xs text-warn">
               {t("privacyWarning")}
             </p>
           ) : null}

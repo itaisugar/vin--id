@@ -52,7 +52,7 @@ export function GoogleButton({ next }: { next?: string }) {
         {isPending ? t("googleStarting") : t("continueWithGoogle")}
       </Button>
       {failed ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t("errors.oauthStart")}
         </p>
       ) : null}

@@ -58,7 +58,7 @@ export function DataPrivacySection() {
           ))}
         </div>
         <p className="text-xs text-muted-foreground">{t("exportHelp")}</p>
-        <p className="rounded-md bg-amber-500/15 p-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+        <p className="rounded-md bg-warn/12 p-2 text-xs font-medium text-warn">
           ⚠️ {t("exportWarning")}
         </p>
       </div>
@@ -86,7 +86,7 @@ export function DataPrivacySection() {
           </Button>
         )}
         {error ? (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-danger">
             {t("deletion.error")}
           </p>
         ) : null}

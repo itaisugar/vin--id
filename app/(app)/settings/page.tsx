@@ -44,37 +44,38 @@ export default async function SettingsPage() {
       )
     : "";
 
+  // Avatar initial: first letter of the name, else of the email, else "?".
+  const initialSource = fullName || user?.email || "";
+  const initial = initialSource.trim().charAt(0).toUpperCase() || "?";
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-ink-2">{t("subtitle")}</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("account.title")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {t("account.fullName")}
-            </p>
-            <p className="text-sm font-medium">{fullName || "—"}</p>
+      {/* Profile card — gradient avatar + identity (COCKPIT "More" hero) */}
+      <Card className="p-4">
+        <div className="flex items-center gap-3">
+          <div
+            aria-hidden
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep text-lg font-extrabold text-on-accent glow-accent"
+          >
+            {initial}
           </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {t("account.email")}
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-bold">{fullName || t("account.title")}</p>
+            <p className="num truncate text-sm text-ink-2">
+              {user?.email ?? "—"}
             </p>
-            <p className="text-sm font-medium">{user?.email ?? "—"}</p>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {t("account.joinedAt")}
-            </p>
-            <p className="text-sm font-medium">{joinedAt || "—"}</p>
-          </div>
-        </CardContent>
+        </div>
+        {joinedAt ? (
+          <p className="mt-3 border-t border-line pt-3 text-xs text-ink-2">
+            {t("account.joinedAt")} · <span className="num">{joinedAt}</span>
+          </p>
+        ) : null}
       </Card>
 
       <Card>

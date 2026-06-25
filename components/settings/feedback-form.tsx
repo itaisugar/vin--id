@@ -77,7 +77,7 @@ export function FeedbackForm({ defaultEmail }: { defaultEmail: string }) {
       <div className="space-y-1.5">
         <Label htmlFor="feedback_message">
           {t("message")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Textarea
           id="feedback_message"
@@ -99,7 +99,7 @@ export function FeedbackForm({ defaultEmail }: { defaultEmail: string }) {
       </div>
 
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`errors.${error}`)}
         </p>
       ) : null}

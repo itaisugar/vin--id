@@ -47,7 +47,7 @@ export function ShareUrl({ url }: { url: string }) {
         </Button>
       </div>
       {status === "error" ? (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-xs text-danger">
           {t("copyFailed")}
         </p>
       ) : null}

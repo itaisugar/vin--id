@@ -113,7 +113,7 @@ export function AuthForm({
           </form>
 
           {oauthError ? (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-danger">
               {t("errors.generic")}
             </p>
           ) : null}
@@ -150,7 +150,7 @@ export function AuthForm({
                   required
                 />
                 {firstNameError ? (
-                  <p id="firstName-error" className="text-sm text-red-600">
+                  <p id="firstName-error" className="text-sm text-danger">
                     {t(`errors.${firstNameError}`)}
                   </p>
                 ) : null}
@@ -171,7 +171,7 @@ export function AuthForm({
                   required
                 />
                 {lastNameError ? (
-                  <p id="lastName-error" className="text-sm text-red-600">
+                  <p id="lastName-error" className="text-sm text-danger">
                     {t(`errors.${lastNameError}`)}
                   </p>
                 ) : null}
@@ -194,7 +194,7 @@ export function AuthForm({
               required
             />
             {emailError ? (
-              <p id="email-error" className="text-sm text-red-600">
+              <p id="email-error" className="text-sm text-danger">
                 {t(`errors.${emailError}`)}
               </p>
             ) : null}
@@ -215,14 +215,14 @@ export function AuthForm({
               required
             />
             {passwordError ? (
-              <p id="password-error" className="text-sm text-red-600">
+              <p id="password-error" className="text-sm text-danger">
                 {t(`errors.${passwordError}`)}
               </p>
             ) : null}
           </div>
 
           {state?.error ? (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-danger">
               {t(`errors.${state.error}`)}
             </p>
           ) : null}

@@ -170,11 +170,11 @@ export async function Landing({ mockAi }: { mockAi: boolean }) {
 
         {/* E. Beta notice */}
         <section className="mx-auto w-full max-w-5xl px-4 py-12">
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-5">
-            <h2 className="text-base font-semibold text-amber-800 dark:text-amber-300">
+          <div className="rounded-lg border border-warn/30 bg-warn/10 p-5">
+            <h2 className="text-base font-semibold text-warn">
               {t("beta.title")}
             </h2>
-            <ul className="mt-3 space-y-1.5 text-sm text-amber-800/90 dark:text-amber-200/90">
+            <ul className="mt-3 space-y-1.5 text-sm text-warn/90">
               {betaPoints.map((point) => (
                 <li key={point}>• {point}</li>
               ))}

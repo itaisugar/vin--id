@@ -187,7 +187,7 @@ export function DocumentForm({
         <div className="space-y-1.5">
           <Label htmlFor="file">
             {t("fields.file")}
-            <span className="text-red-600"> *</span>
+            <span className="text-danger"> *</span>
           </Label>
           <Input
             id="file"
@@ -201,7 +201,7 @@ export function DocumentForm({
           />
           <p className="text-xs text-muted-foreground">{t("fields.fileHelp")}</p>
           {fileError ? (
-            <p className="text-sm text-red-600">{t(`form.errors.${fileError}`)}</p>
+            <p className="text-sm text-danger">{t(`form.errors.${fileError}`)}</p>
           ) : null}
         </div>
       ) : null}
@@ -209,7 +209,7 @@ export function DocumentForm({
       <div className="space-y-1.5">
         <Label htmlFor="document_type">
           {t("fields.documentType")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Select id="document_type" {...register("document_type")}>
           {DOCUMENT_TYPES.map((dt) => (
@@ -277,7 +277,7 @@ export function DocumentForm({
           {t("fields.shareAllowed")}
         </label>
         {showPrivacyWarning ? (
-          <p className="rounded-md bg-amber-500/15 p-2 text-xs text-amber-700 dark:text-amber-400">
+          <p className="rounded-md bg-warn/12 p-2 text-xs text-warn">
             {t("privacyWarning")}
           </p>
         ) : null}
@@ -297,7 +297,7 @@ export function DocumentForm({
       </div>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -348,7 +348,7 @@ function Field({
         {...props}
       />
       {error ? (
-        <p id={`${name}-error`} className="text-sm text-red-600">
+        <p id={`${name}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : null}

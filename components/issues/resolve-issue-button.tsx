@@ -85,7 +85,7 @@ export function ResolveIssueButton({
               />
             </div>
             {error ? (
-              <p role="alert" className="mt-2 text-sm text-red-600">
+              <p role="alert" className="mt-2 text-sm text-danger">
                 {t("form.errors.resolveFailed")}
               </p>
             ) : null}

@@ -99,7 +99,7 @@ export function ReminderForm({
       <div className="space-y-1.5">
         <Label htmlFor="reminder_type">
           {t("fields.reminderType")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Select id="reminder_type" {...register("reminder_type")}>
           {REMINDER_TYPES.map((rt) => (
@@ -124,6 +124,7 @@ export function ReminderForm({
           label={t("fields.dueMileage")}
           type="number"
           inputMode="numeric"
+          className="num"
           error={fieldError("due_mileage")}
           registration={register("due_mileage")}
         />
@@ -157,7 +158,7 @@ export function ReminderForm({
       </div>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -201,7 +202,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={name}>
         {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+        {required ? <span className="text-danger"> *</span> : null}
       </Label>
       <Input
         id={name}
@@ -211,7 +212,7 @@ function Field({
         {...props}
       />
       {error ? (
-        <p id={`${name}-error`} className="text-sm text-red-600">
+        <p id={`${name}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : null}

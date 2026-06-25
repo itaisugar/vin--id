@@ -111,6 +111,7 @@ export function IssueForm({
         label={t("fields.mileage")}
         type="number"
         inputMode="numeric"
+        className="num"
         error={fieldError("mileage")}
         registration={register("mileage")}
       />
@@ -118,7 +119,7 @@ export function IssueForm({
       <div className="space-y-1.5">
         <Label htmlFor="symptoms">
           {t("fields.symptoms")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Textarea
           id="symptoms"
@@ -127,7 +128,7 @@ export function IssueForm({
           {...register("symptoms")}
         />
         {fieldError("symptoms") ? (
-          <p className="text-sm text-red-600">{fieldError("symptoms")}</p>
+          <p className="text-sm text-danger">{fieldError("symptoms")}</p>
         ) : null}
       </div>
 
@@ -180,7 +181,7 @@ export function IssueForm({
       </div>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -224,7 +225,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={name}>
         {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+        {required ? <span className="text-danger"> *</span> : null}
       </Label>
       <Input
         id={name}
@@ -234,7 +235,7 @@ function Field({
         {...props}
       />
       {error ? (
-        <p id={`${name}-error`} className="text-sm text-red-600">
+        <p id={`${name}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : null}

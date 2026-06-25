@@ -104,6 +104,7 @@ export function MaintenanceForm({
         label={t("fields.mileage")}
         type="number"
         inputMode="numeric"
+        className="num"
         error={fieldError("mileage")}
         registration={register("mileage")}
       />
@@ -118,7 +119,7 @@ export function MaintenanceForm({
       <div className="space-y-1.5">
         <Label htmlFor="description">
           {t("fields.description")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Textarea
           id="description"
@@ -126,7 +127,7 @@ export function MaintenanceForm({
           {...register("description")}
         />
         {fieldError("description") ? (
-          <p className="text-sm text-red-600">{fieldError("description")}</p>
+          <p className="text-sm text-danger">{fieldError("description")}</p>
         ) : null}
       </div>
 
@@ -138,6 +139,7 @@ export function MaintenanceForm({
           type="number"
           inputMode="decimal"
           step="0.01"
+          className="num"
           error={fieldError("cost")}
           registration={register("cost")}
         />
@@ -167,7 +169,7 @@ export function MaintenanceForm({
       </div>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -211,7 +213,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={name}>
         {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+        {required ? <span className="text-danger"> *</span> : null}
       </Label>
       <Input
         id={name}
@@ -221,7 +223,7 @@ function Field({
         {...props}
       />
       {error ? (
-        <p id={`${name}-error`} className="text-sm text-red-600">
+        <p id={`${name}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : null}

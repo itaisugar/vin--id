@@ -29,7 +29,7 @@ export function AcceptPassportButton({ token }: { token: string }) {
       </Button>
       <p className="text-xs text-muted-foreground">{t("notOfficial")}</p>
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`errors.${error}`)}
         </p>
       ) : null}

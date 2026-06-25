@@ -174,6 +174,7 @@ export function VehicleForm({
         required
         type="number"
         inputMode="numeric"
+        className="num"
         placeholder={t("fields.yearPlaceholder")}
         error={fieldError("year")}
         registration={register("year")}
@@ -181,12 +182,14 @@ export function VehicleForm({
       <Field
         name="vin"
         label={t("fields.vin")}
+        className="num"
         error={fieldError("vin")}
         registration={register("vin")}
       />
       <Field
         name="license_plate"
         label={t("fields.licensePlate")}
+        className="num"
         error={fieldError("license_plate")}
         registration={register("license_plate")}
       />
@@ -198,6 +201,7 @@ export function VehicleForm({
           label={t("fields.mileage")}
           type="number"
           inputMode="numeric"
+          className="num"
           error={fieldError("mileage")}
           registration={register("mileage")}
         />
@@ -223,7 +227,7 @@ export function VehicleForm({
       />
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -285,7 +289,7 @@ function ComboField({
     <div className="space-y-1.5">
       <Label htmlFor={name}>
         {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+        {required ? <span className="text-danger"> *</span> : null}
       </Label>
       <Combobox
         id={name}
@@ -301,7 +305,7 @@ function ComboField({
         aria-describedby={error ? errorId : helper ? helperId : undefined}
       />
       {error ? (
-        <p id={errorId} className="text-sm text-red-600">
+        <p id={errorId} className="text-sm text-danger">
           {error}
         </p>
       ) : helper ? (
@@ -332,7 +336,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={name}>
         {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+        {required ? <span className="text-danger"> *</span> : null}
       </Label>
       <Input
         id={name}
@@ -342,7 +346,7 @@ function Field({
         {...props}
       />
       {error ? (
-        <p id={`${name}-error`} className="text-sm text-red-600">
+        <p id={`${name}-error`} className="text-sm text-danger">
           {error}
         </p>
       ) : null}

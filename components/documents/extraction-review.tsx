@@ -120,7 +120,7 @@ export function ExtractionReview({
           {t("mockNotice")}
         </p>
         {containsPersonalInfo ? (
-          <p className="rounded-md bg-amber-500/15 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+          <p className="rounded-md bg-warn/12 px-2 py-1 text-xs text-warn">
             {td("privacyWarning")}
           </p>
         ) : null}
@@ -168,7 +168,7 @@ export function ExtractionReview({
           </div>
 
           {serverError ? (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-danger">
               {t(`errors.${serverError}`)}
             </p>
           ) : null}
@@ -214,7 +214,7 @@ function Field({
         </Badge>
       </div>
       {children}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }
