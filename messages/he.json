@@ -29,7 +29,15 @@
     "dashboard": "לוח בקרה",
     "vehicles": "רכבים",
     "diagnose": "אבחון",
-    "settings": "הגדרות"
+    "settings": "הגדרות",
+    "quickAdd": {
+      "open": "הוספה מהירה",
+      "title": "פעולות מהירות",
+      "scan": "סריקת מסמך",
+      "diagnose": "אבחון חכם",
+      "addVehicle": "הוספת רכב",
+      "close": "סגירה"
+    }
   },
   "install": {
     "title": "הוסף את Vin.ID למסך הבית",

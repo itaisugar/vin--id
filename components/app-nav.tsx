@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { navItems } from "@/components/nav-config";
+import { navItems, type NavItem } from "@/components/nav-config";
+import { QuickActionFab } from "@/components/quick-action-fab";
 import { cn } from "@/lib/utils";
 
 function useIsActive() {
@@ -45,10 +46,10 @@ export function SidebarNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
               active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted",
+                ? "bg-surface-2 text-accent"
+                : "text-ink-2 hover:bg-surface-2 hover:text-ink",
             )}
           >
             {content}
@@ -59,51 +60,85 @@ export function SidebarNav() {
   );
 }
 
-/** Mobile: fixed bottom navigation bar (hidden on desktop). */
+/** One mobile bottom-nav slot. */
+function BottomNavSlot({
+  item,
+  active,
+  label,
+}: {
+  item: NavItem;
+  active: boolean;
+  label: string;
+}) {
+  const { href, icon: Icon, enabled } = item;
+  const inner = (
+    <span
+      className={cn(
+        "flex flex-col items-center gap-1 py-2 text-[11px] font-medium",
+        !enabled && "text-ink-3/50",
+        enabled && active && "text-accent",
+        enabled && !active && "text-ink-3",
+      )}
+    >
+      <Icon className="h-[22px] w-[22px]" />
+      {label}
+    </span>
+  );
+
+  if (!enabled) {
+    return (
+      <span aria-disabled="true" className="block cursor-default">
+        {inner}
+      </span>
+    );
+  }
+  return (
+    <Link href={href} aria-current={active ? "page" : undefined} className="block">
+      {inner}
+    </Link>
+  );
+}
+
+/**
+ * Mobile: fixed bottom navigation bar (hidden on desktop). Five slots — two nav
+ * items, the raised amber quick-action FAB, then the remaining two nav items.
+ */
 export function BottomNav() {
   const t = useTranslations("nav");
   const isActive = useIsActive();
 
+  const left = navItems.slice(0, 2);
+  const right = navItems.slice(2);
+
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[rgba(16,19,23,0.92)] pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       aria-label="Primary"
     >
-      <ul className="grid grid-cols-4">
-        {navItems.map(({ key, href, icon: Icon, enabled }) => {
-          const active = enabled && isActive(href);
-          const inner = (
-            <span
-              className={cn(
-                "flex flex-col items-center gap-1 pb-2 pt-4 text-xs font-medium",
-                !enabled && "text-muted-foreground/40",
-                enabled && active && "text-primary",
-                enabled && !active && "text-muted-foreground",
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              {t(key)}
-            </span>
-          );
+      <ul className="grid grid-cols-5 items-center pt-2">
+        {left.map((item) => (
+          <li key={item.key}>
+            <BottomNavSlot
+              item={item}
+              active={item.enabled && isActive(item.href)}
+              label={t(item.key)}
+            />
+          </li>
+        ))}
 
-          return (
-            <li key={key}>
-              {enabled ? (
-                <Link
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  className="block"
-                >
-                  {inner}
-                </Link>
-              ) : (
-                <span aria-disabled="true" className="block cursor-default">
-                  {inner}
-                </span>
-              )}
-            </li>
-          );
-        })}
+        <li className="flex justify-center">
+          <QuickActionFab />
+        </li>
+
+        {right.map((item) => (
+          <li key={item.key}>
+            <BottomNavSlot
+              item={item}
+              active={item.enabled && isActive(item.href)}
+              label={t(item.key)}
+            />
+          </li>
+        ))}
       </ul>
     </nav>
   );

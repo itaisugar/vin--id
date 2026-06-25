@@ -29,7 +29,15 @@
     "dashboard": "Dashboard",
     "vehicles": "Vehicles",
     "diagnose": "Diagnose",
-    "settings": "Settings"
+    "settings": "Settings",
+    "quickAdd": {
+      "open": "Quick add",
+      "title": "Quick actions",
+      "scan": "Scan a document",
+      "diagnose": "AI diagnosis",
+      "addVehicle": "Add vehicle",
+      "close": "Close"
+    }
   },
   "install": {
     "title": "Add Vin.ID to your home screen",

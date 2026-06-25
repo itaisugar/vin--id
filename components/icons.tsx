@@ -133,6 +133,24 @@ export function LogoutIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function PlusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </Icon>
+  );
+}
+
+export function CloseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M18 6 6 18" />
+      <path d="M6 6l12 12" />
+    </Icon>
+  );
+}
+
 /** Document-scan brackets (COCKPIT scan affordance). */
 export function ScanIcon(props: SVGProps<SVGSVGElement>) {
   return (
