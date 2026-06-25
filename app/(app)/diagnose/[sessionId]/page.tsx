@@ -46,25 +46,28 @@ export default async function DiagnosisSessionPage({
       <div className="space-y-1">
         <Link
           href="/diagnose"
-          className="text-sm text-muted-foreground hover:underline"
+          className="text-sm text-ink-2 transition-colors hover:text-ink"
         >
-          ← {t("title")}
+          <span aria-hidden className="inline-block rtl:rotate-180">←</span>{" "}
+          {t("title")}
         </Link>
-        <h1 className="text-2xl font-bold">{t("result.title")}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">
+          {t("result.title")}
+        </h1>
       </div>
 
       {/* Vehicle summary */}
       {vehicle ? (
         <Card>
           <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 p-4 text-sm">
-            <span className="font-medium">
+            <span className="font-semibold">
               {vehicleTitle || tv("untitled")}
             </span>
             {vehicle.year != null ? (
-              <span className="text-muted-foreground">{vehicle.year}</span>
+              <span className="num text-ink-2">{vehicle.year}</span>
             ) : null}
             {vehicle.current_mileage != null ? (
-              <span className="text-muted-foreground">
+              <span className="num text-ink-2">
                 {vehicle.current_mileage.toLocaleString(locale)}{" "}
                 {tv(`units.${vehicle.mileage_unit}`)}
               </span>

@@ -3,13 +3,24 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SafetyBadge } from "@/components/diagnosis/safety-badge";
 import { SafeToDriveBadge } from "@/components/diagnosis/safe-to-drive-badge";
-import type { DiagnosisResult } from "@/lib/diagnosis/types";
+import type { DiagnosisResult, SafetyLevel } from "@/lib/diagnosis/types";
 
 const LIKELIHOOD_TONE = {
   low: "muted",
   medium: "neutral",
   high: "warning",
 } as const;
+
+// Severity meter derived from the safety level (documentation/triage signal,
+// not a measurement). Fill + color escalate with the level.
+const SEVERITY_METER: Record<SafetyLevel, { pct: number; color: string }> = {
+  info: { pct: 15, color: "bg-ok" },
+  monitor: { pct: 30, color: "bg-ok" },
+  diy_simple: { pct: 42, color: "bg-warn" },
+  mechanic_recommended: { pct: 62, color: "bg-warn" },
+  urgent: { pct: 84, color: "bg-danger" },
+  stop_immediately: { pct: 100, color: "bg-danger" },
+};
 
 export function DiagnosisResultView({
   result,
@@ -26,7 +37,7 @@ export function DiagnosisResultView({
   return (
     <div className="space-y-4">
       {isMock ? (
-        <p className="rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+        <p className="rounded-xl border border-line bg-surface-3 px-3 py-2 text-xs text-ink-2">
           {t("mockNotice")}
         </p>
       ) : null}
@@ -36,8 +47,8 @@ export function DiagnosisResultView({
         <div
           className={
             result.safety_level === "stop_immediately"
-              ? "rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-700 dark:text-red-400"
-              : "rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm font-medium text-amber-700 dark:text-amber-400"
+              ? "rounded-2xl border border-danger/30 bg-danger/10 p-3 text-sm font-semibold text-danger"
+              : "rounded-2xl border border-warn/30 bg-warn/10 p-3 text-sm font-semibold text-warn"
           }
           role="alert"
         >
@@ -46,13 +57,23 @@ export function DiagnosisResultView({
       ) : null}
 
       <Card>
-        <CardHeader className="space-y-2">
+        <CardHeader className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <SafetyBadge level={result.safety_level} />
             <SafeToDriveBadge value={result.safe_to_drive} />
             <Badge tone="muted">
               {t("confidence.label")}: {t(`confidence.${result.confidence_level}`)}
             </Badge>
+          </div>
+          {/* Severity meter (escalates with the safety level). */}
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full bg-track"
+            role="presentation"
+          >
+            <div
+              className={`h-full rounded-full ${SEVERITY_METER[result.safety_level].color}`}
+              style={{ width: `${SEVERITY_METER[result.safety_level].pct}%` }}
+            />
           </div>
           <p className="text-sm">{result.symptom_summary}</p>
         </CardHeader>
@@ -63,16 +84,17 @@ export function DiagnosisResultView({
               <h3 className="text-sm font-semibold">{t("sections.causes")}</h3>
               <ul className="space-y-2">
                 {result.likely_causes.map((c, idx) => (
-                  <li key={idx} className="rounded-md border border-border p-3">
+                  <li
+                    key={idx}
+                    className="rounded-xl border border-line bg-surface-3 p-3"
+                  >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">{c.title}</span>
+                      <span className="text-sm font-semibold">{c.title}</span>
                       <Badge tone={LIKELIHOOD_TONE[c.likelihood]}>
                         {t(`likelihood.${c.likelihood}`)}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {c.explanation}
-                    </p>
+                    <p className="mt-1 text-sm text-ink-2">{c.explanation}</p>
                   </li>
                 ))}
               </ul>
@@ -112,7 +134,7 @@ export function DiagnosisResultView({
           </section>
 
           {/* Disclaimer */}
-          <p className="rounded-md border border-border p-3 text-xs text-muted-foreground">
+          <p className="rounded-xl border border-line bg-surface-3 p-3 text-xs text-ink-2">
             {result.disclaimer}
           </p>
         </CardContent>

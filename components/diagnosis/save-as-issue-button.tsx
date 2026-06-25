@@ -25,7 +25,7 @@ export function SaveAsIssueButton({ sessionId }: { sessionId: string }) {
         {isPending ? t("saveIssue.pending") : t("saveIssue.action")}
       </Button>
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${error}`)}
         </p>
       ) : null}

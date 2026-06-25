@@ -95,7 +95,7 @@ export function DiagnoseForm({
       <div className="space-y-1.5">
         <Label htmlFor="vehicleId">
           {t("form.vehicle")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Select
           id="vehicleId"
@@ -112,14 +112,14 @@ export function DiagnoseForm({
           ))}
         </Select>
         {fieldError("vehicleId") ? (
-          <p className="text-sm text-red-600">{fieldError("vehicleId")}</p>
+          <p className="text-sm text-danger">{fieldError("vehicleId")}</p>
         ) : null}
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="symptoms">
           {t("form.symptoms")}
-          <span className="text-red-600"> *</span>
+          <span className="text-danger"> *</span>
         </Label>
         <Textarea
           id="symptoms"
@@ -129,7 +129,7 @@ export function DiagnoseForm({
           {...register("symptoms")}
         />
         {fieldError("symptoms") ? (
-          <p className="text-sm text-red-600">{fieldError("symptoms")}</p>
+          <p className="text-sm text-danger">{fieldError("symptoms")}</p>
         ) : null}
       </div>
 
@@ -142,12 +142,12 @@ export function DiagnoseForm({
           {...register("mileage")}
         />
         {fieldError("mileage") ? (
-          <p className="text-sm text-red-600">{fieldError("mileage")}</p>
+          <p className="text-sm text-danger">{fieldError("mileage")}</p>
         ) : null}
       </div>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {t(`form.errors.${serverError}`)}
         </p>
       ) : null}
@@ -159,7 +159,7 @@ export function DiagnoseForm({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-11 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]",
           )}
         >
           {t("form.cancel")}

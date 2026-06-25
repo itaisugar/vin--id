@@ -26,23 +26,21 @@ export default async function DiagnosePage({
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+        <p className="text-sm text-ink-2">{t("subtitle")}</p>
       </div>
 
-      <p className="rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+      <p className="rounded-xl border border-line bg-surface-3 px-3 py-2 text-xs text-ink-2">
         {t("safetyIntro")}
       </p>
 
       {options.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
-          <p className="font-medium">{t("noVehicles.title")}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            {t("noVehicles.body")}
-          </p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+          <p className="font-semibold">{t("noVehicles.title")}</p>
+          <p className="max-w-sm text-sm text-ink-2">{t("noVehicles.body")}</p>
           <Link
             href="/vehicles/new"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98]"
           >
             {t("noVehicles.cta")}
           </Link>
@@ -57,7 +55,7 @@ export default async function DiagnosePage({
 
       {sessions.length > 0 ? (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
             {t("history.title")}
           </h2>
           <div className="grid gap-3">
