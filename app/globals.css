@@ -136,6 +136,26 @@ body {
   }
 }
 
+/* Document scan-line sweep (~2.1s ease-in-out loop while processing). */
+@keyframes scan-sweep {
+  0%,
+  100% {
+    top: 6%;
+  }
+  50% {
+    top: 94%;
+  }
+}
+.animate-scan-sweep {
+  animation: scan-sweep 2.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan-sweep {
+    animation: none;
+    top: 50%;
+  }
+}
+
 /* Live status dot pulse ("מחובר", "עודכן היום"). */
 @keyframes cockpit-pulse {
   0%,

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { scanExtractAction } from "@/app/(app)/scan/actions";
 import { ScanConfirmForm } from "@/components/scan/scan-confirm-form";
+import { DocumentIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -179,8 +180,42 @@ export function ScanFlow({
           (Camera + Photo Library + Files). `accept="image/*"` keeps the picker
           to images (incl. iOS HEIC, converted to JPEG on pick); the actual
           jpeg/png/webp + size limits are enforced in onFileChange + server. */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="scan-file">{t("fields.file")}</Label>
+
+        {/* Scan viewport — preview framed by amber corner brackets; a scan line
+            sweeps while extraction runs (status pill at the bottom). */}
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-xs overflow-hidden rounded-2xl border border-line [background:radial-gradient(circle_at_50%_40%,#15181d,#0c0e11)]">
+          {previewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewUrl}
+              alt={file?.name ?? ""}
+              className="absolute inset-0 h-full w-full object-contain p-3"
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center text-ink-3">
+              <DocumentIcon className="h-10 w-10" />
+            </div>
+          )}
+
+          {/* Amber corner brackets */}
+          <span className="pointer-events-none absolute left-3 top-3 h-7 w-7 rounded-tl-lg border-l-2 border-t-2 border-accent" />
+          <span className="pointer-events-none absolute right-3 top-3 h-7 w-7 rounded-tr-lg border-r-2 border-t-2 border-accent" />
+          <span className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 rounded-bl-lg border-b-2 border-l-2 border-accent" />
+          <span className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 rounded-br-lg border-b-2 border-r-2 border-accent" />
+
+          {isPending ? (
+            <>
+              <span className="animate-scan-sweep pointer-events-none absolute inset-x-4 h-0.5 -translate-y-1/2 bg-accent shadow-[0_0_12px_2px_rgba(255,138,43,0.6)]" />
+              <span className="absolute inset-x-0 bottom-4 mx-auto flex w-fit items-center gap-2 rounded-full bg-bg/80 px-3 py-1.5 text-xs font-medium backdrop-blur">
+                <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
+                {t("actions.scanning")}
+              </span>
+            </>
+          ) : null}
+        </div>
+
         <Input
           id="scan-file"
           type="file"
@@ -188,21 +223,13 @@ export function ScanFlow({
           onChange={onFileChange}
           className="h-auto py-2"
         />
-        <p className="text-xs text-muted-foreground">{t("fields.fileHelp")}</p>
-        {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={previewUrl}
-            alt={file?.name ?? ""}
-            className="max-h-64 w-full rounded-md border border-border object-contain"
-          />
-        ) : null}
+        <p className="text-xs text-ink-3">{t("fields.fileHelp")}</p>
       </div>
 
       {/* Consent notice (required before sending to a third-party provider) */}
-      <div className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-        <p className="text-sm font-medium">{t("consent.title")}</p>
-        <p className="text-xs text-muted-foreground">{t("consent.body")}</p>
+      <div className="space-y-2 rounded-2xl border border-warn/30 bg-warn/10 p-3">
+        <p className="text-sm font-semibold">{t("consent.title")}</p>
+        <p className="text-xs text-ink-2">{t("consent.body")}</p>
         <label className="flex items-start gap-2 text-sm">
           <Checkbox
             checked={consent}
@@ -213,7 +240,7 @@ export function ScanFlow({
       </div>
 
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm font-medium text-danger">
           {t(`errors.${error}`)}
         </p>
       ) : null}
@@ -229,7 +256,7 @@ export function ScanFlow({
         <Link
           href={cancelHref}
           className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+            "inline-flex h-11 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]",
           )}
         >
           {t("actions.cancel")}

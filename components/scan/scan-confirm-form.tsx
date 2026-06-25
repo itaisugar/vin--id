@@ -198,13 +198,13 @@ export function ScanConfirmForm({
   const undetected = extraction.document_category === "unknown";
 
   return (
-    <Card className="border-primary/40">
+    <Card className="border-accent/40">
       <CardHeader className="space-y-2">
         <CardTitle className="text-base">{t("review.title")}</CardTitle>
         <p className="text-xs text-muted-foreground">{t("review.help")}</p>
 
         {failed ? (
-          <p className="rounded-md bg-amber-500/15 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+          <p className="rounded-lg bg-warn/12 px-2 py-1 text-xs text-warn">
             {t("review.failedNotice")}
           </p>
         ) : engine === "mock" ? (
@@ -218,7 +218,7 @@ export function ScanConfirmForm({
         ) : null}
 
         {!failed && undetected ? (
-          <p className="rounded-md bg-amber-500/15 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+          <p className="rounded-lg bg-warn/12 px-2 py-1 text-xs text-warn">
             {t("review.unknownNotice")}
           </p>
         ) : null}
@@ -275,7 +275,7 @@ export function ScanConfirmForm({
                 <Label htmlFor="description">{t("fields.description")}</Label>
                 <Textarea id="description" rows={3} {...register("description")} />
                 {fieldErr("description") ? (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-danger">
                     {fieldErr("description")}
                   </p>
                 ) : null}
@@ -311,7 +311,7 @@ export function ScanConfirmForm({
                 <Label htmlFor="description">{t("fields.symptoms")}</Label>
                 <Textarea id="description" rows={3} {...register("description")} />
                 {fieldErr("description") ? (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-danger">
                     {fieldErr("description")}
                   </p>
                 ) : null}
@@ -403,7 +403,7 @@ export function ScanConfirmForm({
           <p className="text-xs text-muted-foreground">{t("review.trustNote")}</p>
 
           {serverError ? (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-danger">
               {t(`errors.${serverError}`)}
             </p>
           ) : null}
@@ -423,7 +423,7 @@ export function ScanConfirmForm({
             <Link
               href={cancelHref}
               className={cn(
-                "inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium transition-colors hover:bg-muted",
+                "inline-flex h-11 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]",
               )}
             >
               {t("actions.cancel")}
@@ -496,7 +496,7 @@ function MileageField({
           ))}
         </Select>
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }
@@ -550,7 +550,7 @@ function NotesField({
     <div className="space-y-1.5">
       <Label htmlFor="notes">{t("fields.notes")}</Label>
       <Textarea id="notes" rows={3} {...registration} />
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }
@@ -571,7 +571,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} aria-invalid={Boolean(error)} {...registration} {...props} />
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }
