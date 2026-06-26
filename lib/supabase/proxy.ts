@@ -2,8 +2,21 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
-/** Routes that require an authenticated user. */
-const PROTECTED_PREFIXES = ["/dashboard"];
+/**
+ * Routes that require an authenticated user. Must cover every route in the
+ * `(app)` group: without this, an unauthenticated request to e.g. `/vehicles`
+ * is NOT redirected here and instead reaches the Server Component, whose data
+ * access throws NotAuthenticatedError → the error boundary shows "Something
+ * went wrong" (the `(app)` layout's redirect races the page and loses). The
+ * proxy redirect runs before rendering, so it wins.
+ */
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/vehicles",
+  "/diagnose",
+  "/scan",
+  "/settings",
+];
 /** Auth routes that an already-authenticated user should be bounced away from. */
 const AUTH_PREFIXES = ["/login", "/signup"];
 
