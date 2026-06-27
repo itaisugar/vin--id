@@ -30,14 +30,7 @@
     "vehicles": "רכבים",
     "diagnose": "אבחון",
     "settings": "הגדרות",
-    "quickAdd": {
-      "open": "הוספה מהירה",
-      "title": "פעולות מהירות",
-      "scan": "סריקת מסמך",
-      "diagnose": "אבחון חכם",
-      "addVehicle": "הוספת רכב",
-      "close": "סגירה"
-    }
+    "scan": "סריקת מסמך"
   },
   "install": {
     "title": "הוסף את Vin.ID למסך הבית",
@@ -353,10 +346,6 @@
       }
     },
     "quickActions": {
-      "title": "פעולות מהירות",
-      "addVehicle": "הוספת רכב",
-      "diagnose": "אבחון",
-      "addMaintenance": "הוספת תחזוקה",
       "createPassport": "יצירת דרכון",
       "scanDocument": "סריקת מסמך"
     },
@@ -374,7 +363,7 @@
     "sections": {
       "active": "פעילים",
       "noActive": "אין רכבים פעילים.",
-      "archivedSold": "בארכיון ונמכרו"
+      "archivedSold": "ארכיון"
     },
     "empty": {
       "title": "אין עדיין רכבים",

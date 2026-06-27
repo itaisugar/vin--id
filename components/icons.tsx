@@ -151,6 +151,16 @@ export function CloseIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function GlobeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18" />
+    </Icon>
+  );
+}
+
 /** Document-scan brackets (COCKPIT scan affordance). */
 export function ScanIcon(props: SVGProps<SVGSVGElement>) {
   return (

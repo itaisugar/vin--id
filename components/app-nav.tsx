@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { navItems, type NavItem } from "@/components/nav-config";
-import { QuickActionFab } from "@/components/quick-action-fab";
+import { PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 function useIsActive() {
@@ -127,7 +127,14 @@ export function BottomNav() {
         ))}
 
         <li className="flex justify-center">
-          <QuickActionFab />
+          {/* "+" goes straight to the document scanner (no intermediate menu). */}
+          <Link
+            href="/scan"
+            aria-label={t("scan")}
+            className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-on-accent glow-accent transition active:scale-90"
+          >
+            <PlusIcon className="h-7 w-7" />
+          </Link>
         </li>
 
         {right.map((item) => (

@@ -30,14 +30,7 @@
     "vehicles": "Vehicles",
     "diagnose": "Diagnose",
     "settings": "Settings",
-    "quickAdd": {
-      "open": "Quick add",
-      "title": "Quick actions",
-      "scan": "Scan a document",
-      "diagnose": "AI diagnosis",
-      "addVehicle": "Add vehicle",
-      "close": "Close"
-    }
+    "scan": "Scan a document"
   },
   "install": {
     "title": "Add Vin.ID to your home screen",
@@ -353,10 +346,6 @@
       }
     },
     "quickActions": {
-      "title": "Quick actions",
-      "addVehicle": "Add vehicle",
-      "diagnose": "Diagnose",
-      "addMaintenance": "Add maintenance",
       "createPassport": "Create Passport",
       "scanDocument": "Scan a document"
     },
@@ -374,7 +363,7 @@
     "sections": {
       "active": "Active",
       "noActive": "No active vehicles.",
-      "archivedSold": "Archived & sold"
+      "archivedSold": "Archive"
     },
     "empty": {
       "title": "No vehicles yet",

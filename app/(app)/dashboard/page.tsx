@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import {
-  CarIcon,
-  PassportIcon,
-  ScanIcon,
-  WrenchIcon,
-} from "@/components/icons";
+import { CarIcon, PassportIcon, ScanIcon } from "@/components/icons";
 import { DashboardReminders } from "@/components/reminders/dashboard-reminders";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
 import { createClient } from "@/lib/supabase/server";
@@ -90,41 +85,26 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* Quick actions — fixed order: Scan a document (amber primary) →
-              Create passport → Add maintenance. All but Scan need a vehicle, so
-              they render only when an active vehicle exists; /scan handles its
-              own vehicle pick. Scan is the single way to bring in a document. */}
-          <section className="space-y-3">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
-              {t("quickActions.title")}
-            </h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          {/* Primary actions, stacked: Scan a document (amber) above Create
+              passport. Scan is the single way to bring in a document and handles
+              its own vehicle pick; Create passport needs an active vehicle. */}
+          <section className="space-y-2.5">
+            <Link
+              href="/scan"
+              className={`${ACTION_TILE_BASE} ${ACTION_TILE_PRIMARY}`}
+            >
+              <ScanIcon className="h-6 w-6" />
+              {t("quickActions.scanDocument")}
+            </Link>
+            {primary ? (
               <Link
-                href="/scan"
-                className={`${ACTION_TILE_BASE} ${ACTION_TILE_PRIMARY}`}
+                href={`/vehicles/${primary.id}/passports/new`}
+                className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
               >
-                <ScanIcon className="h-6 w-6" />
-                {t("quickActions.scanDocument")}
+                <PassportIcon className="h-6 w-6 text-accent" />
+                {t("quickActions.createPassport")}
               </Link>
-              {primary ? (
-                <>
-                  <Link
-                    href={`/vehicles/${primary.id}/passports/new`}
-                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
-                  >
-                    <PassportIcon className="h-6 w-6 text-accent" />
-                    {t("quickActions.createPassport")}
-                  </Link>
-                  <Link
-                    href={`/vehicles/${primary.id}/maintenance/new`}
-                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
-                  >
-                    <WrenchIcon className="h-6 w-6 text-accent" />
-                    {t("quickActions.addMaintenance")}
-                  </Link>
-                </>
-              ) : null}
-            </div>
+            ) : null}
           </section>
 
           {/* Your vehicles */}
