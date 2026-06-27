@@ -336,8 +336,8 @@
           "cta": "Add maintenance"
         },
         "document": {
-          "label": "Upload a document",
-          "cta": "Upload document"
+          "label": "Scan a document",
+          "cta": "Scan a document"
         },
         "passport": {
           "label": "Create a Vehicle Passport",
@@ -357,7 +357,6 @@
       "addVehicle": "Add vehicle",
       "diagnose": "Diagnose",
       "addMaintenance": "Add maintenance",
-      "uploadDocument": "Upload document",
       "createPassport": "Create Passport",
       "scanDocument": "Scan a document"
     },
@@ -619,7 +618,7 @@
   },
   "documents": {
     "title": "Documents",
-    "uploadDocument": "Upload document",
+    "scanDocument": "Scan a document",
     "viewAll": "View all ({count})",
     "backToVehicle": "Back to vehicle",
     "untitled": "Document",
@@ -628,7 +627,7 @@
     "trustHelp": "Trust labels describe how this document record was created or supported. They do not certify the vehicle condition.",
     "empty": {
       "title": "No documents yet",
-      "body": "Upload a registration, insurance, invoice or inspection file to keep it with this vehicle."
+      "body": "Scan a registration, insurance, invoice or inspection document to keep it with this vehicle."
     },
     "badges": {
       "personalInfo": "Personal info",
@@ -670,10 +669,6 @@
     "ai": {
       "extract": "Extract with AI",
       "help": "AI extraction will be added later. Extracted fields will require your confirmation before saving."
-    },
-    "new": {
-      "title": "Upload document",
-      "subtitle": "Add a file and its details. Files are stored privately."
     },
     "edit": {
       "title": "Document details"

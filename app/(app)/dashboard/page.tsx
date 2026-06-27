@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
   CarIcon,
-  DocumentIcon,
   PassportIcon,
   ScanIcon,
   WrenchIcon,
@@ -92,9 +91,9 @@ export default async function DashboardPage() {
       ) : (
         <>
           {/* Quick actions — fixed order: Scan a document (amber primary) →
-              Create passport → Add maintenance → Upload document. All but Scan
-              need a vehicle, so they render only when an active vehicle exists;
-              /scan handles its own vehicle pick. */}
+              Create passport → Add maintenance. All but Scan need a vehicle, so
+              they render only when an active vehicle exists; /scan handles its
+              own vehicle pick. Scan is the single way to bring in a document. */}
           <section className="space-y-3">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
               {t("quickActions.title")}
@@ -122,13 +121,6 @@ export default async function DashboardPage() {
                   >
                     <WrenchIcon className="h-6 w-6 text-accent" />
                     {t("quickActions.addMaintenance")}
-                  </Link>
-                  <Link
-                    href={`/vehicles/${primary.id}/documents/new`}
-                    className={`${ACTION_TILE_BASE} ${ACTION_TILE_SECONDARY}`}
-                  >
-                    <DocumentIcon className="h-6 w-6 text-accent" />
-                    {t("quickActions.uploadDocument")}
                   </Link>
                 </>
               ) : null}

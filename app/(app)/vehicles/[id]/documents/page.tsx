@@ -31,10 +31,10 @@ export default async function DocumentsListPage({
           <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
         </div>
         <Link
-          href={`/vehicles/${id}/documents/new`}
+          href={`/scan?vehicle=${id}`}
           className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
         >
-          {t("uploadDocument")}
+          {t("scanDocument")}
         </Link>
       </div>
 
@@ -45,10 +45,10 @@ export default async function DocumentsListPage({
             {t("empty.body")}
           </p>
           <Link
-            href={`/vehicles/${id}/documents/new`}
+            href={`/scan?vehicle=${id}`}
             className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
           >
-            {t("uploadDocument")}
+            {t("scanDocument")}
           </Link>
         </div>
       ) : (

@@ -47,7 +47,7 @@ export async function OnboardingChecklist({
     {
       key: "document",
       done: counts.documents > 0,
-      href: v ? `/vehicles/${v}/documents/new` : "/vehicles/new",
+      href: v ? `/scan?vehicle=${v}` : "/vehicles/new",
     },
     {
       key: "passport",

@@ -27,10 +27,10 @@ export async function DocumentSection({
       <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
         <CardTitle>{t("title")}</CardTitle>
         <Link
-          href={`/vehicles/${vehicleId}/documents/new`}
+          href={`/scan?vehicle=${vehicleId}`}
           className="inline-flex h-9 shrink-0 items-center justify-center rounded-xl bg-accent px-3 text-sm font-semibold text-on-accent transition-transform active:scale-[.98]"
         >
-          {t("uploadDocument")}
+          {t("scanDocument")}
         </Link>
       </CardHeader>
       <CardContent className="space-y-3">
