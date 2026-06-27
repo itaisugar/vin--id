@@ -16,7 +16,10 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
       className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
     >
       <Card className="flex items-center gap-4 p-4 transition active:scale-[.99] hover:bg-surface-2">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-2">
+        {/* Brand badge on a contained white chip (manufacturer name — no
+            third-party logo assets). An owner photo wins if present; an unknown
+            make falls back to a neutral icon (never a broken image). */}
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
           {vehicle.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -24,8 +27,12 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
               alt=""
               className="h-full w-full object-cover"
             />
+          ) : vehicle.make ? (
+            <span className="line-clamp-2 px-1 text-center text-[10px] font-extrabold uppercase leading-tight tracking-tight text-[#1A1E24]">
+              {vehicle.make}
+            </span>
           ) : (
-            <CarIcon className="h-6 w-6 text-ink-3" />
+            <CarIcon className="h-6 w-6 text-[#9CA3AF]" />
           )}
         </div>
 
