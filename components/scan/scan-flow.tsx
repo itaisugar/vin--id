@@ -207,7 +207,7 @@ export function ScanFlow({
 
           {isPending ? (
             <>
-              <span className="animate-scan-sweep pointer-events-none absolute inset-x-4 h-0.5 -translate-y-1/2 bg-accent shadow-[0_0_12px_2px_rgba(255,138,43,0.6)]" />
+              <span className="animate-scan-sweep pointer-events-none absolute inset-x-4 h-0.5 -translate-y-1/2 bg-accent shadow-[0_0_12px_2px_rgba(65,105,225,0.6)]" />
               <span className="absolute inset-x-0 bottom-4 mx-auto flex w-fit items-center gap-2 rounded-full bg-bg/80 px-3 py-1.5 text-xs font-medium backdrop-blur">
                 <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
                 {t("actions.scanning")}

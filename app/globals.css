@@ -17,8 +17,8 @@
   --muted: #1a1e24;
   --muted-foreground: #8a929d;
   --border: rgba(255, 255, 255, 0.07);
-  --primary: #ff8a2b;
-  --primary-foreground: #1a1207;
+  --primary: #4169e1;
+  --primary-foreground: #ffffff;
 
   /* COCKPIT surfaces */
   --bg: #0c0e11;
@@ -32,11 +32,11 @@
   --ink: #f2f4f7;
   --ink-2: #8a929d;
   --ink-3: #6b7280;
-  --on-accent: #1a1207;
+  --on-accent: #ffffff;
 
-  /* COCKPIT accents */
-  --accent: #ff8a2b;
-  --accent-deep: #e0701a;
+  /* COCKPIT accents (royal blue) */
+  --accent: #4169e1;
+  --accent-deep: #3354b8;
   --ok: #38d39f;
   --warn: #ffb23e;
   --danger: #f1604d;
@@ -100,12 +100,12 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Amber glow (FAB, odometer, primary CTA). */
+/* Royal-blue accent glow (FAB, odometer, primary CTA). */
 .glow-accent {
-  box-shadow: 0 0 22px -6px rgba(255, 138, 43, 0.6);
+  box-shadow: 0 0 22px -6px rgba(65, 105, 225, 0.6);
 }
 .text-glow-accent {
-  text-shadow: 0 0 16px rgba(255, 138, 43, 0.45);
+  text-shadow: 0 0 16px rgba(65, 105, 225, 0.45);
 }
 
 /* Green "healthy" glow (health ring, verified). */
@@ -187,7 +187,7 @@ body {
     --muted: #f4f4f5;
     --muted-foreground: #52525b;
     --border: #d4d4d8;
-    --primary: #b45309;
+    --primary: #2f4fb5;
     --primary-foreground: #ffffff;
 
     --bg: #ffffff;
@@ -200,8 +200,8 @@ body {
     --ink-2: #52525b;
     --ink-3: #71717a;
     --on-accent: #ffffff;
-    --accent: #b45309;
-    --accent-deep: #b45309;
+    --accent: #2f4fb5;
+    --accent-deep: #2f4fb5;
     --ok: #047857;
     --warn: #b45309;
     --danger: #b91c1c;

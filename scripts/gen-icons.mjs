@@ -1,11 +1,11 @@
 // Generate simple, dependency-free PWA placeholder icons (no external assets).
-// Dark background (#111111) with a centered orange (#E85D24) diamond mark.
+// Dark background (#111111) with a centered royal-blue (#4169E1) diamond mark.
 // Run: `node scripts/gen-icons.mjs`. Output: public/icons/*.png
 import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const BG = [17, 17, 17, 255]; // #111111
-const FG = [232, 93, 36, 255]; // #E85D24
+const FG = [65, 105, 225, 255]; // #4169E1
 
 // --- minimal PNG encoder (truecolor + alpha, no filtering) -------------------
 const CRC_TABLE = (() => {
