@@ -49,7 +49,7 @@ export default async function AppLayout({
 
         {/* Main content (extra bottom padding leaves room for the mobile nav,
             including the iOS home-indicator safe area) */}
-        <main className="flex-1 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-8">
+        <main className="flex-1 p-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-8">
           {children}
         </main>
       </div>

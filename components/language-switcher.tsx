@@ -64,7 +64,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         <div
           role="menu"
           aria-label={t("language")}
-          className="absolute z-50 mt-1 min-w-[8rem] overflow-hidden rounded-xl border border-line bg-surface py-1 cockpit-lift ltr:left-0 rtl:right-0"
+          className="absolute z-50 mt-1 min-w-[8rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border border-line bg-surface py-1 cockpit-lift ltr:right-0 rtl:left-0"
         >
           {locales.map((locale) => (
             <button

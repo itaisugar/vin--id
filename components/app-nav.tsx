@@ -74,7 +74,7 @@ function BottomNavSlot({
   const inner = (
     <span
       className={cn(
-        "flex flex-col items-center gap-1 py-2 text-[11px] font-medium",
+        "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
         !enabled && "text-ink-3/50",
         enabled && active && "text-accent",
         enabled && !active && "text-ink-3",
@@ -112,10 +112,10 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[rgba(16,19,23,0.92)] pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[rgba(16,19,23,0.92)] pb-[calc(0.625rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
       aria-label="Primary"
     >
-      <ul className="grid grid-cols-5 items-center pt-2">
+      <ul className="grid grid-cols-5 items-center pt-2.5">
         {left.map((item) => (
           <li key={item.key}>
             <BottomNavSlot
