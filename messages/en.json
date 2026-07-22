@@ -26,7 +26,7 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Fleet Dashboard",
     "vehicles": "Vehicles",
     "diagnose": "Diagnose",
     "settings": "Settings",
@@ -444,7 +444,13 @@
         "invalidMileage": "Enter a valid mileage.",
         "invalidUrl": "Enter a valid URL.",
         "saveFailed": "We couldn't save the vehicle. Please try again.",
-        "archiveFailed": "We couldn't archive the vehicle. Please try again."
+        "archiveFailed": "We couldn't archive the vehicle. Please try again.",
+        "invalidDate": "Enter a valid date.",
+        "invalidPhone": "Enter a valid phone number.",
+        "notAuthorized": "You do not have permission to do that.",
+        "noOrganization": "Your account is not linked to an organization.",
+        "notFound": "That vehicle could not be found.",
+        "invalidStatus": "That status is not valid."
       }
     }
   },
@@ -1200,6 +1206,153 @@
       "vehicleNotFound": "That vehicle could not be found.",
       "saveFailed": "We couldn't save the record. Please try again.",
       "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP)."
+    }
+  },
+  "fleet": {
+    "title": "Fleet Dashboard",
+    "subtitle": "Your fleet at a glance",
+    "untitledVehicle": "Untitled vehicle",
+    "openIssuesCount": "{count, plural, one {# open issue} other {# open issues}}",
+    "viewerReadOnly": "You have view-only access.",
+    "status": {
+      "active": "Active",
+      "needs_service": "Needs service",
+      "issue_open": "Open issue",
+      "out_of_service": "Out of service",
+      "in_garage": "In garage",
+      "documents_missing": "Documents missing"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "due_soon": "Due soon",
+      "upcoming": "Upcoming"
+    },
+    "summary": {
+      "heading": "Fleet status",
+      "totalVehicles": "Total vehicles",
+      "active": "Operational",
+      "needsService": "Need service",
+      "issueOpen": "Open issues",
+      "outOfService": "Out of service",
+      "inGarage": "In garage",
+      "documentsAttention": "Documents to handle",
+      "upcomingMaintenance": "Service due"
+    },
+    "attention": {
+      "heading": "Vehicles requiring attention",
+      "empty": "No vehicles require attention."
+    },
+    "reasons": {
+      "openIssues": "{count, plural, one {# open issue} other {# open issues}}",
+      "service": {
+        "overdue": "Service overdue ({date})",
+        "due_soon": "Service due {date}",
+        "upcoming": "Service due {date}"
+      },
+      "serviceNoDate": {
+        "overdue": "Service overdue",
+        "due_soon": "Service due soon",
+        "upcoming": "Service scheduled"
+      },
+      "serviceKm": {
+        "overdue": "Past service mileage ({km})",
+        "due_soon": "Service due at {km}",
+        "upcoming": "Service due at {km}"
+      },
+      "test": {
+        "overdue": "Test expired ({date})",
+        "due_soon": "Test expires {date}",
+        "upcoming": "Test expires {date}"
+      },
+      "insurance": {
+        "overdue": "Insurance expired ({date})",
+        "due_soon": "Insurance expires {date}",
+        "upcoming": "Insurance expires {date}"
+      }
+    },
+    "deadlines": {
+      "heading": "Upcoming maintenance & documents",
+      "empty": "No maintenance or document deadlines in the next 30 days.",
+      "kind": {
+        "next_service": "Next service",
+        "test_expiry": "Test expiry",
+        "insurance_expiry": "Insurance expiry",
+        "document_expiry": "Document expiry",
+        "reminder": "Reminder"
+      }
+    },
+    "filters": {
+      "label": "Filter vehicles",
+      "all": "All",
+      "needs_attention": "Needs attention",
+      "active": "Active",
+      "needs_service": "Needs service",
+      "issue_open": "Open issue",
+      "out_of_service": "Out of service",
+      "in_garage": "In garage",
+      "documents_missing": "Documents missing"
+    },
+    "sort": {
+      "label": "Sort by",
+      "status": "Status",
+      "license_plate": "License plate",
+      "next_service": "Next service",
+      "document_expiry": "Closest document expiry",
+      "recently_updated": "Recently updated"
+    },
+    "vehicles": {
+      "title": "Fleet vehicles",
+      "noneForFilter": "No vehicles match “{filter}”.",
+      "clearFilter": "Show all vehicles"
+    },
+    "fields": {
+      "operationalStatus": "Operational status",
+      "vehicleType": "Vehicle type",
+      "vehicleTypePlaceholder": "e.g. Van",
+      "assignedDriver": "Assigned driver",
+      "driverPhone": "Driver phone",
+      "currentKm": "Current KM",
+      "nextService": "Next service",
+      "nextServiceKm": "Next service KM",
+      "testExpiry": "Test expiry",
+      "insuranceExpiry": "Insurance expiry"
+    },
+    "vehicleTypes": {
+      "car": "Car",
+      "van": "Van",
+      "pickup": "Pickup",
+      "truck": "Truck",
+      "motorcycle": "Motorcycle",
+      "bus": "Bus",
+      "other": "Other"
+    },
+    "formSection": {
+      "title": "Fleet details",
+      "hint": "Optional"
+    },
+    "infoCard": {
+      "title": "Fleet information",
+      "timelineSoon": "A full event timeline for this vehicle is coming in a later phase."
+    },
+    "emptyFleet": {
+      "heading": "Add your first vehicle",
+      "explainer": "Vin.ID Fleet Lite keeps your vehicles, services, documents and deadlines in one place — instead of spreadsheets and folders.",
+      "step1": "Add a vehicle with its license plate and current KM",
+      "step2": "Set its test, insurance and next service dates",
+      "step3": "Watch the dashboard tell you what needs attention",
+      "cta": "Add a vehicle"
+    },
+    "noOrganization": {
+      "title": "No organization found",
+      "body": "Your account is not linked to an organization yet, so there is no fleet to show.",
+      "hint": "Please contact support — no data has been lost."
+    },
+    "errors": {
+      "notAuthorized": "You do not have permission to do that.",
+      "noOrganization": "Your account is not linked to an organization.",
+      "notFound": "That vehicle could not be found.",
+      "saveFailed": "We couldn't save the change. Please try again.",
+      "invalidStatus": "That status is not valid."
     }
   }
 }

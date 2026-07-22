@@ -1,11 +1,8 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { requireOrganization } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getVehicleById,
-  NotAuthenticatedError,
-} from "@/lib/vehicles/service";
+import { getVehicleById } from "@/lib/vehicles/service";
 import {
   DOCUMENT_COLUMNS,
   DOCUMENTS_BUCKET,
@@ -17,8 +14,9 @@ import {
 
 /**
  * Server-only data access for vehicle documents. Relies on Supabase RLS
- * (owner-scoped DB + storage policies) AND additionally verifies ownership of
- * the vehicle and the document, and that storage paths belong to the user.
+ * (organization-scoped DB policies) AND additionally filters by organization_id.
+ * NOTE: Storage paths are still keyed on the UPLOADING USER's id, not the
+ * organization — see docs/fleet-lite-phase-1.md "Known limitations".
  */
 
 export class VehicleNotFoundError extends Error {
@@ -42,26 +40,18 @@ export class InvalidStoragePathError extends Error {
   }
 }
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** All non-deleted documents for a vehicle, newest first. */
 export async function listDocuments(
   vehicleId: string,
 ): Promise<VehicleDocument[]> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicle_documents")
     .select(DOCUMENT_COLUMNS)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
@@ -75,14 +65,14 @@ export async function getDocument(
   documentId: string,
 ): Promise<VehicleDocument | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicle_documents")
     .select(DOCUMENT_COLUMNS)
     .eq("id", documentId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -100,7 +90,7 @@ export async function createDocument(
   input: DocumentCreateInput,
 ): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId } = await requireOrganization();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -133,7 +123,7 @@ export async function updateDocument(
   meta: DocumentMetadataInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const existing = await getDocument(vehicleId, documentId);
   if (!existing) throw new DocumentNotFoundError();
@@ -143,7 +133,7 @@ export async function updateDocument(
     .update(metadataToRow(meta))
     .eq("id", documentId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -160,14 +150,14 @@ export async function softDeleteDocument(
   documentId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { error } = await supabase
     .from("vehicle_documents")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", documentId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -183,7 +173,10 @@ export async function getDocumentSignedUrl(
   expiresInSeconds = 300,
 ): Promise<string | null> {
   const supabase = await createClient();
-  await getUserId(supabase);
+  // Assert an organization context before signing anything. `getDocument` is
+  // itself organization-scoped, so a document belonging to another organization
+  // returns null here and no URL is ever signed for it.
+  await requireOrganization();
 
   const doc = await getDocument(vehicleId, documentId);
   if (!doc || !doc.storage_path) return null;

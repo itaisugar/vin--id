@@ -1,11 +1,9 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { requireOrganization } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getVehicleById,
-  NotAuthenticatedError,
-} from "@/lib/vehicles/service";
+import { getVehicleById } from "@/lib/vehicles/service";
 import type { Vehicle } from "@/lib/vehicles/types";
 import {
   ISSUE_COLUMNS,
@@ -16,7 +14,7 @@ import {
 
 /**
  * Server-only data access for issue logs. Every call relies on Supabase RLS
- * (owner-scoped policies) AND additionally verifies ownership of both the
+ * (organization-scoped policies) AND additionally filters by organization_id,
  * vehicle and the issue, plus filters out soft-deleted rows.
  */
 
@@ -34,18 +32,10 @@ export class IssueNotFoundError extends Error {
   }
 }
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** Bump the vehicle's current_mileage upward only — never lowers it. */
 async function maybeRaiseVehicleMileage(
   supabase: SupabaseClient,
-  userId: string,
+  organizationId: string,
   vehicle: Vehicle,
   mileage: number | null | undefined,
 ): Promise<void> {
@@ -57,19 +47,19 @@ async function maybeRaiseVehicleMileage(
     .from("vehicles")
     .update({ current_mileage: mileage })
     .eq("id", vehicle.id)
-    .eq("owner_user_id", userId);
+    .eq("organization_id", organizationId);
 }
 
 /** All non-deleted issues for a vehicle, newest reported date first. */
 export async function listIssues(vehicleId: string): Promise<IssueLog[]> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("issue_logs")
     .select(ISSUE_COLUMNS)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("reported_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -84,14 +74,14 @@ export async function getIssue(
   issueId: string,
 ): Promise<IssueLog | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("issue_logs")
     .select(ISSUE_COLUMNS)
     .eq("id", issueId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -112,7 +102,7 @@ export async function createIssue(
   documentId: string | null = null,
 ): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId, organizationId } = await requireOrganization();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -135,7 +125,7 @@ export async function createIssue(
 
   if (error) throw error;
 
-  await maybeRaiseVehicleMileage(supabase, userId, vehicle, input.mileage);
+  await maybeRaiseVehicleMileage(supabase, organizationId, vehicle, input.mileage);
   return data.id as string;
 }
 
@@ -146,7 +136,7 @@ export async function updateIssue(
   input: IssueInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -166,12 +156,12 @@ export async function updateIssue(
     .update({ ...issueInputToRow(input), resolved_at: resolvedAt })
     .eq("id", issueId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
 
-  await maybeRaiseVehicleMileage(supabase, userId, vehicle, input.mileage);
+  await maybeRaiseVehicleMileage(supabase, organizationId, vehicle, input.mileage);
 }
 
 /** Quick action: mark resolved, set resolved_at, optionally add notes. */
@@ -181,7 +171,7 @@ export async function resolveIssue(
   resolutionNotes?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const existing = await getIssue(vehicleId, issueId);
   if (!existing) throw new IssueNotFoundError();
@@ -198,7 +188,7 @@ export async function resolveIssue(
     .update(update)
     .eq("id", issueId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -210,14 +200,14 @@ export async function softDeleteIssue(
   issueId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { error } = await supabase
     .from("issue_logs")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", issueId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;

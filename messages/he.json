@@ -26,7 +26,7 @@
     }
   },
   "nav": {
-    "dashboard": "לוח בקרה",
+    "dashboard": "לוח הצי",
     "vehicles": "רכבים",
     "diagnose": "אבחון",
     "settings": "הגדרות",
@@ -444,7 +444,13 @@
         "invalidMileage": "הזן קילומטראז' תקין.",
         "invalidUrl": "הזן כתובת URL תקינה.",
         "saveFailed": "לא הצלחנו לשמור את הרכב. נסה שוב.",
-        "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב."
+        "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidPhone": "הזן מספר טלפון תקין.",
+        "notAuthorized": "אין לך הרשאה לבצע פעולה זו.",
+        "noOrganization": "החשבון שלך אינו משוייך לארגון.",
+        "notFound": "הרכב לא נמצא.",
+        "invalidStatus": "סטטוס לא חוקי."
       }
     }
   },
@@ -1200,6 +1206,153 @@
       "vehicleNotFound": "הרכב לא נמצא.",
       "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב.",
       "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP)."
+    }
+  },
+  "fleet": {
+    "title": "לוח הצי",
+    "subtitle": "הצי שלך במבט אחד",
+    "untitledVehicle": "רכב ללא שם",
+    "openIssuesCount": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+    "viewerReadOnly": "יש לך גישת צפייה בלבד.",
+    "status": {
+      "active": "פעיל",
+      "needs_service": "דורש טיפול",
+      "issue_open": "תקלה פתוחה",
+      "out_of_service": "מושבת",
+      "in_garage": "במוסך",
+      "documents_missing": "חסרים מסמכים"
+    },
+    "deadline": {
+      "overdue": "בפיגור",
+      "due_soon": "מתקרב",
+      "upcoming": "עתידי"
+    },
+    "summary": {
+      "heading": "מצב הצי",
+      "totalVehicles": "סה\"כ רכבים",
+      "active": "תקינים",
+      "needsService": "דורשים טיפול",
+      "issueOpen": "תקלות פתוחות",
+      "outOfService": "מושבתים",
+      "inGarage": "במוסך",
+      "documentsAttention": "מסמכים לטיפול",
+      "upcomingMaintenance": "טיפול מתקרב"
+    },
+    "attention": {
+      "heading": "רכבים הדורשים טיפול",
+      "empty": "אין רכבים הדורשים טיפול."
+    },
+    "reasons": {
+      "openIssues": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+      "service": {
+        "overdue": "טיפול בפיגור ({date})",
+        "due_soon": "טיפול בתאריך {date}",
+        "upcoming": "טיפול בתאריך {date}"
+      },
+      "serviceNoDate": {
+        "overdue": "טיפול בפיגור",
+        "due_soon": "טיפול מתקרב",
+        "upcoming": "טיפול מתוכנן"
+      },
+      "serviceKm": {
+        "overdue": "עבר קילומטראז׳ טיפול ({km})",
+        "due_soon": "טיפול ב-{km}",
+        "upcoming": "טיפול ב-{km}"
+      },
+      "test": {
+        "overdue": "הטסט פג ({date})",
+        "due_soon": "הטסט פג ב-{date}",
+        "upcoming": "הטסט פג ב-{date}"
+      },
+      "insurance": {
+        "overdue": "הביטוח פג ({date})",
+        "due_soon": "הביטוח פג ב-{date}",
+        "upcoming": "הביטוח פג ב-{date}"
+      }
+    },
+    "deadlines": {
+      "heading": "טיפולים ומסמכים מתקרבים",
+      "empty": "אין טיפולים או מסמכים שמסתיימים ב-30 הימים הקרובים.",
+      "kind": {
+        "next_service": "טיפול הבא",
+        "test_expiry": "תפוגת טסט",
+        "insurance_expiry": "תפוגת ביטוח",
+        "document_expiry": "תפוגת מסמך",
+        "reminder": "תזכורת"
+      }
+    },
+    "filters": {
+      "label": "סינון רכבים",
+      "all": "הכל",
+      "needs_attention": "דורש טיפול",
+      "active": "פעיל",
+      "needs_service": "דורש טיפול",
+      "issue_open": "תקלה פתוחה",
+      "out_of_service": "מושבת",
+      "in_garage": "במוסך",
+      "documents_missing": "חסרים מסמכים"
+    },
+    "sort": {
+      "label": "מיון לפי",
+      "status": "סטטוס",
+      "license_plate": "מספר רישוי",
+      "next_service": "טיפול הבא",
+      "document_expiry": "תפוגה הקרובה",
+      "recently_updated": "עודכן לאחרונה"
+    },
+    "vehicles": {
+      "title": "רכבי הצי",
+      "noneForFilter": "אין רכבים התואמים ל״{filter}״.",
+      "clearFilter": "הצג את כל הרכבים"
+    },
+    "fields": {
+      "operationalStatus": "סטטוס תפעולי",
+      "vehicleType": "סוג רכב",
+      "vehicleTypePlaceholder": "למשל: מסחרית",
+      "assignedDriver": "נהג משוייך",
+      "driverPhone": "טלפון נהג",
+      "currentKm": "ק\"מ נוכחי",
+      "nextService": "טיפול הבא",
+      "nextServiceKm": "ק\"מ לטיפול הבא",
+      "testExpiry": "תפוגת טסט",
+      "insuranceExpiry": "תפוגת ביטוח"
+    },
+    "vehicleTypes": {
+      "car": "רכב פרטי",
+      "van": "מסחרית",
+      "pickup": "טנדר",
+      "truck": "משאית",
+      "motorcycle": "אופנוע",
+      "bus": "אוטובוס",
+      "other": "אחר"
+    },
+    "formSection": {
+      "title": "פרטי צי",
+      "hint": "אופציונלי"
+    },
+    "infoCard": {
+      "title": "מידע צי",
+      "timelineSoon": "ציר זמן מלא של אירועי הרכב יגיע בשלב מאוחר יותר."
+    },
+    "emptyFleet": {
+      "heading": "הוסף את הרכב הראשון",
+      "explainer": "Vin.ID Fleet Lite מרכז את הרכבים, הטיפולים, המסמכים והתאריכים במקום אחד — במקום גליונות ותיקיות.",
+      "step1": "הוסף רכב עם מספר רישוי וק\"מ נוכחי",
+      "step2": "קבע תאריכי טסט, ביטוח וטיפול הבא",
+      "step3": "הלוח יראה לך מה דורש טיפול",
+      "cta": "הוסף רכב"
+    },
+    "noOrganization": {
+      "title": "לא נמצא ארגון",
+      "body": "החשבון שלך עדיין לא משוייך לארגון, לכן אין צי להציג.",
+      "hint": "פנה לתמיכה — לא אבד שום מידע."
+    },
+    "errors": {
+      "notAuthorized": "אין לך הרשאה לבצע פעולה זו.",
+      "noOrganization": "החשבון שלך אינו משוייך לארגון.",
+      "notFound": "הרכב לא נמצא.",
+      "saveFailed": "לא הצלחנו לשמור את השינוי. נסה שוב.",
+      "invalidStatus": "סטטוס לא חוקי."
     }
   }
 }

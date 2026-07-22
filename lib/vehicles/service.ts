@@ -1,5 +1,11 @@
 import "server-only";
 
+import { NotAuthenticatedError } from "@/lib/auth/errors";
+import type { OperationalStatus } from "@/lib/fleet/types";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import {
   VEHICLE_COLUMNS,
@@ -9,36 +15,41 @@ import {
 } from "./types";
 
 /**
- * Server-only data access for vehicles. Every call relies on Supabase RLS
- * (owner-scoped policies) AND additionally filters by owner_user_id /
- * deleted_at as defense in depth.
+ * Server-only data access for vehicles.
+ *
+ * SCOPING (Fleet Lite): every query is scoped to the ORGANIZATION resolved from
+ * the authenticated user's profile — no longer to `owner_user_id`. The
+ * organization id is never accepted from the caller.
+ *
+ * Defense in depth: Supabase RLS already restricts rows to
+ * `organization_id = public.current_org_id()`, and each query below ALSO adds
+ * an explicit `.eq("organization_id", …)`. Either layer alone suffices; both
+ * together mean an RLS regression cannot silently widen a query.
+ *
+ * Writes additionally go through `requireFleetWriter()`, so a `viewer` is
+ * rejected in the app layer with a clear error rather than an opaque RLS denial.
  */
 
-export class NotAuthenticatedError extends Error {
+// Re-exported for the modules that already import it from here (maintenance,
+// issues, documents, reminders, passports services).
+export { NotAuthenticatedError };
+
+export class VehicleNotFoundError extends Error {
   constructor() {
-    super("Not authenticated");
-    this.name = "NotAuthenticatedError";
+    super("Vehicle not found");
+    this.name = "VehicleNotFoundError";
   }
 }
 
-async function getUserId(): Promise<string> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
-/** All of the current user's non-deleted vehicles, newest first. */
+/** All of the organization's non-deleted vehicles, newest first. */
 export async function listVehicles(): Promise<Vehicle[]> {
   const supabase = await createClient();
-  const userId = await getUserId();
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicles")
     .select(VEHICLE_COLUMNS)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
@@ -46,16 +57,16 @@ export async function listVehicles(): Promise<Vehicle[]> {
   return (data ?? []) as Vehicle[];
 }
 
-/** A single vehicle owned by the current user, or null if not found. */
+/** A single vehicle in the current organization, or null if not found. */
 export async function getVehicleById(id: string): Promise<Vehicle | null> {
   const supabase = await createClient();
-  const userId = await getUserId();
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicles")
     .select(VEHICLE_COLUMNS)
     .eq("id", id)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -63,10 +74,17 @@ export async function getVehicleById(id: string): Promise<Vehicle | null> {
   return (data as Vehicle | null) ?? null;
 }
 
-/** Insert a new vehicle for the current user. Returns the created id. */
+/**
+ * Insert a new vehicle for the current organization. Returns the created id.
+ *
+ * `organization_id` is intentionally NOT in the payload — the
+ * `vehicles_set_organization_id` BEFORE INSERT trigger derives it from
+ * `owner_user_id`, which makes a forged organization id in form input
+ * impossible by construction.
+ */
 export async function createVehicle(input: VehicleInput): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId();
+  const { userId } = await requireFleetWriter();
 
   const { data, error } = await supabase
     .from("vehicles")
@@ -78,34 +96,63 @@ export async function createVehicle(input: VehicleInput): Promise<string> {
   return data.id as string;
 }
 
-/** Update an existing vehicle owned by the current user. */
+/** Update a vehicle belonging to the current organization. */
 export async function updateVehicle(
   id: string,
   input: VehicleInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("vehicles")
     .update(vehicleInputToRow(input))
     .eq("id", id)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
 }
 
+/**
+ * Update ONLY the operational status ("can this vehicle work today?").
+ *
+ * Separate from `updateVehicle` so the quick status control on the vehicle page
+ * cannot accidentally clear the other fleet fields. `updated_at` is refreshed
+ * by the existing `vehicles_set_updated_at` trigger.
+ */
+export async function setOperationalStatus(
+  id: string,
+  status: OperationalStatus,
+): Promise<void> {
+  const supabase = await createClient();
+  const { organizationId } = await requireFleetWriter();
+
+  const { data, error } = await supabase
+    .from("vehicles")
+    .update({ operational_status: status })
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw error;
+  // No row matched -> the vehicle is not in this organization (or is deleted).
+  // Surface that instead of reporting a silent success.
+  if (!data) throw new VehicleNotFoundError();
+}
+
 /** Soft archive: status='archived' + archived_at=now(). Never hard-deletes. */
 export async function archiveVehicle(id: string): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("vehicles")
     .update({ status: "archived", archived_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;

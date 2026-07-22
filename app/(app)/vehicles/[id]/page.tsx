@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FleetInfoCard } from "@/components/fleet/fleet-info-card";
+import { OperationalStatusBadge } from "@/components/fleet/operational-status-badge";
 import { ArchiveVehicleButton } from "@/components/vehicles/archive-vehicle-button";
 import { VehicleStatusBadge } from "@/components/vehicles/vehicle-status-badge";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
@@ -19,6 +21,8 @@ import { listIssues } from "@/lib/issues/service";
 import { listDocuments } from "@/lib/documents/service";
 import { listReminders } from "@/lib/reminders/service";
 import { listPassports } from "@/lib/passports/service";
+import { getCurrentRole } from "@/lib/organizations/service";
+import { canWriteFleetData } from "@/lib/organizations/types";
 import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
@@ -43,14 +47,18 @@ export default async function VehicleDetailPage({
     dateStyle: "medium",
   }).format(new Date(vehicle.created_at));
 
-  const [maintenanceLogs, issues, documents, reminders, passports] =
+  const [maintenanceLogs, issues, documents, reminders, passports, role] =
     await Promise.all([
       listMaintenanceLogs(vehicle.id),
       listIssues(vehicle.id),
       listDocuments(vehicle.id),
       listReminders(vehicle.id),
       listPassports(vehicle.id),
+      getCurrentRole(),
     ]);
+
+  // Viewers see everything but may not change anything.
+  const canWrite = role != null && canWriteFleetData(role);
 
   return (
     <div className="space-y-6">
@@ -79,13 +87,17 @@ export default async function VehicleDetailPage({
             >
               {tdiag("vehicleCta")}
             </Link>
-            <Link
-              href={`/vehicles/${vehicle.id}/edit`}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
-            >
-              {t("edit.action")}
-            </Link>
-            {vehicle.status === "active" ? (
+            {/* Mutating controls are hidden from viewers. The server action and
+                RLS enforce the same rule — this is only the affordance. */}
+            {canWrite ? (
+              <Link
+                href={`/vehicles/${vehicle.id}/edit`}
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
+              >
+                {t("edit.action")}
+              </Link>
+            ) : null}
+            {canWrite && vehicle.status === "active" ? (
               <ArchiveVehicleButton vehicleId={vehicle.id} />
             ) : null}
           </div>
@@ -96,7 +108,13 @@ export default async function VehicleDetailPage({
             <h1 className="break-words text-2xl font-extrabold tracking-tight">
               {title}
             </h1>
-            <VehicleStatusBadge status={vehicle.status} />
+            {/* Operational status first — it answers "can this vehicle work
+                today?". The lifecycle badge is only shown once the vehicle
+                leaves active service, to avoid two competing "active" chips. */}
+            <OperationalStatusBadge status={vehicle.operational_status} />
+            {vehicle.status !== "active" ? (
+              <VehicleStatusBadge status={vehicle.status} />
+            ) : null}
           </div>
           {vehicle.license_plate || vehicle.year != null ? (
             <p className="num text-sm text-ink-2">
@@ -116,6 +134,9 @@ export default async function VehicleDetailPage({
           ) : null}
         </div>
       </div>
+
+      {/* Fleet information (Fleet Lite Phase 1) */}
+      <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />
 
       {/* Details */}
       <Card>
