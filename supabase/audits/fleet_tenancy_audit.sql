@@ -173,14 +173,39 @@ where n.nspname = 'public'
 
 
 -- -----------------------------------------------------------------------------
--- 7. `anon` must have NO table privileges anywhere in public.
---    Public passport access goes exclusively through SECURITY DEFINER RPCs.
---    Expected: 0 rows.
+-- 7. `anon` must have no POLICY PATH to any org-scoped row.
+--
+--    NOTE (corrected 2026-07-24 after runtime validation): the earlier version
+--    of this query asserted `anon` holds no table GRANTs. That premise is wrong
+--    for Supabase — every Supabase project (local and hosted) grants table
+--    privileges to `anon`/`authenticated` by default. A GRANT does NOT bypass
+--    RLS: with RLS enabled and every policy gated on `current_org_id()` (which
+--    is NULL for an anonymous request, since auth.uid() is NULL), anon matches
+--    no rows. This was verified at runtime: an anon client got 0 rows on SELECT
+--    and was rejected on INSERT for every org-scoped table.
+--
+--    The meaningful, statically-checkable invariant is therefore: no permissive
+--    policy on an org-scoped table is applicable to `anon`/`public` WITHOUT the
+--    org predicate (an unguarded policy would let anon through despite RLS).
+--    Query 5 already flags any policy missing `current_org_id`; this query
+--    additionally flags a permissive policy that is applicable to anon and is
+--    unqualified (USING true / no qual). Expected: 0 rows.
 -- -----------------------------------------------------------------------------
-select table_name, privilege_type
-from information_schema.role_table_grants
-where table_schema = 'public'
-  and grantee = 'anon';
+select tablename, policyname, cmd, roles::text
+from pg_policies
+where schemaname = 'public'
+  and tablename in (
+    'vehicles', 'maintenance_logs', 'issue_logs', 'vehicle_documents',
+    'document_extractions', 'reminders', 'vehicle_passports',
+    'transfer_tokens', 'vehicle_insurance', 'vehicle_registration',
+    'vehicle_inspection'
+  )
+  and permissive = 'PERMISSIVE'
+  -- applicable to anonymous requests (public role includes anon, or anon named)
+  and (roles::text[] && array['public', 'anon'])
+  -- ...but with no organization predicate guarding it
+  and coalesce(qual::text, '') not like '%current_org_id%'
+  and coalesce(with_check::text, '') not like '%current_org_id%';
 
 
 -- -----------------------------------------------------------------------------

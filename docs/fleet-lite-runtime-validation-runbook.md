@@ -1,19 +1,34 @@
 # Fleet Lite Phase 1 — Runtime Validation Runbook
 
-**Status when written: BLOCKED.** Runtime validation of the tenancy migration
-was NOT performed, because this workstation has:
+**Status: RUNTIME VALIDATED (local Supabase, 2026-07-24).** Executed end-to-end
+against a local Supabase stack (Colima + Docker + Supabase CLI 2.101.0,
+Postgres 17, API `http://127.0.0.1:54321`). Production (`jsthfmgvcdrfzpgkpwvt`)
+was never accessed: it was never linked-to for a write, never migrated, never
+seeded; every command targeted `127.0.0.1`, and the app dev server was verified
+to point at the local URL (0 production refs in a freshly rebuilt `.next`).
 
-- no container runtime (no Docker / Colima / Podman) → `supabase start` cannot
-  run a local database, and
-- only one Supabase project available (`jsthfmgvcdrfzpgkpwvt`, "vin - id"), which
-  is what `.env.local` points the app at and contains real beta-user data —
-  i.e. production. The Critical Safety Rule forbids running migrations or auth
-  tests against it.
-- no `SUPABASE_ACCESS_TOKEN`, so a staging project cannot be created
-  non-interactively.
+Results summary:
+- clean migration chain applied; all Fleet objects present; **all 8 tenancy
+  audit queries return 0 rows** (audit query 7 was corrected — see below);
+- legacy-data upgrade backfilled correctly (2 users → 2 distinct orgs, all child
+  rows matched, `NOT NULL` enforced) and the profile-less-owner edge case warned
+  and stayed nullable without crashing;
+- **51/51 authenticated runtime assertions pass** via
+  `npm run validate:fleet-tenancy` (cross-org blocked, forged org rejected,
+  viewer read-only, fleet_manager writes, anon blocked, passport public-leak
+  clean, accept copies into buyer org + replay rejected);
+- public routes 200, protected routes redirect to `/login`, HE→`dir="rtl"` /
+  EN→`dir="ltr"`.
 
-This runbook is the exact procedure to run once ONE of the two allowed
-environments exists. Do **not** run any of it against `jsthfmgvcdrfzpgkpwvt`.
+**Audit query 7 correction:** it previously asserted `anon` holds no table
+GRANTs. That premise is wrong for Supabase (every project grants
+anon/authenticated by default) and was masking nothing — RLS blocks all anon
+access regardless, proven at runtime (anon got 0 rows / insert rejected). Query 7
+now checks the real invariant: no permissive policy on an org-scoped table is
+applicable to anon/public without the `current_org_id()` predicate.
+
+The procedure below is the exact reproducible runbook. Do **not** run any of it
+against `jsthfmgvcdrfzpgkpwvt`.
 
 ---
 
@@ -210,11 +225,16 @@ is UNVERIFIED pending a non-production database.
 | Check | Status |
 |-------|--------|
 | tsc / eslint / build | ✅ executed, pass |
-| Static review of migration/RLS/audit/services | ✅ done — no blocking bug found |
-| Migrations apply (clean) | ❌ blocked — no non-prod DB |
-| Migrations apply (seeded) + backfill correctness | ❌ blocked |
-| Audit queries return zero rows | ❌ blocked |
-| Cross-org read/write blocked (real JWTs) | ❌ blocked |
-| Role enforcement (viewer read-only) | ❌ blocked |
-| Passport public-leak | ❌ blocked (static field-list review only) |
-| Passport accept org propagation | ❌ blocked |
+| Local Supabase started | ✅ Colima+Docker, PG17, 127.0.0.1 |
+| Migrations apply (clean) | ✅ all objects present |
+| Migrations apply (legacy seeded) + backfill | ✅ 2 users→2 orgs, NOT NULL set |
+| Legacy orphan (profile-less owner) edge case | ✅ warned, stayed nullable, no crash |
+| Audit queries return zero rows | ✅ all 8 (q7 corrected) |
+| anon blocked despite table grants | ✅ 0 rows / insert rejected |
+| Cross-org read/write blocked (real JWTs) | ✅ all 11 org tables |
+| Forged organization_id rejected | ✅ RLS WITH CHECK |
+| Role enforcement (viewer RO / fleet_manager write) | ✅ |
+| Passport public-leak | ✅ no org_id/owner/phone/op-status/path |
+| Passport accept org propagation + replay | ✅ buyer-org copy, seller sold, replay blocked |
+| Public routes / redirects / RTL (HTTP-level) | ✅ 200 / 307→login / dir=rtl\|ltr |
+| Authenticated UI render, visual layout, mobile viewport | ⚠️ MANUAL — no browser automation available |
