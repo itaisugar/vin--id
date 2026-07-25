@@ -94,9 +94,22 @@ export const VEHICLE_TYPE_SUGGESTIONS = [
 // -----------------------------------------------------------------------------
 // Filters & sorting for the fleet vehicles list
 // -----------------------------------------------------------------------------
+/**
+ * Practical filters only — not a query builder.
+ *
+ * The first group answers operational questions ("what is overdue?"); the
+ * operational statuses are kept as filters too so the dashboard status tiles can
+ * link straight into a filtered list.
+ */
 export const FLEET_FILTERS = [
   "all",
   "needs_attention",
+  "service_overdue",
+  "service_due_soon",
+  "document_expiring",
+  "open_issues",
+  "driver_assigned",
+  "driver_unassigned",
   ...OPERATIONAL_STATUSES,
 ] as const;
 export type FleetFilter = (typeof FLEET_FILTERS)[number];
@@ -105,16 +118,31 @@ export function isFleetFilter(v: unknown): v is FleetFilter {
   return typeof v === "string" && (FLEET_FILTERS as readonly string[]).includes(v);
 }
 
+/** Filters offered as chips, in display order. */
+export const PRIMARY_FLEET_FILTERS: readonly FleetFilter[] = [
+  "all",
+  "needs_attention",
+  "service_overdue",
+  "service_due_soon",
+  "document_expiring",
+  "open_issues",
+  "driver_unassigned",
+];
+
 export const FLEET_SORTS = [
-  "status",
+  "urgency",
+  "name",
   "license_plate",
   "next_service",
   "document_expiry",
+  "cost",
+  "status",
   "recently_updated",
 ] as const;
 export type FleetSort = (typeof FLEET_SORTS)[number];
 
-export const DEFAULT_FLEET_SORT: FleetSort = "status";
+/** Urgency first: the list opens on whatever needs handling today. */
+export const DEFAULT_FLEET_SORT: FleetSort = "urgency";
 
 export function isFleetSort(v: unknown): v is FleetSort {
   return typeof v === "string" && (FLEET_SORTS as readonly string[]).includes(v);
