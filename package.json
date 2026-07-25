@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:fleet-tenancy": "node scripts/validation/fleet-tenancy-check.mjs"
+    "validate:fleet-tenancy": "node scripts/validation/fleet-tenancy-check.mjs",
+    "validate:document-storage": "node scripts/validation/document-storage-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

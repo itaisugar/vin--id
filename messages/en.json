@@ -691,7 +691,8 @@
         "fileTooLarge": "The file is larger than 5 MB.",
         "uploadFailed": "We couldn't upload the file. Please try again.",
         "saveFailed": "We couldn't save this document. Please try again.",
-        "deleteFailed": "We couldn't remove this document. Please try again."
+        "deleteFailed": "We couldn't remove this document. Please try again.",
+        "notAuthorized": "You do not have permission to do that."
       }
     },
     "extraction": {

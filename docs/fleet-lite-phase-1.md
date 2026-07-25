@@ -177,14 +177,12 @@ show real content.
 
 ## Known limitations
 
-- **Documents uploaded by one user are not viewable by another user in the same
-  organization.** Storage paths are `{user_id}/{vehicle_id}/{document_id}/…` and
-  the `vehicle-documents` bucket policy keys on the first path segment =
-  `auth.uid()`. The metadata row is now org-visible, but `getDocumentSignedUrl`
-  will return null for a colleague's file. Not reachable today (no invitations,
-  so every organization has exactly one user), but it **must** be fixed before
-  multi-user organizations ship — it needs an org-keyed storage path or an
-  org-aware storage policy.
+- ~~**Documents uploaded by one user are not viewable by another user in the
+  same organization.**~~ **RESOLVED** by migration
+  `20260725120000_document_storage_org_access` — Storage access is now
+  authorized by the document row's organization (SECURITY DEFINER helpers), not
+  the uploader's uid. Any authorized org member can open the file; cross-org
+  stays blocked. See `docs/fleet-lite-document-storage.md`.
 - No invitations, no team management, no multi-org membership — a user belongs
   to exactly one organization, created at signup.
 - No organization settings UI. The `organizations` row exists and is editable via
