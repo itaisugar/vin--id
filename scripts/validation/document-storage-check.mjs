@@ -20,6 +20,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { cleanupUsers, joinOrg, orgOf, setRole } from "./lib/org-fixtures.mjs";
 
 const URL = process.env.SUPABASE_URL;
 const ANON = process.env.SUPABASE_ANON_KEY;
@@ -53,7 +54,6 @@ async function signIn(email) {
   if (error) throw new Error(`signIn ${email}: ${error.message}`);
   return c;
 }
-const orgOf = async (id) => (await admin.from("profiles").select("organization_id").eq("id", id).single()).data.organization_id;
 
 /** Emulate the app's upload+metadata flow for a persona (client JWT). */
 async function uploadDoc(client, uid, vehicleId, { withMeta = true } = {}) {
@@ -75,10 +75,13 @@ async function main() {
   const A = await mkUser("a"), B = await mkUser("b"), D = await mkUser("d"), C = await mkUser("c"), PRIV = await mkUser("priv");
   const users = [A, B, D, C, PRIV];
   try {
-    const orgA = await orgOf(A.id);
-    await admin.from("profiles").update({ organization_id: orgA, role: "viewer" }).eq("id", B.id);
-    await admin.from("profiles").update({ organization_id: orgA, role: "fleet_manager" }).eq("id", D.id);
-    await admin.from("profiles").update({ role: "owner" }).eq("id", A.id);
+    // Fixtures are built on organization_members — the authorization authority.
+    // Writing profiles.organization_id/role instead (as this harness used to)
+    // grants nothing, so every persona below would test as an outsider.
+    const orgA = await orgOf(admin, A.id);
+    await joinOrg(admin, B.id, orgA, "viewer");
+    await joinOrg(admin, D.id, orgA, "fleet_manager");
+    await setRole(admin, A.id, "owner");
 
     const aC = await signIn(A.email), bC = await signIn(B.email), dC = await signIn(D.email), cC = await signIn(C.email), pC = await signIn(PRIV.email);
     const anon = createClient(URL, ANON, { auth: { persistSession: false } });
@@ -129,9 +132,11 @@ async function main() {
     pSign.data?.signedUrl ? P("private user signs own doc: succeeds") : F(`private sign: ${pSign.error?.message}`);
 
     // ---------- MEMBERSHIP LOSS ----------
-    // Move B out of Org A (Phase 1 model: change profile.organization_id).
+    // Move B out of Org A. This MUST go through organization_members: rewriting
+    // profiles.organization_id (the Phase 1 model) no longer revokes anything,
+    // so B would keep access and this assertion would fail for the right reason.
     const orphanOrg = (await admin.from("organizations").insert({ name: "solo" }).select("id").single()).data.id;
-    await admin.from("profiles").update({ organization_id: orphanOrg, role: "owner" }).eq("id", B.id);
+    await joinOrg(admin, B.id, orphanOrg, "owner");
     const bC2 = await signIn(B.email); // fresh session picks up new org
     const bSignAfter = await sign(bC2, docA.path);
     !bSignAfter.data?.signedUrl ? P("membership loss: former member cannot create new signed URL") : F("removed member still signed (!)");
@@ -188,7 +193,9 @@ async function main() {
     const mCount = (await admin.from("maintenance_logs").select("id").eq("vehicle_id", vA)).data?.length ?? 0;
     mCount === 0 ? P("no maintenance record exists before confirmation") : F(`unexpected ${mCount} maintenance rows`);
   } finally {
-    for (const u of users) await admin.auth.admin.deleteUser(u.id).catch(() => {});
+    // Organization-first teardown: the last-owner trigger refuses to let a sole
+    // owner's membership cascade away while their organization still exists.
+    await cleanupUsers(admin, users);
   }
 
   console.log(`\n${fails === 0 ? "ALL PASS" : fails + " FAILURE(S)"}  (${passes} passed)`);

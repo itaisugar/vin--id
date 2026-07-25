@@ -30,7 +30,8 @@
     "vehicles": "Vehicles",
     "diagnose": "Diagnose",
     "settings": "Settings",
-    "scan": "Scan a document"
+    "scan": "Scan a document",
+    "organization": "Organization"
   },
   "install": {
     "title": "Add Vin.ID to your home screen",
@@ -1354,6 +1355,129 @@
       "notFound": "That vehicle could not be found.",
       "saveFailed": "We couldn't save the change. Please try again.",
       "invalidStatus": "That status is not valid."
+    }
+  },
+  "organization": {
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "fleet_manager": "Fleet manager",
+      "viewer": "Viewer"
+    },
+    "team": {
+      "title": "Organization",
+      "subtitle": "Your team and who can do what.",
+      "yourRole": "Your role in this organization",
+      "untitledOrganization": "Untitled organization",
+      "noOrganization": "Your account is not part of an organization yet. Ask an owner or admin to invite you.",
+      "readOnlyNotice": "Only owners and admins can manage team members and invitations.",
+      "cancel": "Cancel",
+      "members": {
+        "title": "Members",
+        "empty": "No members yet.",
+        "you": "(you)",
+        "roleLabel": "Role",
+        "remove": "Remove",
+        "removing": "Removing…",
+        "removed": "Member removed.",
+        "roleUpdated": "Role updated.",
+        "thisMember": "this member",
+        "confirmRemoveTitle": "Remove member?",
+        "confirmRemoveBody": "{name} will immediately lose access to this organization's vehicles and documents."
+      },
+      "invite": {
+        "title": "Invite a colleague",
+        "help": "They will get a link that works once, for their email address only.",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "colleague@company.com",
+        "roleLabel": "Role",
+        "roleHelp": "Fleet managers can edit vehicles and documents. Viewers can only read. Admins can also manage the team.",
+        "submit": "Create invitation",
+        "creating": "Creating…",
+        "created": "Invitation created for {email}.",
+        "copyOnce": "Copy this link now and send it to them — it is shown only once and cannot be recovered later.",
+        "copy": "Copy link",
+        "copied": "Copied"
+      },
+      "invitations": {
+        "title": "Pending invitations",
+        "empty": "No pending invitations.",
+        "expiresAt": "Expires {date}",
+        "revoke": "Revoke",
+        "revoking": "Revoking…",
+        "revoked": "Invitation revoked.",
+        "confirmRevokeTitle": "Revoke invitation?",
+        "confirmRevokeBody": "The link sent to {email} will stop working immediately."
+      },
+      "errors": {
+        "notAuthorized": "You do not have permission to do this.",
+        "invalidEmail": "Enter a valid email address.",
+        "invalidRole": "Choose a valid role.",
+        "alreadyMember": "That person is already a member of this organization.",
+        "duplicatePending": "There is already a pending invitation for that address. Revoke it first to send a new one.",
+        "linkUnavailable": "The invitation link could not be generated because the app URL is not configured.",
+        "memberNotFound": "That member no longer exists.",
+        "lastOwner": "This organization must keep at least one owner. Promote someone else to owner first.",
+        "cannotManageOwner": "Only an owner can change or remove another owner.",
+        "copyFailed": "Couldn't copy automatically. Select the link and copy it manually.",
+        "saveFailed": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "invite": {
+    "heading": "You've been invited to {organization}",
+    "roleLine": "You'll join as {role}.",
+    "sentTo": "This invitation was sent to",
+    "signInPrompt": "Sign in or create an account to accept it.",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signedInAs": "You are signed in as",
+    "switchAccount": "Sign in with a different account",
+    "accept": "Accept invitation",
+    "accepting": "Accepting…",
+    "goToApp": "Go to the app",
+    "roles": {
+      "admin": "an admin",
+      "fleet_manager": "a fleet manager",
+      "viewer": "a viewer"
+    },
+    "states": {
+      "success": {
+        "title": "You're in.",
+        "body": "You now have access to this organization's fleet."
+      },
+      "invalid": {
+        "title": "This invitation link isn't valid",
+        "body": "Check that you copied the whole link, or ask for a new invitation."
+      },
+      "expired": {
+        "title": "This invitation has expired",
+        "body": "Invitation links are valid for 7 days. Ask for a new one."
+      },
+      "revoked": {
+        "title": "This invitation was revoked",
+        "body": "Ask an owner or admin of the organization to send a new one."
+      },
+      "accepted": {
+        "title": "This invitation was already used",
+        "body": "If that was you, just sign in. Otherwise ask for a new invitation."
+      },
+      "email_mismatch": {
+        "title": "This invitation is for a different email address",
+        "body": "Sign in with the address the invitation was sent to, then open the link again."
+      },
+      "not_authenticated": {
+        "title": "You need to sign in first",
+        "body": "Sign in with the invited email address, then open the link again."
+      },
+      "already_member": {
+        "title": "You already belong to another organization",
+        "body": "An account can be in one organization at a time. Ask to be removed from your current one first."
+      },
+      "failed": {
+        "title": "Something went wrong",
+        "body": "The invitation could not be accepted. Please try again."
+      }
     }
   }
 }

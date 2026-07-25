@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import {
   Card,
@@ -15,6 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
+  const tOrg = await getTranslations("organization.team");
   const locale = await getLocale();
 
   const supabase = await createClient();
@@ -76,6 +78,25 @@ export default async function SettingsPage() {
             {t("account.joinedAt")} · <span className="num">{joinedAt}</span>
           </p>
         ) : null}
+      </Card>
+
+      {/* Team management lives on its own screen; the bottom nav keeps four
+          slots on mobile, so it is reached from here. */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{tOrg("title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href="/organization"
+            className="flex items-center justify-between gap-3 text-sm"
+          >
+            <span className="text-ink-2">{tOrg("subtitle")}</span>
+            <span className="shrink-0 font-medium text-accent">
+              {tOrg("members.title")}
+            </span>
+          </Link>
+        </CardContent>
       </Card>
 
       <Card>

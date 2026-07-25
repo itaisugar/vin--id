@@ -41,6 +41,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import { cleanupUsers, joinOrg, orgOf, setRole } from "./lib/org-fixtures.mjs";
 
 const URL = process.env.SUPABASE_URL;
 const ANON = process.env.SUPABASE_ANON_KEY;
@@ -90,18 +91,18 @@ async function signIn(email) {
   if (error) throw new Error(`signIn ${email}: ${error.message}`);
   return c;
 }
-const orgOf = async (id) =>
-  (await admin.from("profiles").select("organization_id").eq("id", id).single()).data.organization_id;
-
 async function main() {
   const A = await mkUser("a"), B = await mkUser("b"), C = await mkUser("c"), D = await mkUser("d");
   const created = [A, B, C, D];
   try {
-    const orgA = await orgOf(A.id);
-    const orgC = await orgOf(C.id);
-    await admin.from("profiles").update({ organization_id: orgA, role: "viewer" }).eq("id", B.id);
-    await admin.from("profiles").update({ organization_id: orgA, role: "fleet_manager" }).eq("id", D.id);
-    await admin.from("profiles").update({ role: "owner" }).eq("id", A.id);
+    // Fixtures are built on organization_members — the authorization authority.
+    // Writing profiles.organization_id/role instead (as this harness used to)
+    // grants nothing, so every persona below would test as an outsider.
+    const orgA = await orgOf(admin, A.id);
+    const orgC = await orgOf(admin, C.id);
+    await joinOrg(admin, B.id, orgA, "viewer");
+    await joinOrg(admin, D.id, orgA, "fleet_manager");
+    await setRole(admin, A.id, "owner");
     orgA !== orgC ? P("signup provisioned distinct orgs for A and C") : F("signup did not isolate orgs");
 
     const aC = await signIn(A.email), bC = await signIn(B.email), cC = await signIn(C.email), dC = await signIn(D.email);
@@ -223,7 +224,9 @@ async function main() {
       }
     }
   } finally {
-    for (const u of created) await admin.auth.admin.deleteUser(u.id).catch(() => {});
+    // Organization-first teardown: the last-owner trigger refuses to let a sole
+    // owner's membership cascade away while their organization still exists.
+    await cleanupUsers(admin, created);
   }
 
   console.log(`\n${fails === 0 ? "ALL PASS" : fails + " FAILURE(S)"}  (${passes} passed)`);

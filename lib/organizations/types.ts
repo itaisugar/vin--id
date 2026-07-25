@@ -90,6 +90,177 @@ export interface OrgContext {
 }
 
 // -----------------------------------------------------------------------------
+// Membership
+// -----------------------------------------------------------------------------
+/**
+ * A row of `organization_members` — the AUTHORITY for what a user may do.
+ * `profiles.organization_id` / `profiles.role` are only a denormalized cache of
+ * the same facts and never grant access on their own.
+ */
+export interface OrganizationMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: OrgRole;
+  created_at: string;
+}
+
+/** A member as shown on the team screen, joined with their identity. */
+export interface OrganizationMemberListItem extends OrganizationMember {
+  email: string | null;
+  full_name: string | null;
+}
+
+/**
+ * Everything a request needs to know about who is acting. Assembled server-side
+ * from the session plus the membership row — never from client input.
+ */
+export interface CurrentUserContext {
+  profile: UserProfile;
+  organization: Organization | null;
+  membership: OrganizationMember | null;
+  /** The role that actually governs access. `null` when there is no membership. */
+  effectiveRole: OrgRole | null;
+  organizationName: string | null;
+}
+
+// -----------------------------------------------------------------------------
+// Invitations
+// -----------------------------------------------------------------------------
+/**
+ * Roles an invitation may carry. `owner` is deliberately absent: ownership is
+ * granted by promoting an existing member, never by emailing a link. The
+ * database CHECK constraint on `organization_invitations.role` mirrors this.
+ */
+export const INVITABLE_ROLES = ["admin", "fleet_manager", "viewer"] as const;
+export type InvitableRole = (typeof INVITABLE_ROLES)[number];
+
+export function isInvitableRole(value: unknown): value is InvitableRole {
+  return (
+    typeof value === "string" &&
+    (INVITABLE_ROLES as readonly string[]).includes(value)
+  );
+}
+
+export const INVITATION_STATUSES = [
+  "pending",
+  "accepted",
+  "revoked",
+  "expired",
+] as const;
+export type InvitationStatus = (typeof INVITATION_STATUSES)[number];
+
+/**
+ * A pending/handled invitation as shown to an admin.
+ *
+ * `token_hash` is intentionally NOT part of this type. The raw token exists only
+ * in the response of {@link createInvitation}; the hash never leaves the
+ * database.
+ */
+export interface OrganizationInvitation {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: InvitableRole;
+  status: InvitationStatus;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+}
+
+/** Explicit column list — never `select *`, which would pull in `token_hash`. */
+export const INVITATION_COLUMNS =
+  "id, organization_id, email, role, status, created_at, expires_at, accepted_at, revoked_at";
+
+/**
+ * What the invitation landing page may learn BEFORE anyone signs in or accepts.
+ * Deliberately minimal: enough to decide whether to accept, and nothing that
+ * would make a leaked link useful for reconnaissance. The email is masked.
+ */
+export type InvitationPreview =
+  | {
+      state: "valid";
+      organization_name: string;
+      role: InvitableRole;
+      email_masked: string;
+      expires_at: string;
+    }
+  | { state: "invalid" | "expired" | "revoked" | "accepted" };
+
+/** Result of creating an invitation. The raw token is returned exactly once. */
+export type CreateInvitationResult =
+  | {
+      ok: true;
+      invitation: OrganizationInvitation;
+      /**
+       * The single copyable invite link. Built from the raw token, which is not
+       * stored anywhere and cannot be recovered after this response — reissue
+       * the invitation instead.
+       */
+      inviteUrl: string;
+    }
+  | { ok: false; error: InvitationErrorKey };
+
+/** Result of accepting an invitation. Mirrors `accept_invitation()`'s states. */
+export type AcceptInvitationResult =
+  | { state: "ok"; organization_id: string }
+  | {
+      state:
+        | "not_authenticated"
+        | "invalid"
+        | "expired"
+        | "revoked"
+        | "accepted"
+        | "email_mismatch"
+        | "already_member"
+        | "failed";
+    };
+
+/** Translation keys under `organization.team.errors`. */
+export type InvitationErrorKey =
+  | "notAuthorized"
+  | "invalidEmail"
+  | "invalidRole"
+  | "alreadyMember"
+  | "duplicatePending"
+  | "linkUnavailable"
+  | "saveFailed";
+
+/** Translation keys under `organization.team.errors` for member management. */
+export type MemberErrorKey =
+  | "notAuthorized"
+  | "invalidRole"
+  | "memberNotFound"
+  | "lastOwner"
+  | "cannotManageOwner"
+  | "saveFailed";
+
+export type MemberActionResult =
+  | { ok: true }
+  | { ok: false; error: MemberErrorKey };
+
+// -----------------------------------------------------------------------------
+// Invitation validation
+// -----------------------------------------------------------------------------
+export const invitationInputSchema = z.object({
+  email: z
+    .string({ error: "invalidEmail" })
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ error: "invalidEmail" }).max(200, { error: "invalidEmail" })),
+  role: z.enum(INVITABLE_ROLES, { error: "invalidRole" }),
+});
+
+export type InvitationInput = z.infer<typeof invitationInputSchema>;
+
+/** Role change targets. Only an owner may pick `owner` — enforced server-side. */
+export const memberRoleChangeSchema = z.object({
+  memberId: z.uuid({ error: "memberNotFound" }),
+  role: z.enum(ORG_ROLES, { error: "invalidRole" }),
+});
+
+// -----------------------------------------------------------------------------
 // Validation
 // -----------------------------------------------------------------------------
 // Error messages are translation keys (resolved under `organization.form.errors`).
