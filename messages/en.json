@@ -1232,13 +1232,15 @@
     "summary": {
       "heading": "Fleet status",
       "totalVehicles": "Total vehicles",
-      "active": "Operational",
-      "needsService": "Need service",
-      "issueOpen": "Open issues",
-      "outOfService": "Out of service",
-      "inGarage": "In garage",
-      "documentsAttention": "Documents to handle",
-      "upcomingMaintenance": "Service due"
+      "operational": "Operational",
+      "requiresAttention": "Need attention",
+      "servicesOverdue": "Service overdue",
+      "servicesDueSoon": "Service due soon",
+      "documentsExpired": "Documents expired",
+      "documentsExpiringSoon": "Documents expiring",
+      "openIssues": "Open issues",
+      "monthCost": "Cost this month",
+      "mixedCurrencyNote": "This month's costs were recorded in more than one currency. Only the most-used currency is totalled — amounts are never converted."
     },
     "attention": {
       "heading": "Vehicles requiring attention",
@@ -1292,7 +1294,13 @@
       "issue_open": "Open issue",
       "out_of_service": "Out of service",
       "in_garage": "In garage",
-      "documents_missing": "Documents missing"
+      "documents_missing": "Documents missing",
+      "service_overdue": "Service overdue",
+      "service_due_soon": "Service soon",
+      "document_expiring": "Documents",
+      "open_issues": "Open issues",
+      "driver_assigned": "Has driver",
+      "driver_unassigned": "No driver"
     },
     "sort": {
       "label": "Sort by",
@@ -1300,12 +1308,17 @@
       "license_plate": "License plate",
       "next_service": "Next service",
       "document_expiry": "Closest document expiry",
-      "recently_updated": "Recently updated"
+      "recently_updated": "Recently updated",
+      "urgency": "Urgency",
+      "name": "Vehicle name",
+      "cost": "Cost this month"
     },
     "vehicles": {
       "title": "Fleet vehicles",
       "noneForFilter": "No vehicles match “{filter}”.",
-      "clearFilter": "Show all vehicles"
+      "clearFilter": "Show all vehicles",
+      "showing": "Showing {shown} of {total}",
+      "noneForSearch": "No vehicles match \"{term}\"."
     },
     "fields": {
       "operationalStatus": "Operational status",
@@ -1317,7 +1330,10 @@
       "nextService": "Next service",
       "nextServiceKm": "Next service KM",
       "testExpiry": "Test expiry",
-      "insuranceExpiry": "Insurance expiry"
+      "insuranceExpiry": "Insurance expiry",
+      "nearestExpiry": "Nearest expiry",
+      "openIssues": "Open issues",
+      "monthCost": "Cost this month"
     },
     "vehicleTypes": {
       "car": "Car",
@@ -1355,7 +1371,71 @@
       "notFound": "That vehicle could not be found.",
       "saveFailed": "We couldn't save the change. Please try again.",
       "invalidStatus": "That status is not valid."
-    }
+    },
+    "actions": {
+      "heading": "Needs action today",
+      "allClear": "Nothing needs attention today.",
+      "allClearBody": "No overdue service, expiring documents or open issues in your fleet.",
+      "untitledVehicle": "Unnamed vehicle",
+      "urgency": {
+        "critical": "Overdue",
+        "high": "Urgent",
+        "soon": "Soon",
+        "info": "Review"
+      },
+      "reasons": {
+        "service_overdue": "Service is overdue",
+        "service_due_soon": "Service due {date}",
+        "document_expired": "{count, plural, one {# document has expired} other {# documents have expired}}",
+        "document_expiring": "{count, plural, one {# document expires soon} other {# documents expire soon}}",
+        "issue_high_priority": "{count, plural, one {# urgent open issue} other {# urgent open issues}}",
+        "issue_open": "{count, plural, one {# open issue} other {# open issues}}",
+        "status_unavailable": "Vehicle is not available for work",
+        "missing_service_data": "No service date or mileage target set",
+        "cost_anomaly": "Costs well above the fleet average this month"
+      }
+    },
+    "insights": {
+      "heading": "Fleet insights",
+      "aVehicle": "A vehicle",
+      "mostExpensive": "{vehicle} is your highest cost this month at {amount}.",
+      "repeatedIssues": "{vehicle} has {count} open issues.",
+      "serviceDataMissing": "{count, plural, one {# vehicle has no service date or mileage target} other {# vehicles have no service date or mileage target}}, so their service status cannot be calculated."
+    },
+    "search": {
+      "label": "Search vehicles",
+      "placeholder": "Plate, make, model or driver",
+      "clear": "Clear"
+    },
+    "vehicleStatus": {
+      "heading": "Fleet status",
+      "upcoming": "Needs action",
+      "source": {
+        "calculated": "Calculated",
+        "records": "From records",
+        "missing": "Not set"
+      },
+      "service": {
+        "label": "Next service",
+        "unknown": "No target set",
+        "atKm": "At {km}"
+      },
+      "documents": {
+        "label": "Nearest document expiry",
+        "none": "None tracked",
+        "flaggedMissing": "Marked as missing",
+        "counts": "{expired} expired · {expiring} expiring soon"
+      },
+      "issues": {
+        "label": "Open issues",
+        "highPriority": "{count} urgent"
+      },
+      "cost": {
+        "label": "Cost this month",
+        "none": "None recorded"
+      }
+    },
+    "actionsCount": "{count, plural, one {# action} other {# actions}}"
   },
   "organization": {
     "roles": {

@@ -1231,14 +1231,16 @@
     },
     "summary": {
       "heading": "מצב הצי",
-      "totalVehicles": "סה\"כ רכבים",
-      "active": "תקינים",
-      "needsService": "דורשים טיפול",
-      "issueOpen": "תקלות פתוחות",
-      "outOfService": "מושבתים",
-      "inGarage": "במוסך",
-      "documentsAttention": "מסמכים לטיפול",
-      "upcomingMaintenance": "טיפול מתקרב"
+      "totalVehicles": "סה״כ רכבים",
+      "operational": "תקינים",
+      "requiresAttention": "דורשים טיפול",
+      "servicesOverdue": "טיפול באיחור",
+      "servicesDueSoon": "טיפול מתקרב",
+      "documentsExpired": "מסמכים שפגו",
+      "documentsExpiringSoon": "מסמכים לקראת פקיעה",
+      "openIssues": "תקלות פתוחות",
+      "monthCost": "עלות החודש",
+      "mixedCurrencyNote": "עלויות החודש נרשמו ביותר ממטבע אחד. מסוכם רק המטבע הנפוץ ביותר — לא מתבצעת המרה."
     },
     "attention": {
       "heading": "רכבים הדורשים טיפול",
@@ -1292,7 +1294,13 @@
       "issue_open": "תקלה פתוחה",
       "out_of_service": "מושבת",
       "in_garage": "במוסך",
-      "documents_missing": "חסרים מסמכים"
+      "documents_missing": "חסרים מסמכים",
+      "service_overdue": "טיפול באיחור",
+      "service_due_soon": "טיפול בקרוב",
+      "document_expiring": "מסמכים",
+      "open_issues": "תקלות פתוחות",
+      "driver_assigned": "עם נהג",
+      "driver_unassigned": "ללא נהג"
     },
     "sort": {
       "label": "מיון לפי",
@@ -1300,12 +1308,17 @@
       "license_plate": "מספר רישוי",
       "next_service": "טיפול הבא",
       "document_expiry": "תפוגה הקרובה",
-      "recently_updated": "עודכן לאחרונה"
+      "recently_updated": "עודכן לאחרונה",
+      "urgency": "דחיפות",
+      "name": "שם הרכב",
+      "cost": "עלות החודש"
     },
     "vehicles": {
       "title": "רכבי הצי",
       "noneForFilter": "אין רכבים התואמים ל״{filter}״.",
-      "clearFilter": "הצג את כל הרכבים"
+      "clearFilter": "הצג את כל הרכבים",
+      "showing": "מוצגים {shown} מתוך {total}",
+      "noneForSearch": "לא נמצאו רכבים התואמים \"{term}\"."
     },
     "fields": {
       "operationalStatus": "סטטוס תפעולי",
@@ -1317,7 +1330,10 @@
       "nextService": "טיפול הבא",
       "nextServiceKm": "ק\"מ לטיפול הבא",
       "testExpiry": "תפוגת טסט",
-      "insuranceExpiry": "תפוגת ביטוח"
+      "insuranceExpiry": "תפוגת ביטוח",
+      "nearestExpiry": "פקיעה קרובה",
+      "openIssues": "תקלות פתוחות",
+      "monthCost": "עלות החודש"
     },
     "vehicleTypes": {
       "car": "רכב פרטי",
@@ -1355,7 +1371,71 @@
       "notFound": "הרכב לא נמצא.",
       "saveFailed": "לא הצלחנו לשמור את השינוי. נסה שוב.",
       "invalidStatus": "סטטוס לא חוקי."
-    }
+    },
+    "actions": {
+      "heading": "דורש טיפול היום",
+      "allClear": "אין מה לטפל היום.",
+      "allClearBody": "אין טיפולים באיחור, מסמכים שפגו או תקלות פתוחות בצי.",
+      "untitledVehicle": "רכב ללא שם",
+      "urgency": {
+        "critical": "באיחור",
+        "high": "דחוף",
+        "soon": "בקרוב",
+        "info": "לבדיקה"
+      },
+      "reasons": {
+        "service_overdue": "הטיפול באיחור",
+        "service_due_soon": "טיפול נדרש ב-{date}",
+        "document_expired": "{count, plural, one {מסמך אחד פג תוקף} other {# מסמכים פגי תוקף}}",
+        "document_expiring": "{count, plural, one {מסמך אחד לקראת פקיעה} other {# מסמכים לקראת פקיעה}}",
+        "issue_high_priority": "{count, plural, one {תקלה דחופה אחת פתוחה} other {# תקלות דחופות פתוחות}}",
+        "issue_open": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+        "status_unavailable": "הרכב אינו זמין לעבודה",
+        "missing_service_data": "לא הוגדר תאריך טיפול או יעד קילומטראז׳",
+        "cost_anomaly": "עלויות גבוהות משמעותית מממוצע הצי החודש"
+      }
+    },
+    "insights": {
+      "heading": "תובנות צי",
+      "aVehicle": "רכב",
+      "mostExpensive": "{vehicle} הוא היקר ביותר החודש — {amount}.",
+      "repeatedIssues": "ל{vehicle} יש {count} תקלות פתוחות.",
+      "serviceDataMissing": "{count, plural, one {לרכב אחד אין תאריך טיפול או יעד קילומטראז׳} other {ל-# רכבים אין תאריך טיפול או יעד קילומטראז׳}}, ולכן לא ניתן לחשב את מצב הטיפול."
+    },
+    "search": {
+      "label": "חיפוש רכבים",
+      "placeholder": "מספר רישוי, יצרן, דגם או נהג",
+      "clear": "ניקוי"
+    },
+    "vehicleStatus": {
+      "heading": "מצב תפעולי",
+      "upcoming": "דורש טיפול",
+      "source": {
+        "calculated": "מחושב",
+        "records": "מתוך רשומות",
+        "missing": "לא הוגדר"
+      },
+      "service": {
+        "label": "הטיפול הבא",
+        "unknown": "לא הוגדר יעד",
+        "atKm": "ב-{km}"
+      },
+      "documents": {
+        "label": "פקיעת המסמך הקרובה",
+        "none": "לא נמצאו",
+        "flaggedMissing": "סומן כחסר",
+        "counts": "{expired} פגו · {expiring} לקראת פקיעה"
+      },
+      "issues": {
+        "label": "תקלות פתוחות",
+        "highPriority": "{count} דחופות"
+      },
+      "cost": {
+        "label": "עלות החודש",
+        "none": "לא נרשמה"
+      }
+    },
+    "actionsCount": "{count, plural, one {פעולה אחת} other {# פעולות}}"
   },
   "organization": {
     "roles": {
