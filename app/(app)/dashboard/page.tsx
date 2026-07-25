@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { AttentionList } from "@/components/fleet/attention-list";
+import { ActionList } from "@/components/fleet/action-list";
 import { DeadlineList } from "@/components/fleet/deadline-list";
+import { FleetInsights } from "@/components/fleet/fleet-insights";
 import { FleetSummaryCards } from "@/components/fleet/fleet-summary-cards";
 import { OrganizationMissing } from "@/components/fleet/organization-missing";
 import { CarIcon, ScanIcon } from "@/components/icons";
@@ -58,7 +59,7 @@ export default async function DashboardPage() {
     user?.email?.split("@")[0] ||
     "";
 
-  const { summary, attention, deadlines } = overview;
+  const { summary, actions, insights, deadlines } = overview;
 
   return (
     <div className="space-y-6">
@@ -86,7 +87,8 @@ export default async function DashboardPage() {
             {td("quickActions.scanDocument")}
           </Link>
 
-          <AttentionList items={attention} />
+          <ActionList items={actions} />
+          <FleetInsights items={insights} />
           <DeadlineList items={deadlines} />
         </>
       )}

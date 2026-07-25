@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { FleetInfoCard } from "@/components/fleet/fleet-info-card";
 import { OperationalStatusBadge } from "@/components/fleet/operational-status-badge";
+import { VehicleFleetStatus } from "@/components/fleet/vehicle-fleet-status";
 import { ArchiveVehicleButton } from "@/components/vehicles/archive-vehicle-button";
 import { VehicleStatusBadge } from "@/components/vehicles/vehicle-status-badge";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
@@ -21,6 +22,7 @@ import { listIssues } from "@/lib/issues/service";
 import { listDocuments } from "@/lib/documents/service";
 import { listReminders } from "@/lib/reminders/service";
 import { listPassports } from "@/lib/passports/service";
+import { getFleetVehicleDetail } from "@/lib/fleet/service";
 import { getCurrentRole } from "@/lib/organizations/service";
 import { canWriteFleetData } from "@/lib/organizations/types";
 import { getVehicleById } from "@/lib/vehicles/service";
@@ -47,7 +49,7 @@ export default async function VehicleDetailPage({
     dateStyle: "medium",
   }).format(new Date(vehicle.created_at));
 
-  const [maintenanceLogs, issues, documents, reminders, passports, role] =
+  const [maintenanceLogs, issues, documents, reminders, passports, role, fleetRow] =
     await Promise.all([
       listMaintenanceLogs(vehicle.id),
       listIssues(vehicle.id),
@@ -55,6 +57,10 @@ export default async function VehicleDetailPage({
       listReminders(vehicle.id),
       listPassports(vehicle.id),
       getCurrentRole(),
+      // Same rules as the dashboard, so the two screens can never disagree.
+      // Resolves within the caller's organization only: a forged id is simply
+      // absent from that org-scoped set and yields null.
+      getFleetVehicleDetail(vehicle.id),
     ]);
 
   // Viewers see everything but may not change anything.
@@ -134,6 +140,11 @@ export default async function VehicleDetailPage({
           ) : null}
         </div>
       </div>
+
+      {/* Operational fleet status: service, documents, issues, cost, actions */}
+      {fleetRow ? (
+        <VehicleFleetStatus row={fleetRow.row} currency={fleetRow.currency} />
+      ) : null}
 
       {/* Fleet information (Fleet Lite Phase 1) */}
       <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />

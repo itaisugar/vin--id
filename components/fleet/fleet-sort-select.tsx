@@ -17,9 +17,12 @@ import { FLEET_SORTS, type FleetFilter, type FleetSort } from "@/lib/fleet/types
 export function FleetSortSelect({
   value,
   filter,
+  search,
 }: {
   value: FleetSort;
   filter: FleetFilter;
+  /** Carried through so changing sort does not discard the search term. */
+  search: string;
 }) {
   const t = useTranslations("fleet.sort");
   const router = useRouter();
@@ -36,9 +39,10 @@ export function FleetSortSelect({
         value={value}
         disabled={isPending}
         onChange={(e) => {
-          const next = e.target.value;
+          const params = new URLSearchParams({ filter, sort: e.target.value });
+          if (search) params.set("q", search);
           startTransition(() => {
-            router.push(`/vehicles?filter=${filter}&sort=${next}`);
+            router.push(`/vehicles?${params.toString()}`);
           });
         }}
         className="h-9 w-auto min-w-[10rem] text-xs"

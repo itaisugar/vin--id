@@ -1,19 +1,24 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { formatCost } from "@/lib/fleet/costs";
 import type { FleetSummary } from "@/lib/fleet/service";
 
 /**
  * The dashboard's top row: "what is the state of the fleet right now?".
  *
- * Every tile shows a REAL count derived from organization-scoped data. There
- * are no placeholder metrics — a metric with no data behind it shows 0, which
- * is the honest value, and the tiles that would be meaningless at zero are
- * simply not linked anywhere.
+ * Every tile is a REAL count from organization-scoped rows. There are no
+ * placeholder metrics and no fabricated compliance figures — a metric with no
+ * data behind it shows 0, which is the honest value.
+ *
+ * LABEL DISCIPLINE: a tile that counts documents says "documents"; a tile that
+ * counts vehicles says "vehicles". The previous version had one tile reading
+ * "Documents to handle" while counting vehicles, which quietly overstated how
+ * much paperwork was outstanding.
  */
 
 interface Tile {
   key: string;
-  value: number;
+  value: string | number;
   href?: string;
   tone?: "default" | "warn" | "danger";
 }
@@ -25,14 +30,15 @@ function StatTile({
   tone = "default",
 }: {
   label: string;
-  value: number;
+  value: string | number;
   href?: string;
   tone?: "default" | "warn" | "danger";
 }) {
+  const isPositive = typeof value === "number" ? value > 0 : true;
   const valueTone =
-    tone === "danger" && value > 0
+    tone === "danger" && isPositive
       ? "text-danger"
-      : tone === "warn" && value > 0
+      : tone === "warn" && isPositive
         ? "text-warn"
         : "text-ink";
 
@@ -68,43 +74,57 @@ export async function FleetSummaryCards({
   summary: FleetSummary;
 }) {
   const t = await getTranslations("fleet.summary");
+  const locale = await getLocale();
 
   const tiles: Tile[] = [
     { key: "totalVehicles", value: summary.totalVehicles, href: "/vehicles" },
     {
-      key: "active",
-      value: summary.active,
+      key: "operational",
+      value: summary.operational,
       href: "/vehicles?filter=active",
     },
     {
-      key: "needsService",
-      value: summary.needsService,
-      href: "/vehicles?filter=needs_service",
+      key: "requiresAttention",
+      value: summary.requiresAttention,
+      href: "/vehicles?filter=needs_attention",
       tone: "warn",
     },
     {
-      key: "issueOpen",
-      value: summary.issueOpen,
-      href: "/vehicles?filter=issue_open",
-      tone: "warn",
-    },
-    {
-      key: "outOfService",
-      value: summary.outOfService,
-      href: "/vehicles?filter=out_of_service",
+      key: "servicesOverdue",
+      value: summary.servicesOverdue,
+      href: "/vehicles?filter=service_overdue",
       tone: "danger",
     },
     {
-      key: "inGarage",
-      value: summary.inGarage,
-      href: "/vehicles?filter=in_garage",
-    },
-    {
-      key: "documentsAttention",
-      value: summary.documentsAttention,
+      key: "servicesDueSoon",
+      value: summary.servicesDueSoon,
+      href: "/vehicles?filter=service_due_soon",
       tone: "warn",
     },
-    { key: "upcomingMaintenance", value: summary.upcomingMaintenance, tone: "warn" },
+    {
+      key: "documentsExpired",
+      value: summary.documentsExpired,
+      href: "/vehicles?filter=document_expiring",
+      tone: "danger",
+    },
+    {
+      key: "documentsExpiringSoon",
+      value: summary.documentsExpiringSoon,
+      href: "/vehicles?filter=document_expiring",
+      tone: "warn",
+    },
+    {
+      key: "openIssues",
+      value: summary.openIssues,
+      href: "/vehicles?filter=open_issues",
+      tone: summary.highPriorityIssues > 0 ? "danger" : "warn",
+    },
+    {
+      key: "monthCost",
+      // Real persisted maintenance spend for the current month. Never converted
+      // between currencies — see lib/fleet/costs.ts.
+      value: formatCost(summary.monthCost, summary.costCurrency, locale),
+    },
   ];
 
   return (
@@ -115,7 +135,7 @@ export async function FleetSummaryCards({
       >
         {t("heading")}
       </h2>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
         {tiles.map((tile) => (
           <StatTile
             key={tile.key}
@@ -126,6 +146,10 @@ export async function FleetSummaryCards({
           />
         ))}
       </div>
+
+      {summary.costMixedCurrency ? (
+        <p className="text-xs text-ink-3">{t("mixedCurrencyNote")}</p>
+      ) : null}
     </section>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { DeadlineBadge } from "@/components/fleet/deadline-badge";
 import { OperationalStatusBadge } from "@/components/fleet/operational-status-badge";
+import { formatCost } from "@/lib/fleet/costs";
 import type { FleetVehicleRow as Row } from "@/lib/fleet/service";
 import type { DeadlineState } from "@/lib/fleet/dates";
 
@@ -11,9 +12,23 @@ import type { DeadlineState } from "@/lib/fleet/dates";
  * Responsive card rather than a true <table>: at 10–80 vehicles on a tablet or
  * phone a horizontally-scrolling table is unusable, and the same fields read
  * fine stacked. Desktop gets a denser multi-column grid.
+ *
+ * MOBILE DENSITY: the identity line, the attention chips and four operational
+ * fields are all that appear on a phone. Cost is the fifth field and is hidden
+ * below `sm` — it is the least urgent number here, and keeping it off the
+ * mobile card is what stops the row becoming a spreadsheet.
+ *
+ * No signed URL, image fetch or per-row query happens here — everything
+ * rendered arrives precomputed on `row`.
  */
-export async function FleetVehicleRow({ row }: { row: Row }) {
-  const { vehicle: v, openIssueCount, serviceState, testState, insuranceState } = row;
+export async function FleetVehicleRow({
+  row,
+  currency,
+}: {
+  row: Row;
+  currency: string;
+}) {
+  const { vehicle: v, openIssueCount, highPriorityIssueCount, service, documents, monthCost, actions } = row;
   const t = await getTranslations("fleet");
   const tv = await getTranslations("vehicles");
   const locale = await getLocale();
@@ -27,6 +42,8 @@ export async function FleetVehicleRow({ row }: { row: Row }) {
           new Date(`${iso}T00:00:00Z`),
         )
       : "—";
+
+  const hasCritical = actions.some((a) => a.urgency === "critical");
 
   return (
     <li>
@@ -45,9 +62,7 @@ export async function FleetVehicleRow({ row }: { row: Row }) {
               ) : null}
               <span className="min-w-0 break-words text-sm text-ink-2">
                 {title}
-                {v.year != null ? (
-                  <span className="num"> · {v.year}</span>
-                ) : null}
+                {v.year != null ? <span className="num"> · {v.year}</span> : null}
               </span>
             </div>
             {v.vehicle_type || v.assigned_driver_name ? (
@@ -60,8 +75,26 @@ export async function FleetVehicleRow({ row }: { row: Row }) {
           </div>
 
           <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+            {/* One attention marker, driven by the same rules as the dashboard. */}
+            {actions.length > 0 ? (
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  hasCritical
+                    ? "bg-danger/12 text-danger"
+                    : "bg-warn/12 text-warn"
+                }`}
+              >
+                {t("actionsCount", { count: actions.length })}
+              </span>
+            ) : null}
             {openIssueCount > 0 ? (
-              <span className="rounded-full bg-warn/12 px-2.5 py-0.5 text-xs font-medium text-warn">
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  highPriorityIssueCount > 0
+                    ? "bg-danger/12 text-danger"
+                    : "bg-warn/12 text-warn"
+                }`}
+              >
                 {t("openIssuesCount", { count: openIssueCount })}
               </span>
             ) : null}
@@ -70,7 +103,7 @@ export async function FleetVehicleRow({ row }: { row: Row }) {
         </div>
 
         {/* Operational data */}
-        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-3 sm:grid-cols-4">
+        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-3 sm:grid-cols-5">
           <Field
             label={t("fields.currentKm")}
             value={
@@ -81,18 +114,28 @@ export async function FleetVehicleRow({ row }: { row: Row }) {
           />
           <Field
             label={t("fields.nextService")}
-            value={formatDate(v.next_service_date)}
-            state={serviceState}
+            value={
+              service.date
+                ? formatDate(service.date)
+                : service.dueKm != null
+                  ? `${service.dueKm.toLocaleString(locale)} ${tv(`units.${v.mileage_unit}`)}`
+                  : "—"
+            }
+            state={service.state}
           />
           <Field
-            label={t("fields.testExpiry")}
-            value={formatDate(v.test_expiry_date)}
-            state={testState}
+            label={t("fields.nearestExpiry")}
+            value={formatDate(documents.nearestExpiry)}
+            state={documents.worst}
           />
           <Field
-            label={t("fields.insuranceExpiry")}
-            value={formatDate(v.insurance_expiry_date)}
-            state={insuranceState}
+            label={t("fields.openIssues")}
+            value={String(openIssueCount)}
+          />
+          <Field
+            label={t("fields.monthCost")}
+            value={monthCost != null ? formatCost(monthCost, currency, locale) : "—"}
+            className="hidden sm:block"
           />
         </dl>
       </Link>
@@ -104,13 +147,15 @@ function Field({
   label,
   value,
   state,
+  className,
 }: {
   label: string;
   value: string;
   state?: DeadlineState | null;
+  className?: string;
 }) {
   return (
-    <div className="min-w-0 space-y-0.5">
+    <div className={`min-w-0 space-y-0.5 ${className ?? ""}`}>
       <dt className="text-[10px] uppercase tracking-[0.12em] text-ink-3">
         {label}
       </dt>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { FleetFilterBar } from "@/components/fleet/fleet-filter-bar";
+import { FleetSearch } from "@/components/fleet/fleet-search";
 import { FleetSortSelect } from "@/components/fleet/fleet-sort-select";
 import { FleetVehicleRow } from "@/components/fleet/fleet-vehicle-row";
 import { OrganizationMissing } from "@/components/fleet/organization-missing";
@@ -31,20 +32,25 @@ export default async function VehiclesPage({
     ? params.filter[0]
     : params.filter;
   const sortParam = Array.isArray(params.sort) ? params.sort[0] : params.sort;
+  const searchParam = Array.isArray(params.q) ? params.q[0] : params.q;
 
   const filter = isFleetFilter(filterParam) ? filterParam : "all";
   const sort = isFleetSort(sortParam) ? sortParam : DEFAULT_FLEET_SORT;
+  // Cap the term so a pathological query string cannot be used as a payload.
+  const search = typeof searchParam === "string" ? searchParam.slice(0, 100) : "";
 
   let result: FleetVehiclesResult;
   try {
-    result = await listFleetVehicles(filter, sort);
+    result = await listFleetVehicles({ filter, sort, search });
   } catch (error) {
     if (error instanceof OrganizationMissingError) return <OrganizationMissing />;
     throw error;
   }
 
-  const { rows, counts } = result;
-  const fleetIsEmpty = counts.all === 0;
+  const { rows, counts, totalCount } = result;
+  // "Empty fleet" means the organization has no vehicles at all — not that the
+  // current search or filter happens to match none.
+  const fleetIsEmpty = totalCount === 0;
 
   return (
     <div className="space-y-5">
@@ -65,16 +71,32 @@ export default async function VehiclesPage({
       ) : (
         <>
           <div className="space-y-3">
-            <FleetFilterBar active={filter} sort={sort} counts={counts} />
-            <div className="flex justify-end">
-              <FleetSortSelect value={sort} filter={filter} />
+            <FleetSearch value={search} filter={filter} sort={sort} />
+            <FleetFilterBar
+              active={filter}
+              sort={sort}
+              search={search}
+              counts={counts}
+            />
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs text-ink-3">
+                {t("vehicles.showing", {
+                  shown: rows.length,
+                  total: totalCount,
+                })}
+              </p>
+              <FleetSortSelect value={sort} filter={filter} search={search} />
             </div>
           </div>
 
           {rows.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-line p-10 text-center">
               <p className="text-sm text-ink-2">
-                {t("vehicles.noneForFilter", { filter: t(`filters.${filter}`) })}
+                {search
+                  ? t("vehicles.noneForSearch", { term: search })
+                  : t("vehicles.noneForFilter", {
+                      filter: t(`filters.${filter}`),
+                    })}
               </p>
               <Link
                 href="/vehicles?filter=all"
@@ -86,7 +108,11 @@ export default async function VehiclesPage({
           ) : (
             <ul className="space-y-2.5">
               {rows.map((row) => (
-                <FleetVehicleRow key={row.vehicle.id} row={row} />
+                <FleetVehicleRow
+                  key={row.vehicle.id}
+                  row={row}
+                  currency={result.costs.currency}
+                />
               ))}
             </ul>
           )}
