@@ -43,12 +43,18 @@ STEP 1 — CLASSIFY the document into exactly one "document_category":
 STEP 2 — EXTRACT ONLY that category's fields.
 
 Return ONLY a single JSON object. No prose, no explanation, no markdown, no code
-fences. Include "document_category", "confidence" (0..1), and ONLY the fields for
-the chosen category (omit the others):
+fences. Include "document_category", "confidence" (0..1), the two vehicle
+identifier fields below, and ONLY the fields for the chosen category (omit the
+others).
+
+ALWAYS include these two, for every category including "unknown":
+  "vehicle_registration": string|null   (licence/registration plate as printed)
+  "vin": string|null                    (VIN / chassis number)
 
 maintenance:
   { "document_category": "maintenance", "date": string|null, "garage_name": string|null,
     "mileage": number|null, "service_type": string|null, "service_details": string|null,
+    "cost": number|null, "next_service_date": string|null, "next_service_km": number|null,
     "confidence": number }
 insurance:
   { "document_category": "insurance", "insurer_name": string|null, "start_date": string|null,
@@ -65,6 +71,10 @@ unknown:
 
 Rules:
 - Never invent values. Use null for any field not clearly present in the image.
+- Copy "vehicle_registration" and "vin" EXACTLY as printed, including separators.
+  Do not reformat, pad or guess them: they are used to identify the vehicle, and
+  a guessed identifier is worse than none. Use null if not clearly legible.
+- "cost" is the document TOTAL actually charged, not a line item or a quote.
 - Dates as ISO yyyy-mm-dd. Numbers as plain numbers (no currency symbols or units).
 - For a validity range, "start_date" is when the document/cover begins (issue or
   "valid from") and "end_date" is when it ends or expires ("valid until"). A

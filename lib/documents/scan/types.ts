@@ -173,6 +173,23 @@ const confidenceField = z.any().transform((v) => {
 // only hard requirement is a valid discriminator, which the providers ensure via
 // `coerceCategory` before parsing.
 // -----------------------------------------------------------------------------
+/**
+ * Vehicle identifiers, present on EVERY category including "unknown".
+ *
+ * These are what Fleet intake matches a document to a vehicle with, and they
+ * are deliberately category-independent: an unclassifiable document can still
+ * name its vehicle, and that is often the only useful thing on it. Matching
+ * itself happens server-side in `match_fleet_vehicles()` — these fields are raw
+ * model output and authorize nothing on their own.
+ *
+ * Private-owner scanning ignores them (the vehicle is already chosen), so
+ * adding them here costs that flow nothing.
+ */
+const vehicleIdentifierFields = {
+  vehicle_registration: textField(40),
+  vin: textField(40),
+};
+
 export const scanExtractionSchema = z.discriminatedUnion("document_category", [
   z.object({
     document_category: z.literal("maintenance"),
@@ -181,7 +198,11 @@ export const scanExtractionSchema = z.discriminatedUnion("document_category", [
     mileage: mileageField,
     service_type: textField(120),
     service_details: textField(2000),
+    cost: costField,
+    next_service_date: dateField,
+    next_service_km: mileageField,
     confidence: confidenceField,
+    ...vehicleIdentifierFields,
   }),
   z.object({
     document_category: z.literal("insurance"),
@@ -191,6 +212,7 @@ export const scanExtractionSchema = z.discriminatedUnion("document_category", [
     cost: costField,
     insurance_type: textField(120),
     confidence: confidenceField,
+    ...vehicleIdentifierFields,
   }),
   z.object({
     document_category: z.literal("registration"),
@@ -199,6 +221,7 @@ export const scanExtractionSchema = z.discriminatedUnion("document_category", [
     mileage: mileageField,
     notes: textField(2000),
     confidence: confidenceField,
+    ...vehicleIdentifierFields,
   }),
   z.object({
     document_category: z.literal("inspection"),
@@ -208,10 +231,12 @@ export const scanExtractionSchema = z.discriminatedUnion("document_category", [
     cost: costField,
     notes: textField(2000),
     confidence: confidenceField,
+    ...vehicleIdentifierFields,
   }),
   z.object({
     document_category: z.literal("unknown"),
     confidence: confidenceField,
+    ...vehicleIdentifierFields,
   }),
 ]);
 
