@@ -1208,7 +1208,8 @@
       "vehicleRequired": "בחר רכב.",
       "vehicleNotFound": "הרכב לא נמצא.",
       "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב.",
-      "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP)."
+      "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP).",
+      "notAllowed": "אין לך הרשאה להוסיף רשומות עבור רכב זה."
     }
   },
   "fleet": {

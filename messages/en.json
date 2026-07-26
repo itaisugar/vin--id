@@ -1208,7 +1208,8 @@
       "vehicleRequired": "Choose a vehicle.",
       "vehicleNotFound": "That vehicle could not be found.",
       "saveFailed": "We couldn't save the record. Please try again.",
-      "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP)."
+      "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP).",
+      "notAllowed": "You don't have permission to add records for this vehicle."
     }
   },
   "fleet": {
