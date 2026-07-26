@@ -135,18 +135,37 @@ export const documentMetadataSchema = z.object({
 
 export type DocumentMetadataInput = z.infer<typeof documentMetadataSchema>;
 
-/** Full create payload: metadata + the already-uploaded file descriptor. */
-export const documentCreateSchema = documentMetadataSchema.extend({
-  documentId: z.uuid({ error: "saveFailed" }),
-  storage_path: z.string().min(1, { error: "saveFailed" }),
-  file_name: z.string().min(1).max(255),
-  mime_type: z.enum(ALLOWED_MIME_TYPES, { error: "invalidFileType" }),
-  file_size: z
-    .number()
-    .int()
-    .positive()
-    .max(MAX_FILE_SIZE, { error: "fileTooLarge" }),
-});
+/**
+ * Full create payload: metadata + the already-uploaded file descriptor.
+ *
+ * `maxFileSize` exists because two entry points legitimately disagree about how
+ * large a file may be. A manual upload is capped at {@link MAX_FILE_SIZE} (5 MB)
+ * — the user picked the file and can pick a smaller one. A CAMERA CAPTURE is
+ * capped at `MAX_SCAN_FILE_SIZE` (10 MB), because a phone photo is routinely
+ * 3–8 MB and the user cannot do anything about that.
+ *
+ * Before this parameter existed, the scan path accepted a 7 MB photo, extracted
+ * it (a paid provider call), and then failed this schema while persisting the
+ * image — silently, because persistence is best-effort. The record was created
+ * with no attached document, so the very evidence the feature exists to capture
+ * was dropped without a word to the user, on the most common mobile file size.
+ */
+export function makeDocumentCreateSchema(maxFileSize: number = MAX_FILE_SIZE) {
+  return documentMetadataSchema.extend({
+    documentId: z.uuid({ error: "saveFailed" }),
+    storage_path: z.string().min(1, { error: "saveFailed" }),
+    file_name: z.string().min(1).max(255),
+    mime_type: z.enum(ALLOWED_MIME_TYPES, { error: "invalidFileType" }),
+    file_size: z
+      .number()
+      .int()
+      .positive()
+      .max(maxFileSize, { error: "fileTooLarge" }),
+  });
+}
+
+/** The default (manual upload) create schema. */
+export const documentCreateSchema = makeDocumentCreateSchema();
 
 export type DocumentCreateInput = z.infer<typeof documentCreateSchema>;
 

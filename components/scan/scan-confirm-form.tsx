@@ -173,6 +173,12 @@ export function ScanConfirmForm({
       values.category,
       { ...values, mileage: normalizedMileage, mileage_unit: vehicleMileageUnit },
       document,
+      // What the provider read, so the confirmation is stored next to it. When
+      // extraction failed the user typed everything, and there is no reading to
+      // keep. The server builds the record only from the validated values above
+      // — this is written to the provenance row and nowhere else.
+      failed ? null : extraction,
+      engine,
     );
 
     // Success redirects (never returns). Reaching here means it failed, so clean

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import * as z from "zod";
 import { trackEvent } from "@/lib/analytics/track";
+import { requireFleetWriter } from "@/lib/organizations/service";
 import { createMaintenanceLog } from "@/lib/maintenance/service";
 import { maintenanceInputSchema } from "@/lib/maintenance/types";
 import { createIssue } from "@/lib/issues/service";
@@ -29,12 +30,17 @@ import {
   SCAN_FORM_CATEGORIES,
   type ScanConfirmFormValues,
   type ScanDocumentDescriptor,
+  type ScanExtraction,
   type ScanExtractionResponse,
   type ScanFormCategory,
 } from "@/lib/documents/scan/types";
 import { createDocument } from "@/lib/documents/service";
 import {
-  documentCreateSchema,
+  recordScanProvenance,
+  type ScanRecordType,
+} from "@/lib/documents/scan/provenance";
+import {
+  makeDocumentCreateSchema,
   type DocumentType,
 } from "@/lib/documents/types";
 
@@ -93,6 +99,15 @@ export async function scanExtractAction(
   }
   if (file.size > MAX_SCAN_FILE_SIZE) {
     return { ok: false, error: "fileTooLarge" };
+  }
+
+  // Authorize BEFORE spending a paid provider call. A viewer or driver can
+  // never save the resulting record (RLS write policies are `is_org_writer()`),
+  // so extracting for them would cost money and end in a refusal.
+  try {
+    await requireFleetWriter();
+  } catch {
+    return { ok: false, error: "notAllowed" };
   }
 
   const locale = await getLocale();
@@ -183,7 +198,10 @@ async function persistScanDocument(
     category === "inspection";
   const amount = hasCost && values.cost.trim() !== "" ? values.cost : undefined;
 
-  const parsed = documentCreateSchema.safeParse({
+  // A camera capture may be up to MAX_SCAN_FILE_SIZE — the same limit this flow
+  // already accepted for extraction. Validating it against the smaller manual-
+  // upload cap silently dropped ordinary phone photos (see makeDocumentCreateSchema).
+  const parsed = makeDocumentCreateSchema(MAX_SCAN_FILE_SIZE).safeParse({
     document_type: scanCategoryToDocType(category),
     document_date: documentDate.trim() !== "" ? documentDate : undefined,
     vendor: vendor.trim() !== "" ? vendor : undefined,
@@ -225,11 +243,42 @@ export async function createRecordFromScanAction(
   category: ScanFormCategory,
   values: ScanConfirmFormValues,
   document?: ScanDocumentDescriptor,
+  /**
+   * What the provider read, passed back unchanged from `scanExtractAction`, so
+   * the confirmation can be stored alongside the reading that produced it. The
+   * server does not trust it for anything: it is written to the provenance row
+   * and never used to build the record, which comes solely from `values` after
+   * Zod validation. Absent when the user fell back to manual entry.
+   */
+  extraction?: ScanExtraction | null,
+  engine?: string,
 ): Promise<ScanCreateState> {
   if (!vehicleId) return { error: "saveFailed" };
   if (!(SCAN_FORM_CATEGORIES as readonly string[]).includes(category)) {
     return { error: "saveFailed" };
   }
+
+  /**
+   * Store what the model read next to what the user confirmed, linked to the
+   * record that resulted. Runs AFTER the record exists, so it can never be a
+   * step towards creating one. Best effort: a provenance failure must not cost
+   * the user the record they just confirmed.
+   */
+  const keepProvenance = (
+    recordType: ScanRecordType,
+    recordId: string,
+    documentId: string | null,
+  ) =>
+    recordScanProvenance({
+      vehicleId,
+      category,
+      extraction: extraction ?? null,
+      values,
+      engine: engine ?? "unknown",
+      recordType,
+      recordId,
+      documentId,
+    });
 
   if (category === "maintenance") {
     // The garage name has no dedicated maintenance column; fold it into the
@@ -257,8 +306,9 @@ export async function createRecordFromScanAction(
       ? await persistScanDocument(vehicleId, category, values, document)
       : null;
 
+    let recordId: string;
     try {
-      await createMaintenanceLog(
+      recordId = await createMaintenanceLog(
         vehicleId,
         parsed.data,
         "document_scan",
@@ -267,6 +317,8 @@ export async function createRecordFromScanAction(
     } catch {
       return { error: "saveFailed" };
     }
+
+    await keepProvenance("maintenance", recordId, documentId);
 
     await trackEvent({
       eventName: "maintenance_created",
@@ -304,11 +356,19 @@ export async function createRecordFromScanAction(
       ? await persistScanDocument(vehicleId, category, values, document)
       : null;
 
+    let recordId: string;
     try {
-      await createIssue(vehicleId, parsed.data, "document_scan", documentId);
+      recordId = await createIssue(
+        vehicleId,
+        parsed.data,
+        "document_scan",
+        documentId,
+      );
     } catch {
       return { error: "saveFailed" };
     }
+
+    await keepProvenance("issue", recordId, documentId);
 
     await trackEvent({
       eventName: "issue_created",
@@ -341,11 +401,19 @@ export async function createRecordFromScanAction(
       ? await persistScanDocument(vehicleId, category, values, document)
       : null;
 
+    let recordId: string;
     try {
-      await createInsurance(vehicleId, parsed.data, "document_scan", documentId);
+      recordId = await createInsurance(
+        vehicleId,
+        parsed.data,
+        "document_scan",
+        documentId,
+      );
     } catch {
       return { error: "saveFailed" };
     }
+
+    await keepProvenance("insurance", recordId, documentId);
 
     await trackEvent({
       eventName: "insurance_created",
@@ -372,8 +440,9 @@ export async function createRecordFromScanAction(
       ? await persistScanDocument(vehicleId, category, values, document)
       : null;
 
+    let recordId: string;
     try {
-      await createRegistration(
+      recordId = await createRegistration(
         vehicleId,
         parsed.data,
         "document_scan",
@@ -382,6 +451,8 @@ export async function createRecordFromScanAction(
     } catch {
       return { error: "saveFailed" };
     }
+
+    await keepProvenance("registration", recordId, documentId);
 
     await trackEvent({
       eventName: "registration_created",
@@ -409,11 +480,19 @@ export async function createRecordFromScanAction(
     ? await persistScanDocument(vehicleId, category, values, document)
     : null;
 
+  let recordId: string;
   try {
-    await createInspection(vehicleId, parsed.data, "document_scan", documentId);
+    recordId = await createInspection(
+      vehicleId,
+      parsed.data,
+      "document_scan",
+      documentId,
+    );
   } catch {
     return { error: "saveFailed" };
   }
+
+  await keepProvenance("inspection", recordId, documentId);
 
   await trackEvent({
     eventName: "inspection_created",
