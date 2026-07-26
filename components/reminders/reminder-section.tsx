@@ -54,7 +54,7 @@ export async function ReminderSection({
           </p>
         ) : (
           <>
-            <div className="grid gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
               {recent.map((reminder) => (
                 <ReminderListItem
                   key={reminder.id}

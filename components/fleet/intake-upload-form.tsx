@@ -56,11 +56,16 @@ export function IntakeUploadForm({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="intake-file">{t("fileLabel")}</Label>
+        {/* No `capture` attribute on purpose. `capture="environment"` makes a
+            mobile browser jump straight into the camera and REMOVES the option
+            to pick an existing photo, which is the common case — the invoice was
+            usually photographed or emailed earlier. Without it the native
+            chooser offers Camera, Photo Library and Files, so the camera path is
+            still one tap away. Same reasoning as components/scan/scan-flow.tsx. */}
         <input
           id="intake-file"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          capture="environment"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="block w-full rounded-xl border border-line bg-surface-2 p-2 text-sm file:me-3 file:rounded-lg file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:text-ink"
         />

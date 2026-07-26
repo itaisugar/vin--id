@@ -39,7 +39,12 @@ export function IssueListItem({
 
   return (
     <Card className="p-4">
-      <div className="flex items-start justify-between gap-3">
+      {/* Wraps on narrow screens. The action column is `shrink-0` so its
+          buttons keep their hit area, which means on a 320px screen the row
+          could not fit content + actions side by side and pushed the page
+          into a horizontal scroll. Wrapping drops the actions onto their own
+          line instead of shrinking anything below a usable size. */}
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
         <div className="min-w-0 flex-1 space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <IssueStatusBadge status={issue.status} />

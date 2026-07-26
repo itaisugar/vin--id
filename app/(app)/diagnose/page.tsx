@@ -62,7 +62,7 @@ export default async function DiagnosePage({
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-3">
             {t("history.title")}
           </h2>
-          <div className="grid gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
             {sessions.map((session) => (
               <SessionCard key={session.id} session={session} />
             ))}

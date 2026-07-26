@@ -54,8 +54,18 @@ export default async function AppLayout({
         </aside>
 
         {/* Main content (extra bottom padding leaves room for the mobile nav,
-            including the iOS home-indicator safe area) */}
-        <main className="flex-1 p-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-8">
+            including the iOS home-indicator safe area).
+
+            `min-w-0` is load-bearing. A flex item defaults to `min-width: auto`,
+            which refuses to shrink below its content's minimum width — so one
+            wide child (a long vehicle name, the filter chip strip, a wide table)
+            pushed <main> past the viewport and gave the WHOLE PAGE a horizontal
+            scrollbar, in both directions: content ran off the right in English
+            and off the left in Hebrew. Every screen that scrolled sideways at
+            320/375/768px traced back to this one declaration; the components
+            themselves already wrap and truncate correctly, they were simply
+            never given a bounded width to do it in. */}
+        <main className="min-w-0 flex-1 p-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-8">
           {children}
         </main>
       </div>

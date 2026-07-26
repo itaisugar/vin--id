@@ -52,7 +52,7 @@ export default async function PassportsListPage({
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
           {passports.map((passport) => (
             <PassportCard key={passport.id} vehicleId={id} passport={passport} />
           ))}

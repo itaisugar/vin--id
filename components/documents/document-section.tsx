@@ -40,7 +40,7 @@ export async function DocumentSection({
           </p>
         ) : (
           <>
-            <div className="grid gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
               {recent.map((doc) => (
                 <DocumentListItem
                   key={doc.id}

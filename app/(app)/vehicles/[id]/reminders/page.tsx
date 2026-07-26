@@ -65,7 +65,7 @@ export default async function RemindersListPage({
               {t("sections.active")} ({active.length})
             </h2>
             {active.length > 0 ? (
-              <div className="grid gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
                 {active.map((reminder) => (
                   <ReminderListItem
                     key={reminder.id}
@@ -88,7 +88,7 @@ export default async function RemindersListPage({
               <h2 className="text-sm font-semibold text-ink-2">
                 {t("sections.completedDismissed")} ({inactive.length})
               </h2>
-              <div className="grid gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
                 {inactive.map((reminder) => (
                   <ReminderListItem
                     key={reminder.id}

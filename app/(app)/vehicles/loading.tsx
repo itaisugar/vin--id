@@ -5,7 +5,7 @@ export default function VehiclesLoading() {
         <div className="h-7 w-32 animate-pulse rounded bg-surface-2" />
         <div className="h-10 w-28 animate-pulse rounded-md bg-surface-2" />
       </div>
-      <div className="grid gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-[5.5rem] animate-pulse rounded-lg bg-surface-2" />
         ))}

@@ -52,7 +52,7 @@ export default async function MaintenanceListPage({
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
           {logs.map((log) => (
             <MaintenanceListItem
               key={log.id}
