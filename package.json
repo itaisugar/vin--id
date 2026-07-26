@@ -12,7 +12,8 @@
     "validate:organization-members": "node scripts/validation/organization-members-invitations-check.mjs",
     "validate:fleet-manager": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/fleet-manager-check.mjs",
     "validate:driver-view": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/driver-view-check.mjs",
-    "validate:fleet-ai-intake": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/fleet-ai-intake-check.mjs"
+    "validate:fleet-ai-intake": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/fleet-ai-intake-check.mjs",
+    "validate:private-vehicle": "node --experimental-strip-types scripts/validation/private-vehicle-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
