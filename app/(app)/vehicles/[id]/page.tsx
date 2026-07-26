@@ -24,13 +24,24 @@ import { listReminders } from "@/lib/reminders/service";
 import { listPassports } from "@/lib/passports/service";
 import { getFleetVehicleDetail } from "@/lib/fleet/service";
 import { getCurrentRole } from "@/lib/organizations/service";
-import { canWriteFleetData } from "@/lib/organizations/types";
+import { canManageAssignments, canWriteFleetData } from "@/lib/organizations/types";
+import { DriverAssignmentCard } from "@/components/drivers/driver-assignment-card";
+import { redirectDriversAway } from "@/lib/drivers/guard";
+import {
+  getCurrentAssignment,
+  getVehicleAssignmentHistory,
+  listEligibleDrivers,
+} from "@/lib/drivers/service";
 import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
   params,
   searchParams,
 }: PageProps<"/vehicles/[id]">) {
+  // A driver has no Fleet vehicle detail screen — RLS would return nothing for
+  // most of it anyway. Send them to their own view.
+  await redirectDriversAway();
+
   const { id } = await params;
   const { accepted } = await searchParams;
   const t = await getTranslations("vehicles");
@@ -65,6 +76,17 @@ export default async function VehicleDetailPage({
 
   // Viewers see everything but may not change anything.
   const canWrite = role != null && canWriteFleetData(role);
+  const canAssign = canManageAssignments(role);
+
+  // Assignment data is fetched only for the roles that may act on it; for
+  // everyone else the RPCs would return empty anyway (they self-check the role).
+  const [eligibleDrivers, assignmentHistory, currentAssignment] = canAssign
+    ? await Promise.all([
+        listEligibleDrivers(),
+        getVehicleAssignmentHistory(vehicle.id),
+        getCurrentAssignment(vehicle.id),
+      ])
+    : [[], [], null];
 
   return (
     <div className="space-y-6">
@@ -148,6 +170,17 @@ export default async function VehicleDetailPage({
 
       {/* Fleet information (Fleet Lite Phase 1) */}
       <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />
+
+      {/* Driver assignment — owner/admin/fleet_manager only. Hiding the card is
+          presentation; the actions and RPCs behind it re-check the role. */}
+      {canAssign ? (
+        <DriverAssignmentCard
+          vehicleId={vehicle.id}
+          current={currentAssignment}
+          eligible={eligibleDrivers}
+          history={assignmentHistory}
+        />
+      ) : null}
 
       {/* Details */}
       <Card>

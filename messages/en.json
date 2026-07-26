@@ -31,7 +31,8 @@
     "diagnose": "Diagnose",
     "settings": "Settings",
     "scan": "Scan a document",
-    "organization": "Organization"
+    "organization": "Organization",
+    "myVehicle": "My Vehicle"
   },
   "install": {
     "title": "Add Vin.ID to your home screen",
@@ -1442,7 +1443,8 @@
       "owner": "Owner",
       "admin": "Admin",
       "fleet_manager": "Fleet manager",
-      "viewer": "Viewer"
+      "viewer": "Viewer",
+      "driver": "Driver"
     },
     "team": {
       "title": "Organization",
@@ -1471,7 +1473,7 @@
         "emailLabel": "Email address",
         "emailPlaceholder": "colleague@company.com",
         "roleLabel": "Role",
-        "roleHelp": "Fleet managers can edit vehicles and documents. Viewers can only read. Admins can also manage the team.",
+        "roleHelp": "Fleet managers can edit vehicles and documents. Viewers can only read the whole fleet. Drivers see only the vehicle assigned to them. Admins can also manage the team.",
         "submit": "Create invitation",
         "creating": "Creating…",
         "created": "Invitation created for {email}.",
@@ -1519,7 +1521,8 @@
     "roles": {
       "admin": "an admin",
       "fleet_manager": "a fleet manager",
-      "viewer": "a viewer"
+      "viewer": "a viewer",
+      "driver": "a driver"
     },
     "states": {
       "success": {
@@ -1558,6 +1561,64 @@
         "title": "Something went wrong",
         "body": "The invitation could not be accepted. Please try again."
       }
+    }
+  },
+  "driver": {
+    "title": "My Vehicle",
+    "subtitle": "Assigned to you by {organization}",
+    "untitled": "Vehicle",
+    "assignedSince": "Assigned to you since {date}",
+    "noAssignment": {
+      "title": "No vehicle assigned yet",
+      "body": "Once your fleet manager assigns you a vehicle, its details, service history and shared documents appear here."
+    },
+    "fields": {
+      "plate": "Licence plate",
+      "mileage": "Mileage",
+      "nextService": "Next service",
+      "testExpiry": "Test expires",
+      "insuranceExpiry": "Insurance expires",
+      "vin": "VIN"
+    },
+    "maintenance": {
+      "title": "Service history",
+      "empty": "No service records yet.",
+      "untyped": "Service"
+    },
+    "reminders": {
+      "title": "Reminders",
+      "due": "Due {date}"
+    },
+    "documents": {
+      "title": "Shared documents",
+      "empty": "Your fleet manager has not shared any documents for this vehicle.",
+      "untitled": "Document",
+      "open": "Open"
+    },
+    "assignment": {
+      "title": "Assigned driver",
+      "none": "No driver is assigned to this vehicle.",
+      "unnamed": "Unnamed driver",
+      "assign": "Assign driver",
+      "assignLabel": "Assign a driver",
+      "replace": "Replace driver",
+      "replaceLabel": "Replace with",
+      "unassign": "Unassign",
+      "choose": "Choose a driver…",
+      "noEligibleDrivers": "No one in this organization holds the driver role yet. Invite a driver from the Organization screen first.",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "e.g. weekday shift",
+      "noteHelp": "Visible to managers only — the driver never sees this note.",
+      "willMove": "This driver is currently assigned to another vehicle. Assigning them here will end that assignment.",
+      "history": "Past assignments"
+    },
+    "errors": {
+      "notAuthenticated": "Please sign in again.",
+      "notAuthorized": "You do not have permission to change driver assignments.",
+      "vehicleNotFound": "That vehicle is no longer available.",
+      "memberNotFound": "That member is no longer in this organization.",
+      "notADriver": "Only members with the driver role can be assigned a vehicle.",
+      "saveFailed": "Could not save the assignment. Please try again."
     }
   }
 }

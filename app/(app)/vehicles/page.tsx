@@ -8,6 +8,7 @@ import { OrganizationMissing } from "@/components/fleet/organization-missing";
 import { CarIcon } from "@/components/icons";
 import { OrganizationMissingError } from "@/lib/auth/errors";
 import { listFleetVehicles, type FleetVehiclesResult } from "@/lib/fleet/service";
+import { redirectDriversAway } from "@/lib/drivers/guard";
 import {
   DEFAULT_FLEET_SORT,
   isFleetFilter,
@@ -24,6 +25,9 @@ import {
 export default async function VehiclesPage({
   searchParams,
 }: PageProps<"/vehicles">) {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
   const params = await searchParams;
   const t = await getTranslations("fleet");
   const tv = await getTranslations("vehicles");

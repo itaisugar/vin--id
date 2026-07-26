@@ -4,16 +4,30 @@ import * as z from "zod";
 // Roles
 // -----------------------------------------------------------------------------
 /**
- * Phase 1 role model — deliberately flat. No custom roles, no permission
- * matrix, no multi-org membership: one user belongs to one organization with
- * one role.
+ * Role model — deliberately flat. No custom roles, no permission matrix, no
+ * multi-org membership: one user belongs to one organization with one role.
  *
  *   owner         full access, including organization settings
  *   admin         full operational access + organization settings
  *   fleet_manager manages vehicles and fleet operations, not org settings
- *   viewer        read-only
+ *   viewer        organization-wide READ-ONLY
+ *   driver        ONE assigned vehicle only — not a narrower viewer
+ *
+ * `driver` is not a lesser `viewer`. A viewer reads the whole organization; a
+ * driver reads a single assigned vehicle and a small allowlist of related
+ * records, and is denied every cost-bearing table outright. The two are
+ * separate roles with separate rules, enforced in the database by
+ * 20260725220000_driver_rls.sql — not by this file. Nothing here grants access;
+ * these constants exist so the UI can mirror the database rule, and the
+ * database is what actually holds the line.
  */
-export const ORG_ROLES = ["owner", "admin", "fleet_manager", "viewer"] as const;
+export const ORG_ROLES = [
+  "owner",
+  "admin",
+  "fleet_manager",
+  "viewer",
+  "driver",
+] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
 
 /** Roles allowed to create/update/delete fleet data. Mirrors `is_org_writer()`. */
@@ -25,6 +39,30 @@ export const WRITER_ROLES: readonly OrgRole[] = [
 
 /** Roles allowed to change organization settings. Mirrors the org RLS policy. */
 export const ORG_ADMIN_ROLES: readonly OrgRole[] = ["owner", "admin"];
+
+/**
+ * Roles allowed to assign, replace and end driver assignments.
+ * Mirrors `can_manage_driver_assignments()`.
+ *
+ * Deliberately NOT the same set as {@link ORG_ADMIN_ROLES}: a fleet_manager may
+ * hand a vehicle to a driver, but may not invite or remove members. Assignment
+ * rights and membership rights are separate.
+ */
+export const ASSIGNMENT_MANAGER_ROLES: readonly OrgRole[] = [
+  "owner",
+  "admin",
+  "fleet_manager",
+];
+
+/** Is this the assigned-vehicle-only role? Mirrors `is_org_driver()`. */
+export function isDriverRole(role: OrgRole | null | undefined): boolean {
+  return role === "driver";
+}
+
+/** May this role manage driver assignments? */
+export function canManageAssignments(role: OrgRole | null | undefined): boolean {
+  return role != null && ASSIGNMENT_MANAGER_ROLES.includes(role);
+}
 
 export function isOrgRole(value: unknown): value is OrgRole {
   return (
@@ -132,7 +170,12 @@ export interface CurrentUserContext {
  * granted by promoting an existing member, never by emailing a link. The
  * database CHECK constraint on `organization_invitations.role` mirrors this.
  */
-export const INVITABLE_ROLES = ["admin", "fleet_manager", "viewer"] as const;
+export const INVITABLE_ROLES = [
+  "admin",
+  "fleet_manager",
+  "viewer",
+  "driver",
+] as const;
 export type InvitableRole = (typeof INVITABLE_ROLES)[number];
 
 export function isInvitableRole(value: unknown): value is InvitableRole {

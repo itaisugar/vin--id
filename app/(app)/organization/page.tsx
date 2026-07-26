@@ -13,6 +13,7 @@ import { listPendingInvitations } from "@/lib/organizations/invitations";
 import { listOrganizationMembers } from "@/lib/organizations/members";
 import { getCurrentUserContext } from "@/lib/organizations/service";
 import { canManageOrganization } from "@/lib/organizations/types";
+import { redirectDriversAway } from "@/lib/drivers/guard";
 
 /**
  * Organization team screen.
@@ -24,6 +25,9 @@ import { canManageOrganization } from "@/lib/organizations/types";
  * and again here so the management UI is never even rendered.
  */
 export default async function OrganizationPage() {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
   const t = await getTranslations("organization.team");
 
   const context = await getCurrentUserContext();

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentRole } from "@/lib/organizations/service";
+import { isDriverRole } from "@/lib/organizations/types";
 import { SidebarNav, BottomNav } from "@/components/app-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
@@ -21,6 +23,10 @@ export default async function AppLayout({
   }
 
   const t = await getTranslations("common");
+
+  // Drivers get a reduced navigation set. Presentation only — every Fleet screen
+  // also guards itself, and RLS denies the data regardless of what is rendered.
+  const isDriver = isDriverRole(await getCurrentRole());
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -43,7 +49,7 @@ export default async function AppLayout({
       <div className="mx-auto flex w-full max-w-6xl flex-1">
         {/* Desktop sidebar */}
         <aside className="hidden w-60 shrink-0 border-e border-line p-4 md:flex md:flex-col md:justify-between print:hidden">
-          <SidebarNav />
+          <SidebarNav isDriver={isDriver} />
           <LogoutButton className="w-full justify-start" />
         </aside>
 
@@ -56,7 +62,7 @@ export default async function AppLayout({
 
       {/* Mobile bottom navigation */}
       <div className="print:hidden">
-        <BottomNav />
+        <BottomNav isDriver={isDriver} />
       </div>
     </div>
   );

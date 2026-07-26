@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ScanFlow } from "@/components/scan/scan-flow";
 import { listVehicles } from "@/lib/vehicles/service";
+import { redirectDriversAway } from "@/lib/drivers/guard";
 
 /**
  * Scan a document → AI extraction → confirm → create a maintenance/issue record.
@@ -9,6 +10,9 @@ import { listVehicles } from "@/lib/vehicles/service";
  * user-confirmed record is saved.
  */
 export default async function ScanPage({ searchParams }: PageProps<"/scan">) {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
   const { vehicle } = await searchParams;
   const t = await getTranslations("scan");
 

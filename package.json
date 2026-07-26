@@ -10,7 +10,8 @@
     "validate:fleet-tenancy": "node scripts/validation/fleet-tenancy-check.mjs",
     "validate:document-storage": "node scripts/validation/document-storage-check.mjs",
     "validate:organization-members": "node scripts/validation/organization-members-invitations-check.mjs",
-    "validate:fleet-manager": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/fleet-manager-check.mjs"
+    "validate:fleet-manager": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/fleet-manager-check.mjs",
+    "validate:driver-view": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/driver-view-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

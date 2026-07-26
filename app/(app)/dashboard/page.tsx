@@ -10,6 +10,7 @@ import { OrganizationMissingError } from "@/lib/auth/errors";
 import { getFleetOverview, type FleetOverview } from "@/lib/fleet/service";
 import { getCurrentOrganization } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
+import { redirectDriversAway } from "@/lib/drivers/guard";
 
 /**
  * Fleet Dashboard — the operational control tower.
@@ -23,6 +24,9 @@ import { createClient } from "@/lib/supabase/server";
  * Both features still exist; only their presentation moved.
  */
 export default async function DashboardPage() {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
   const t = await getTranslations("fleet");
   const td = await getTranslations("dashboard");
 
