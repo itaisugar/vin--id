@@ -1401,7 +1401,15 @@
       "aVehicle": "רכב",
       "mostExpensive": "{vehicle} הוא היקר ביותר החודש — {amount}.",
       "repeatedIssues": "ל{vehicle} יש {count} תקלות פתוחות.",
-      "serviceDataMissing": "{count, plural, one {לרכב אחד אין תאריך טיפול או יעד קילומטראז׳} other {ל-# רכבים אין תאריך טיפול או יעד קילומטראז׳}}, ולכן לא ניתן לחשב את מצב הטיפול."
+      "serviceDataMissing": "{count, plural, one {לרכב אחד אין תאריך טיפול או יעד קילומטראז׳} other {ל-# רכבים אין תאריך טיפול או יעד קילומטראז׳}}, ולכן לא ניתן לחשב את מצב הטיפול.",
+      "costAnomaly": "העלות של {vehicle} החודש היא {amount} — יותר מכפליים מהממוצע בצי, {average}.",
+      "documentChangedAction": "מסמך {type} שאושר עדכן את מה שנדרש עבור {vehicle}.",
+      "recordTypes": {
+        "maintenance": "טיפול",
+        "insurance": "ביטוח",
+        "registration": "רישיון",
+        "inspection": "טסט"
+      }
     },
     "search": {
       "label": "חיפוש רכבים",
@@ -1436,7 +1444,86 @@
         "none": "לא נרשמה"
       }
     },
-    "actionsCount": "{count, plural, one {פעולה אחת} other {# פעולות}}"
+    "actionsCount": "{count, plural, one {פעולה אחת} other {# פעולות}}",
+    "intake": {
+      "title": "הוספה ממסמך",
+      "subtitle": "צלמו חשבונית, תעודת ביטוח, רישיון רכב או דוח טסט. שום דבר לא נשמר עד שתבדקו ותאשרו.",
+      "addFromDocument": "הוספת רישום ממסמך",
+      "noVehicles": "יש להוסיף רכב לפני ייבוא מסמכים.",
+      "fileLabel": "תמונת המסמך",
+      "fileHelp": "JPEG,‏ PNG או WebP, עד ‎10‎ מגה-בייט. קובצי PDF אינם נתמכים עדיין.",
+      "vehicleOptionalLabel": "רכב (לא חובה)",
+      "vehicleUnknown": "שהמסמך יקבע",
+      "vehicleOptionalHelp": "אפשר להשאיר ריק — מספר הרישוי או מספר השלדה שעל המסמך משמשים לזיהוי הרכב, ואתם מאשרים את ההתאמה לפני שנשמר משהו.",
+      "uploadAndExtract": "העלאה וקריאת המסמך",
+      "extracting": "קורא את המסמך…",
+      "consentNote": "התמונה נשלחת לספק החילוץ מהשרת שלנו כדי לקרוא את תוכנה. היא לעולם אינה משותפת בפומבי.",
+      "reviewTitle": "בדיקה לפני שמירה",
+      "reviewSubtitle": "בדקו כל ערך. עדיין לא נשמר דבר.",
+      "nothingSavedYet": "לא נוצר רישום עד שתלחצו על אישור. ביטול משאיר את הצי ללא שינוי.",
+      "vehicleSection": "רכב",
+      "detailsSection": "פרטים",
+      "vehicleLabel": "שמירת המסמך עבור",
+      "chooseVehicle": "בחירת רכב…",
+      "mustChooseVehicle": "לא ניתן היה לזהות את הרכב בוודאות — יש לבחור אותו ידנית.",
+      "identifiersFound": "נמצא במסמך — מספר רישוי: {registration}, מספר שלדה: {vin}",
+      "noIdentifiers": "לא נמצאו מספר רישוי או מספר שלדה במסמך, לכן יש לבחור את הרכב ידנית.",
+      "vehicleConflict": "המזהים שבמסמך אינם תואמים לרכב שממנו התחלתם. יש לבחור את הרכב הנכון לפני האישור.",
+      "categoryLabel": "סוג המסמך",
+      "chooseCategory": "בחירת סוג…",
+      "categories": {
+        "maintenance": "חשבונית טיפול או תיקון",
+        "insurance": "ביטוח",
+        "registration": "רישיון רכב",
+        "inspection": "טסט שנתי"
+      },
+      "lowConfidence": "לא ניתן היה לקבוע את סוג המסמך. יש לבחור אותו ידנית.",
+      "checkCategory": "נא לבדוק את סוג המסמך — הזיהוי לא היה ודאי.",
+      "duplicateWarning": "הקובץ הזה כבר הועלה {count, plural, one {פעם אחת} other {# פעמים}}. יש לאשר רק אם מדובר באמת ברישום נפרד.",
+      "aiSuggested": "נקרא מהמסמך: {value}",
+      "aiFoundNothing": "לא נמצא במסמך — אפשר להוסיף ידנית אם צריך.",
+      "youChanged": "שיניתם את זה",
+      "fields": {
+        "date": "תאריך",
+        "garage": "מוסך או ספק",
+        "serviceType": "סוג העבודה",
+        "description": "מה בוצע",
+        "mileage": "קילומטראז'",
+        "cost": "סכום כולל",
+        "nextServiceDate": "הטיפול הבא בתאריך",
+        "nextServiceKm": "הטיפול הבא בקילומטראז'",
+        "insurer": "חברת ביטוח",
+        "insuranceType": "סוג הכיסוי",
+        "startDate": "בתוקף מ",
+        "endDate": "בתוקף עד",
+        "notes": "הערות"
+      },
+      "confirm": "אישור ושמירה",
+      "confirming": "שומר…",
+      "cancel": "ביטול",
+      "retry": "ניסיון עם מסמך אחר",
+      "startOver": "התחלה מחדש",
+      "extractionFailed": "לא ניתן היה לקרוא את המסמך",
+      "extractionFailedBody": "שום דבר לא נשמר. אפשר לנסות תמונה ברורה יותר, או להוסיף את הרישום ידנית.",
+      "noLongerAvailable": "הבדיקה הזו כבר אינה זמינה. היא בוטלה או הוחלפה בהעלאה חדשה יותר.",
+      "errors": {
+        "notAuthenticated": "יש להתחבר מחדש.",
+        "notAuthorized": "אין לך הרשאה לייבא מסמכים.",
+        "extractionNotFound": "בדיקת המסמך הזו כבר לא קיימת.",
+        "vehicleNotFound": "הרכב הזה כבר לא זמין.",
+        "vehicleRequired": "יש לבחור רכב.",
+        "categoryRequired": "יש לבחור סוג מסמך.",
+        "invalidCategory": "לא ניתן לשמור את סוג המסמך הזה.",
+        "invalidPayload": "יש לבדוק את הערכים המסומנים ולנסות שוב.",
+        "stale": "הבדיקה הזו בוטלה ולא ניתן לאשר אותה יותר.",
+        "fileRequired": "יש לבחור תמונת מסמך.",
+        "invalidFileType": "יש להשתמש בתמונת JPEG,‏ PNG או WebP.",
+        "fileTooLarge": "התמונה גדולה מדי. יש להשתמש בתמונה עד ‎10‎ מגה-בייט.",
+        "extractFailed": "לא ניתן היה לקרוא את המסמך. שום דבר לא נשמר.",
+        "uploadFailed": "ההעלאה נכשלה. שום דבר לא נשמר.",
+        "saveFailed": "לא ניתן היה לשמור. יש לנסות שוב."
+      }
+    }
   },
   "organization": {
     "roles": {

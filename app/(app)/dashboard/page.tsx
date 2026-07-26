@@ -11,6 +11,8 @@ import { getFleetOverview, type FleetOverview } from "@/lib/fleet/service";
 import { getCurrentOrganization } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { redirectDriversAway } from "@/lib/drivers/guard";
+import { getCurrentRole } from "@/lib/organizations/service";
+import { canWriteFleetData } from "@/lib/organizations/types";
 
 /**
  * Fleet Dashboard — the operational control tower.
@@ -65,6 +67,10 @@ export default async function DashboardPage() {
 
   const { summary, actions, insights, deadlines } = overview;
 
+  // Presentation only: the intake pages and actions re-check this server-side.
+  const role = await getCurrentRole();
+  const canWrite = role != null && canWriteFleetData(role);
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -83,13 +89,19 @@ export default async function DashboardPage() {
         <>
           <FleetSummaryCards summary={summary} />
 
-          <Link
-            href="/scan"
-            className="flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-          >
-            <ScanIcon className="h-5 w-5" />
-            {td("quickActions.scanDocument")}
-          </Link>
+          {/* Fleet intake, not /scan: this entry point accepts a document whose
+              vehicle is not yet known and matches it server-side. Rendered only
+              for writers — a viewer previously saw a prominent button leading to
+              a flow whose every step the server rejects. */}
+          {canWrite ? (
+            <Link
+              href="/fleet-intake"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
+              <ScanIcon className="h-5 w-5" />
+              {td("quickActions.scanDocument")}
+            </Link>
+          ) : null}
 
           <ActionList items={actions} />
           <FleetInsights items={insights} />

@@ -48,7 +48,7 @@ const INTAKE_COLUMNS =
   "id, document_id, vehicle_id, status, engine, provider_model, proposed_category, " +
   "category_confidence, confirmed_category, vehicle_match_method, vehicle_candidates, " +
   "extracted_data, confirmed_data, field_provenance, created_record_type, " +
-  "created_record_id, confirmed_by, confirmed_at, created_at";
+  "created_record_id, confirmed_by, confirmed_at, created_at, content_hash";
 
 /** sha256 of the uploaded bytes, for advisory duplicate detection. */
 export function hashFileContent(buffer: Buffer): string {
@@ -187,25 +187,47 @@ export async function findDuplicateDocuments(
  * what the model said the first time.
  */
 export async function runFleetExtraction(params: {
+  /** Empty when the vehicle is not yet known — see `pending`. */
   documentId: string;
   vehicleId?: string | null;
   image: { buffer: Buffer; mimeType: ScanImageMime };
   contentHash: string;
   locale?: string;
+  /**
+   * Dashboard intake: the file is already in Storage but no document row can
+   * exist yet, because `vehicle_documents.vehicle_id` is NOT NULL and the
+   * vehicle is exactly what we are trying to work out. The descriptor rides on
+   * the intake row until `confirm_fleet_intake()` files it.
+   */
+  pending?: {
+    storage_path: string;
+    file_name: string;
+    mime_type: string;
+    file_size: number;
+  } | null;
 }): Promise<{ ok: true; intakeId: string } | { ok: false; error: string }> {
   const { userId, organizationId } = await requireFleetWriter();
   const supabase = await createClient();
 
-  // The document must be one this organization owns. RLS already scopes the
-  // read; the explicit filter makes the intent local and testable.
-  const { data: doc } = await supabase
-    .from("vehicle_documents")
-    .select("id, vehicle_id")
-    .eq("id", params.documentId)
-    .eq("organization_id", organizationId)
-    .is("deleted_at", null)
-    .maybeSingle();
-  if (!doc) return { ok: false, error: "extractionNotFound" };
+  // When intake starts from an existing document it must be one this
+  // organization owns. RLS already scopes the read; the explicit filter makes
+  // the intent local and testable.
+  type DocRef = { id: string; vehicle_id: string | null };
+  let doc: DocRef | null = null;
+  if (params.documentId) {
+    const { data } = await supabase
+      .from("vehicle_documents")
+      .select("id, vehicle_id")
+      .eq("id", params.documentId)
+      .eq("organization_id", organizationId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    doc = (data as DocRef | null) ?? null;
+    if (!doc) return { ok: false, error: "extractionNotFound" };
+  } else if (!params.pending) {
+    // Neither an existing document nor a pending file: nothing to review.
+    return { ok: false, error: "fileRequired" };
+  }
 
   // sharp is imported lazily: it is a native module and the intake page should
   // not pay for it on a request that never extracts.
@@ -241,34 +263,43 @@ export async function runFleetExtraction(params: {
     await supabase.from("document_extractions").insert({
       owner_user_id: userId,
       organization_id: organizationId,
-      document_id: params.documentId,
-      vehicle_id: params.vehicleId ?? doc.vehicle_id ?? null,
+      document_id: params.documentId || null,
+      vehicle_id: params.vehicleId ?? doc?.vehicle_id ?? null,
       status: "failed",
       source: "fleet_intake",
       engine: provider.engine,
       extracted_data: {},
       content_hash: params.contentHash,
+      pending_storage_path: params.pending?.storage_path ?? null,
+      pending_file_name: params.pending?.file_name ?? null,
+      pending_mime_type: params.pending?.mime_type ?? null,
+      pending_file_size: params.pending?.file_size ?? null,
       error: err instanceof Error ? err.name : "provider_error",
     });
     return { ok: false, error: "extractFailed" };
   }
 
-  const match = await matchVehicle(extraction, params.vehicleId ?? doc.vehicle_id);
+  const match = await matchVehicle(extraction, params.vehicleId ?? doc?.vehicle_id ?? null);
 
-  // Retry / re-extract: retire the previous pending row instead of deleting it.
-  await supabase
-    .from("document_extractions")
-    .update({ status: "superseded" })
-    .eq("document_id", params.documentId)
-    .eq("organization_id", organizationId)
-    .eq("status", "pending_confirmation");
+  // Retry / re-extract: retire the previous pending row instead of deleting it,
+  // so the trail of what the model said the first time survives. Only possible
+  // when intake started from an existing document — a dashboard upload is a new
+  // file each time and has nothing to supersede.
+  if (params.documentId) {
+    await supabase
+      .from("document_extractions")
+      .update({ status: "superseded" })
+      .eq("document_id", params.documentId)
+      .eq("organization_id", organizationId)
+      .eq("status", "pending_confirmation");
+  }
 
   const { data, error } = await supabase
     .from("document_extractions")
     .insert({
       owner_user_id: userId,
       organization_id: organizationId,
-      document_id: params.documentId,
+      document_id: params.documentId || null,
       vehicle_id: match.resolvedVehicleId,
       status: "pending_confirmation",
       source: "fleet_intake",
@@ -282,6 +313,10 @@ export async function runFleetExtraction(params: {
       vehicle_match_method: match.method,
       vehicle_candidates: match.candidates,
       content_hash: params.contentHash,
+      pending_storage_path: params.pending?.storage_path ?? null,
+      pending_file_name: params.pending?.file_name ?? null,
+      pending_mime_type: params.pending?.mime_type ?? null,
+      pending_file_size: params.pending?.file_size ?? null,
     })
     .select("id")
     .single();

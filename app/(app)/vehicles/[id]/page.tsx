@@ -47,6 +47,7 @@ export default async function VehicleDetailPage({
   const t = await getTranslations("vehicles");
   const tp = await getTranslations("passports.accept");
   const tdiag = await getTranslations("diagnose");
+  const tIntake = await getTranslations("fleet.intake");
   const locale = await getLocale();
 
   const vehicle = await getVehicleById(id);
@@ -170,6 +171,18 @@ export default async function VehicleDetailPage({
 
       {/* Fleet information (Fleet Lite Phase 1) */}
       <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />
+
+      {/* Fleet intake for THIS vehicle. The vehicle is preselected, but the
+          server still re-verifies access and warns if the document's own
+          identifiers point at a different vehicle. */}
+      {canWrite ? (
+        <Link
+          href={`/fleet-intake?vehicle=${vehicle.id}`}
+          className="flex items-center justify-center gap-2 rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent transition hover:bg-accent/15"
+        >
+          {tIntake("addFromDocument")}
+        </Link>
+      ) : null}
 
       {/* Driver assignment — owner/admin/fleet_manager only. Hiding the card is
           presentation; the actions and RPCs behind it re-check the role. */}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatCost } from "@/lib/fleet/costs";
-import type { FleetInsight } from "@/lib/fleet/service";
+import type { FleetInsight, InsightSeverity } from "@/lib/fleet/service";
 
 /**
  * Simple, defensible observations about the fleet.
@@ -33,7 +33,8 @@ export async function FleetInsights({ items }: { items: FleetInsight[] }) {
               return (
                 <InsightRow
                   key={insight.kind}
-                  href={`/vehicles/${insight.vehicleId}`}
+                  href={insight.href}
+                  severity={insight.severity}
                   text={t("mostExpensive", {
                     vehicle:
                       insight.licensePlate ||
@@ -47,7 +48,8 @@ export async function FleetInsights({ items }: { items: FleetInsight[] }) {
               return (
                 <InsightRow
                   key={insight.kind}
-                  href={`/vehicles/${insight.vehicleId}/issues`}
+                  href={insight.href}
+                  severity={insight.severity}
                   text={t("repeatedIssues", {
                     vehicle:
                       insight.licensePlate ||
@@ -61,8 +63,40 @@ export async function FleetInsights({ items }: { items: FleetInsight[] }) {
               return (
                 <InsightRow
                   key={insight.kind}
-                  href="/vehicles?filter=needs_attention"
+                  href={insight.href}
+                  severity={insight.severity}
                   text={t("serviceDataMissing", { count: insight.count })}
+                />
+              );
+            case "cost_anomaly":
+              return (
+                <InsightRow
+                  key={insight.kind}
+                  href={insight.href}
+                  severity={insight.severity}
+                  text={t("costAnomaly", {
+                    vehicle:
+                      insight.licensePlate ||
+                      insight.vehicleLabel ||
+                      t("aVehicle"),
+                    amount: formatCost(insight.amount, insight.currency, locale),
+                    average: formatCost(insight.average, insight.currency, locale),
+                  })}
+                />
+              );
+            case "document_changed_action":
+              return (
+                <InsightRow
+                  key={insight.kind}
+                  href={insight.href}
+                  severity={insight.severity}
+                  text={t("documentChangedAction", {
+                    vehicle:
+                      insight.licensePlate ||
+                      insight.vehicleLabel ||
+                      t("aVehicle"),
+                    type: t(`recordTypes.${insight.recordType}`),
+                  })}
                 />
               );
           }
@@ -72,12 +106,30 @@ export async function FleetInsights({ items }: { items: FleetInsight[] }) {
   );
 }
 
-function InsightRow({ href, text }: { href: string; text: string }) {
+/**
+ * Severity is carried by a border accent rather than colour alone, so the
+ * ranking survives for anyone who cannot distinguish the hues.
+ */
+const severityBorder: Record<InsightSeverity, string> = {
+  critical: "border-danger/40",
+  warning: "border-warn/35",
+  info: "border-line",
+};
+
+function InsightRow({
+  href,
+  text,
+  severity = "info",
+}: {
+  href: string;
+  text: string;
+  severity?: InsightSeverity;
+}) {
   return (
     <li>
       <Link
         href={href}
-        className="block rounded-2xl border border-line bg-surface p-3.5 text-sm text-ink-2 transition hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        className={`block rounded-2xl border ${severityBorder[severity]} bg-surface p-3.5 text-sm text-ink-2 transition hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg`}
       >
         {text}
       </Link>

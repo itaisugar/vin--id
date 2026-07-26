@@ -1401,7 +1401,15 @@
       "aVehicle": "A vehicle",
       "mostExpensive": "{vehicle} is your highest cost this month at {amount}.",
       "repeatedIssues": "{vehicle} has {count} open issues.",
-      "serviceDataMissing": "{count, plural, one {# vehicle has no service date or mileage target} other {# vehicles have no service date or mileage target}}, so their service status cannot be calculated."
+      "serviceDataMissing": "{count, plural, one {# vehicle has no service date or mileage target} other {# vehicles have no service date or mileage target}}, so their service status cannot be calculated.",
+      "costAnomaly": "{vehicle} cost {amount} this month — more than twice the fleet average of {average}.",
+      "documentChangedAction": "A confirmed {type} document updated what {vehicle} needs.",
+      "recordTypes": {
+        "maintenance": "service",
+        "insurance": "insurance",
+        "registration": "registration",
+        "inspection": "test"
+      }
     },
     "search": {
       "label": "Search vehicles",
@@ -1436,7 +1444,86 @@
         "none": "None recorded"
       }
     },
-    "actionsCount": "{count, plural, one {# action} other {# actions}}"
+    "actionsCount": "{count, plural, one {# action} other {# actions}}",
+    "intake": {
+      "title": "Add from a document",
+      "subtitle": "Photograph an invoice, insurance certificate, registration or test report. Nothing is saved until you review and confirm it.",
+      "addFromDocument": "Add a record from a document",
+      "noVehicles": "Add a vehicle before importing documents.",
+      "fileLabel": "Document photo",
+      "fileHelp": "JPEG, PNG or WebP, up to 10 MB. PDFs are not supported yet.",
+      "vehicleOptionalLabel": "Vehicle (optional)",
+      "vehicleUnknown": "Let the document decide",
+      "vehicleOptionalHelp": "Leave this if you are not sure — the licence plate or VIN on the document is used to find the vehicle, and you confirm the match before anything is saved.",
+      "uploadAndExtract": "Upload and read document",
+      "extracting": "Reading document…",
+      "consentNote": "The image is sent to the extraction provider from our server to read its contents. It is never shared publicly.",
+      "reviewTitle": "Review before saving",
+      "reviewSubtitle": "Check every value. Nothing has been saved yet.",
+      "nothingSavedYet": "No record exists until you press Confirm. Cancelling leaves your fleet unchanged.",
+      "vehicleSection": "Vehicle",
+      "detailsSection": "Details",
+      "vehicleLabel": "Save this document against",
+      "chooseVehicle": "Choose a vehicle…",
+      "mustChooseVehicle": "The vehicle could not be identified with confidence — please choose it yourself.",
+      "identifiersFound": "Found on the document — plate: {registration}, VIN: {vin}",
+      "noIdentifiers": "No licence plate or VIN was found on this document, so the vehicle must be chosen manually.",
+      "vehicleConflict": "The identifiers on this document do not match the vehicle you started from. Choose the correct vehicle before confirming.",
+      "categoryLabel": "Document type",
+      "chooseCategory": "Choose a type…",
+      "categories": {
+        "maintenance": "Service or repair invoice",
+        "insurance": "Insurance",
+        "registration": "Registration",
+        "inspection": "Annual test / inspection"
+      },
+      "lowConfidence": "The document type could not be determined. Please choose it yourself.",
+      "checkCategory": "Please check the document type — it was not certain.",
+      "duplicateWarning": "This exact file has already been uploaded {count, plural, one {once} other {# times}}. Confirm only if this really is a separate record.",
+      "aiSuggested": "Read from document: {value}",
+      "aiFoundNothing": "Nothing found on the document — add it yourself if you need it.",
+      "youChanged": "you changed this",
+      "fields": {
+        "date": "Date",
+        "garage": "Garage or supplier",
+        "serviceType": "Type of work",
+        "description": "What was done",
+        "mileage": "Mileage",
+        "cost": "Total amount",
+        "nextServiceDate": "Next service due",
+        "nextServiceKm": "Next service mileage",
+        "insurer": "Insurer",
+        "insuranceType": "Cover type",
+        "startDate": "Valid from",
+        "endDate": "Valid until",
+        "notes": "Notes"
+      },
+      "confirm": "Confirm and save",
+      "confirming": "Saving…",
+      "cancel": "Cancel",
+      "retry": "Try another document",
+      "startOver": "Start again",
+      "extractionFailed": "The document could not be read",
+      "extractionFailedBody": "Nothing was saved. Try a clearer photo, or add the record manually.",
+      "noLongerAvailable": "This review is no longer available. It was cancelled or replaced by a newer upload.",
+      "errors": {
+        "notAuthenticated": "Please sign in again.",
+        "notAuthorized": "You do not have permission to import documents.",
+        "extractionNotFound": "This document review no longer exists.",
+        "vehicleNotFound": "That vehicle is no longer available.",
+        "vehicleRequired": "Choose a vehicle.",
+        "categoryRequired": "Choose a document type.",
+        "invalidCategory": "That document type cannot be saved.",
+        "invalidPayload": "Check the highlighted values and try again.",
+        "stale": "This review was cancelled and can no longer be confirmed.",
+        "fileRequired": "Choose a document photo.",
+        "invalidFileType": "Use a JPEG, PNG or WebP image.",
+        "fileTooLarge": "That image is too large. Use one under 10 MB.",
+        "extractFailed": "The document could not be read. Nothing was saved.",
+        "uploadFailed": "The upload failed. Nothing was saved.",
+        "saveFailed": "Could not save. Please try again."
+      }
+    }
   },
   "organization": {
     "roles": {

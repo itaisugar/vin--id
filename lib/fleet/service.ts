@@ -116,10 +116,32 @@ export interface FleetDeadline {
 }
 
 /** A simple, deterministic observation about the fleet. Never LLM-generated. */
-export type FleetInsight =
+/**
+ * Severity of an insight. Deliberately three levels, matching how the fleet
+ * actually reacts: something is wrong now, something is worth looking at, or
+ * something is merely worth knowing.
+ */
+export type InsightSeverity = "critical" | "warning" | "info";
+
+/**
+ * A deterministic observation about the fleet.
+ *
+ * Every variant is a calculation over confirmed rows — there is no LLM anywhere
+ * in this file or in the component that renders it, and no generated prose. The
+ * rules are the ones already validated in Phase 4 (`lib/fleet/alerts.ts` and
+ * `lib/fleet/costs.ts`); nothing here defines a competing threshold.
+ *
+ * `href` is the supporting evidence: every insight links to the vehicle or list
+ * the number came from, so a claim can always be checked against the records
+ * behind it.
+ */
+export type FleetInsight = { severity: InsightSeverity; href: string } & (
   | { kind: "most_expensive_vehicle"; vehicleId: string; vehicleLabel: string; licensePlate: string | null; amount: number; currency: string }
   | { kind: "repeated_issues"; vehicleId: string; vehicleLabel: string; licensePlate: string | null; count: number }
-  | { kind: "service_data_missing"; count: number };
+  | { kind: "service_data_missing"; count: number }
+  | { kind: "cost_anomaly"; vehicleId: string; vehicleLabel: string; licensePlate: string | null; amount: number; average: number; currency: string }
+  | { kind: "document_changed_action"; vehicleId: string; vehicleLabel: string; licensePlate: string | null; recordType: string; confirmedAt: string }
+);
 
 export interface FleetOverview {
   summary: FleetSummary;
@@ -364,13 +386,13 @@ function buildRows(
   });
 }
 
-/** The five org-scoped queries every fleet surface shares. */
+/** The org-scoped queries every fleet surface shares. */
 async function fetchFleetData(organizationId: string) {
   const supabase = await createClient();
   const from = monthStartIso();
   const to = nextMonthStartIso();
 
-  const [vehiclesRes, issuesRes, docsRes, remindersRes, costsRes] =
+  const [vehiclesRes, issuesRes, docsRes, remindersRes, costsRes, intakeRes] =
     await Promise.all([
       // The operating fleet = lifecycle-active vehicles. Archived/sold vehicles
       // are history, not fleet, so they are excluded from every count.
@@ -413,6 +435,18 @@ async function fetchFleetData(organizationId: string) {
         .gte("performed_at", from)
         .lt("performed_at", to)
         .is("deleted_at", null),
+
+      // The most recent CONFIRMED document intake. Only confirmed rows are read,
+      // so an insight can never be built from a proposal nobody accepted.
+      supabase
+        .from("document_extractions")
+        .select("vehicle_id, created_record_type, confirmed_at")
+        .eq("organization_id", organizationId)
+        .eq("status", "confirmed")
+        .eq("source", "fleet_intake")
+        .not("vehicle_id", "is", null)
+        .order("confirmed_at", { ascending: false })
+        .limit(1),
     ]);
 
   if (vehiclesRes.error) throw vehiclesRes.error;
@@ -420,8 +454,18 @@ async function fetchFleetData(organizationId: string) {
   if (docsRes.error) throw docsRes.error;
   if (remindersRes.error) throw remindersRes.error;
   if (costsRes.error) throw costsRes.error;
+  // A failure here must not take the whole dashboard down: the intake trail
+  // powers one informational insight, not any operational number.
+  if (intakeRes.error) {
+    console.error("[fleet] intake trail unavailable:", { code: intakeRes.error.code });
+  }
+
+  const intakeRow = (intakeRes.data ?? [])[0] as
+    | { vehicle_id: string; created_record_type: string; confirmed_at: string }
+    | undefined;
 
   return {
+    lastConfirmedIntake: intakeRow ?? null,
     vehicles: (vehiclesRes.data ?? []) as Vehicle[],
     issues: (issuesRes.data ?? []) as unknown as IssueRow[],
     docs: (docsRes.data ?? []) as unknown as DocRow[],
@@ -441,7 +485,7 @@ async function fetchFleetData(organizationId: string) {
 // -----------------------------------------------------------------------------
 export async function getFleetOverview(): Promise<FleetOverview> {
   const { organizationId } = await requireOrganization();
-  const { vehicles, issues, docs, reminders, costs } =
+  const { vehicles, issues, docs, reminders, costs, lastConfirmedIntake } =
     await fetchFleetData(organizationId);
 
   const rows = buildRows(vehicles, issues, docs, costs);
@@ -482,12 +526,44 @@ export async function getFleetOverview(): Promise<FleetOverview> {
   // --- insights (deterministic, no generated prose) ---------------------------
   const insights: FleetInsight[] = [];
 
+  // COST ANOMALY, using the Phase 4 rule verbatim (`costs.anomalies`): at least
+  // 3 vehicles with cost, this vehicle at >= 2x the fleet average, and >= 1000
+  // absolute. Listed before "most expensive", because being the priciest
+  // vehicle in a cheap month is not itself notable — being an outlier is.
+  const anomalyId = costs.anomalies[0];
+  if (anomalyId) {
+    const v = byId.get(anomalyId);
+    const entry = costs.byVehicle.find((c) => c.vehicleId === anomalyId);
+    const withCost = costs.byVehicle.filter((c) => c.total > 0);
+    const average =
+      withCost.length > 0
+        ? withCost.reduce((n, c) => n + c.total, 0) / withCost.length
+        : 0;
+    if (v && entry) {
+      insights.push({
+        kind: "cost_anomaly",
+        severity: "warning",
+        href: `/vehicles/${v.id}`,
+        vehicleId: v.id,
+        vehicleLabel: vehicleLabel(v),
+        licensePlate: v.license_plate,
+        amount: entry.total,
+        average,
+        currency: costs.currency,
+      });
+    }
+  }
+
   const topCost = costs.byVehicle[0];
-  if (topCost && topCost.total > 0) {
+  // Suppressed when the same vehicle is already reported as an anomaly, so the
+  // list never says the same thing twice in different words.
+  if (topCost && topCost.total > 0 && topCost.vehicleId !== anomalyId) {
     const v = byId.get(topCost.vehicleId);
     if (v) {
       insights.push({
         kind: "most_expensive_vehicle",
+        severity: "info",
+        href: `/vehicles/${v.id}`,
         vehicleId: v.id,
         vehicleLabel: vehicleLabel(v),
         licensePlate: v.license_plate,
@@ -503,6 +579,9 @@ export async function getFleetOverview(): Promise<FleetOverview> {
   if (repeated) {
     insights.push({
       kind: "repeated_issues",
+      // High-priority open issues are an operational stop, not an observation.
+      severity: repeated.highPriorityIssueCount > 0 ? "critical" : "warning",
+      href: `/vehicles/${repeated.vehicle.id}`,
       vehicleId: repeated.vehicle.id,
       vehicleLabel: vehicleLabel(repeated.vehicle),
       licensePlate: repeated.vehicle.license_plate,
@@ -510,8 +589,35 @@ export async function getFleetOverview(): Promise<FleetOverview> {
     });
   }
 
+  // INCOMPLETE DATA, worded precisely. This counts vehicles whose service
+  // status cannot be determined — it does NOT claim a document is missing or
+  // that anyone is out of compliance, because nothing in the schema records
+  // which documents a given organization is required to hold.
   if (summary.serviceUnknown > 0) {
-    insights.push({ kind: "service_data_missing", count: summary.serviceUnknown });
+    insights.push({
+      kind: "service_data_missing",
+      severity: "info",
+      href: "/vehicles?filter=service_unknown",
+      count: summary.serviceUnknown,
+    });
+  }
+
+  // A confirmed document that changed what the fleet must act on. Sourced from
+  // the intake trail, so it only ever reflects records a human confirmed.
+  if (lastConfirmedIntake) {
+    const v = byId.get(lastConfirmedIntake.vehicle_id);
+    if (v) {
+      insights.push({
+        kind: "document_changed_action",
+        severity: "info",
+        href: `/vehicles/${v.id}`,
+        vehicleId: v.id,
+        vehicleLabel: vehicleLabel(v),
+        licensePlate: v.license_plate,
+        recordType: lastConfirmedIntake.created_record_type,
+        confirmedAt: lastConfirmedIntake.confirmed_at,
+      });
+    }
   }
 
   // --- upcoming deadlines ----------------------------------------------------

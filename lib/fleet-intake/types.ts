@@ -148,7 +148,8 @@ export function categoryConfidenceLevel(
 // -----------------------------------------------------------------------------
 export interface IntakeRecord {
   id: string;
-  document_id: string;
+  /** Null while a dashboard upload is still awaiting its vehicle. */
+  document_id: string | null;
   vehicle_id: string | null;
   status: IntakeStatus;
   engine: string;
@@ -166,6 +167,7 @@ export interface IntakeRecord {
   confirmed_by: string | null;
   confirmed_at: string | null;
   created_at: string;
+  content_hash: string | null;
 }
 
 /** What the model proposed for one field versus what the user confirmed. */
