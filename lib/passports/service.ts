@@ -2,7 +2,10 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { resolveAppBaseUrl } from "@/lib/app-url";
-import { requireOrganization } from "@/lib/organizations/service";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { listDocuments } from "@/lib/documents/service";
 import { listIssues } from "@/lib/issues/service";
@@ -98,7 +101,7 @@ export async function createPassport(
   options: PassportOptions,
 ): Promise<{ passportId: string; shareUrl: string | null }> {
   const supabase = await createClient();
-  const { userId } = await requireOrganization();
+  const { userId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -345,7 +348,7 @@ export async function revokePassport(
   passportId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getPassport(vehicleId, passportId);
   if (!existing) throw new PassportNotFoundError();

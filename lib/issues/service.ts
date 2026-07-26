@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireOrganization } from "@/lib/organizations/service";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { getVehicleById } from "@/lib/vehicles/service";
 import type { Vehicle } from "@/lib/vehicles/types";
@@ -102,7 +105,7 @@ export async function createIssue(
   documentId: string | null = null,
 ): Promise<string> {
   const supabase = await createClient();
-  const { userId, organizationId } = await requireOrganization();
+  const { userId, organizationId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -136,7 +139,7 @@ export async function updateIssue(
   input: IssueInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -171,7 +174,7 @@ export async function resolveIssue(
   resolutionNotes?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getIssue(vehicleId, issueId);
   if (!existing) throw new IssueNotFoundError();
@@ -200,7 +203,7 @@ export async function softDeleteIssue(
   issueId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("issue_logs")

@@ -1,6 +1,9 @@
 import "server-only";
 
-import { requireOrganization } from "@/lib/organizations/service";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { getVehicleById } from "@/lib/vehicles/service";
 import {
@@ -87,7 +90,7 @@ export async function createReminder(
   input: ReminderInput,
 ): Promise<string> {
   const supabase = await createClient();
-  const { userId } = await requireOrganization();
+  const { userId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -116,7 +119,7 @@ export async function updateReminder(
   input: ReminderInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getReminder(vehicleId, reminderId);
   if (!existing) throw new ReminderNotFoundError();
@@ -144,7 +147,7 @@ export async function setReminderStatus(
   status: "completed" | "dismissed",
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getReminder(vehicleId, reminderId);
   if (!existing) throw new ReminderNotFoundError();
@@ -172,7 +175,7 @@ export async function softDeleteReminder(
   reminderId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("reminders")

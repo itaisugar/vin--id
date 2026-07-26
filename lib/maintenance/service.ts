@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireOrganization } from "@/lib/organizations/service";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { getVehicleById } from "@/lib/vehicles/service";
 import type { Vehicle } from "@/lib/vehicles/types";
@@ -16,6 +19,14 @@ import {
  * Server-only data access for maintenance logs. Every call relies on Supabase
  * RLS (organization-scoped policies) AND additionally filters by
  * organization_id, the vehicle, and deleted_at as defense in depth.
+ *
+ * AUTHORIZATION MIRRORS THE DATABASE. Reads use `requireOrganization()` — every
+ * member of the organization may read. Writes use `requireFleetWriter()`, which
+ * is the server-side statement of the RLS write policy on this table
+ * (`organization_id = current_org_id() AND is_org_writer()`): a viewer or a
+ * driver is rejected before any statement reaches Postgres, with a clear
+ * NotAuthorizedError rather than an opaque row-level-security denial. RLS
+ * remains the second, independent enforcement layer.
  */
 
 export class VehicleNotFoundError extends Error {
@@ -104,7 +115,7 @@ export async function createMaintenanceLog(
   documentId: string | null = null,
 ): Promise<string> {
   const supabase = await createClient();
-  const { userId, organizationId } = await requireOrganization();
+  const { userId, organizationId } = await requireFleetWriter();
 
   // Vehicle membership is enforced here (getVehicleById is organization-scoped).
   const vehicle = await getVehicleById(vehicleId);
@@ -135,7 +146,7 @@ export async function updateMaintenanceLog(
   input: MaintenanceInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -162,7 +173,7 @@ export async function softDeleteMaintenanceLog(
   logId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("maintenance_logs")

@@ -1,6 +1,9 @@
 import "server-only";
 
-import { requireOrganization } from "@/lib/organizations/service";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { runMockDocumentExtraction } from "@/lib/server/ai/mock-document-extraction";
 import { getDocument } from "./service";
@@ -61,7 +64,7 @@ export async function runExtraction(
   documentId: string,
 ): Promise<string> {
   const supabase = await createClient();
-  const { userId, organizationId } = await requireOrganization();
+  const { userId, organizationId } = await requireFleetWriter();
 
   const doc = await getDocument(vehicleId, documentId);
   if (!doc) throw new DocumentNotFoundError();
@@ -107,7 +110,7 @@ export async function confirmExtraction(
   input: ConfirmExtractionInput,
 ): Promise<{ vehicleId: string | null; documentId: string }> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const { data: extraction, error: exErr } = await supabase
     .from("document_extractions")
@@ -156,7 +159,7 @@ export async function confirmExtraction(
 /** Discard a pending extraction (no change to the document). */
 export async function discardExtraction(extractionId: string): Promise<void> {
   const supabase = await createClient();
-  const { organizationId } = await requireOrganization();
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("document_extractions")
