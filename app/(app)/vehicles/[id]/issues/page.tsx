@@ -52,7 +52,7 @@ export default async function IssuesListPage({
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
           {issues.map((issue) => (
             <IssueListItem
               key={issue.id}

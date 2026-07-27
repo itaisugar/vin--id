@@ -19,6 +19,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import {
+  OPERATIONAL_STATUSES,
+  VEHICLE_TYPE_SUGGESTIONS,
+} from "@/lib/fleet/types";
+import {
   getModelsForMake,
   getVehicleMakes,
   normalizeMakeName,
@@ -48,6 +52,15 @@ const FIELD_NAMES: (keyof VehicleFormValues)[] = [
   "mileage",
   "mileage_unit",
   "photo_url",
+  // Fleet Lite fields
+  "operational_status",
+  "vehicle_type",
+  "assigned_driver_name",
+  "assigned_driver_phone",
+  "next_service_date",
+  "next_service_km",
+  "test_expiry_date",
+  "insurance_expiry_date",
 ];
 
 export function VehicleForm({
@@ -57,6 +70,7 @@ export function VehicleForm({
   cancelHref,
 }: VehicleFormProps) {
   const t = useTranslations("vehicles");
+  const tf = useTranslations("fleet");
   const [serverError, setServerError] = React.useState<string | null>(null);
 
   const {
@@ -225,6 +239,99 @@ export function VehicleForm({
         error={fieldError("photo_url")}
         registration={register("photo_url")}
       />
+
+      {/* Fleet details — collapsed by default so the required fields stay
+          minimal and the form does not become a wall of inputs. Every field
+          in here is optional except the status, which has a sane default. */}
+      <details className="rounded-xl border border-line bg-surface-2/40 open:bg-transparent">
+        <summary className="cursor-pointer select-none rounded-xl px-3 py-2.5 text-sm font-semibold text-ink marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">
+          {tf("formSection.title")}
+          <span className="ms-2 text-xs font-normal text-ink-3">
+            {tf("formSection.hint")}
+          </span>
+        </summary>
+
+        <div className="space-y-5 px-3 pb-4 pt-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="operational_status">
+              {tf("fields.operationalStatus")}
+            </Label>
+            <Select id="operational_status" {...register("operational_status")}>
+              {OPERATIONAL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {tf(`status.${s}`)}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <Field
+            name="vehicle_type"
+            label={tf("fields.vehicleType")}
+            list="vehicle-type-suggestions"
+            placeholder={tf("fields.vehicleTypePlaceholder")}
+            error={fieldError("vehicle_type")}
+            registration={register("vehicle_type")}
+          />
+          <datalist id="vehicle-type-suggestions">
+            {VEHICLE_TYPE_SUGGESTIONS.map((type) => (
+              <option key={type} value={tf(`vehicleTypes.${type}`)} />
+            ))}
+          </datalist>
+
+          <Field
+            name="assigned_driver_name"
+            label={tf("fields.assignedDriver")}
+            error={fieldError("assigned_driver_name")}
+            registration={register("assigned_driver_name")}
+          />
+          <Field
+            name="assigned_driver_phone"
+            label={tf("fields.driverPhone")}
+            type="tel"
+            inputMode="tel"
+            className="num"
+            error={fieldError("assigned_driver_phone")}
+            registration={register("assigned_driver_phone")}
+          />
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              name="next_service_date"
+              label={tf("fields.nextService")}
+              type="date"
+              className="num"
+              error={fieldError("next_service_date")}
+              registration={register("next_service_date")}
+            />
+            <Field
+              name="next_service_km"
+              label={tf("fields.nextServiceKm")}
+              type="number"
+              inputMode="numeric"
+              className="num"
+              error={fieldError("next_service_km")}
+              registration={register("next_service_km")}
+            />
+            <Field
+              name="test_expiry_date"
+              label={tf("fields.testExpiry")}
+              type="date"
+              className="num"
+              error={fieldError("test_expiry_date")}
+              registration={register("test_expiry_date")}
+            />
+            <Field
+              name="insurance_expiry_date"
+              label={tf("fields.insuranceExpiry")}
+              type="date"
+              className="num"
+              error={fieldError("insurance_expiry_date")}
+              registration={register("insurance_expiry_date")}
+            />
+          </div>
+        </div>
+      </details>
 
       {serverError ? (
         <p role="alert" className="text-sm text-danger">

@@ -1,11 +1,12 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
 import {
-  getVehicleById,
-  NotAuthenticatedError,
-} from "@/lib/vehicles/service";
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
+import { createClient } from "@/lib/supabase/server";
+import { getVehicleById } from "@/lib/vehicles/service";
 import type { Vehicle } from "@/lib/vehicles/types";
 import {
   MAINTENANCE_COLUMNS,
@@ -16,8 +17,16 @@ import {
 
 /**
  * Server-only data access for maintenance logs. Every call relies on Supabase
- * RLS (owner-scoped policies) AND additionally verifies ownership of both the
- * vehicle and the log, plus filters out soft-deleted rows.
+ * RLS (organization-scoped policies) AND additionally filters by
+ * organization_id, the vehicle, and deleted_at as defense in depth.
+ *
+ * AUTHORIZATION MIRRORS THE DATABASE. Reads use `requireOrganization()` — every
+ * member of the organization may read. Writes use `requireFleetWriter()`, which
+ * is the server-side statement of the RLS write policy on this table
+ * (`organization_id = current_org_id() AND is_org_writer()`): a viewer or a
+ * driver is rejected before any statement reaches Postgres, with a clear
+ * NotAuthorizedError rather than an opaque row-level-security denial. RLS
+ * remains the second, independent enforcement layer.
  */
 
 export class VehicleNotFoundError extends Error {
@@ -34,18 +43,10 @@ export class MaintenanceNotFoundError extends Error {
   }
 }
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** Bump the vehicle's current_mileage upward only — never lowers it. */
 async function maybeRaiseVehicleMileage(
   supabase: SupabaseClient,
-  userId: string,
+  organizationId: string,
   vehicle: Vehicle,
   mileage: number | null | undefined,
 ): Promise<void> {
@@ -57,7 +58,7 @@ async function maybeRaiseVehicleMileage(
     .from("vehicles")
     .update({ current_mileage: mileage })
     .eq("id", vehicle.id)
-    .eq("owner_user_id", userId);
+    .eq("organization_id", organizationId);
 }
 
 /** All non-deleted logs for a vehicle, newest service date first. */
@@ -65,13 +66,13 @@ export async function listMaintenanceLogs(
   vehicleId: string,
 ): Promise<MaintenanceLog[]> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("maintenance_logs")
     .select(MAINTENANCE_COLUMNS)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("performed_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -86,14 +87,14 @@ export async function getMaintenanceLog(
   logId: string,
 ): Promise<MaintenanceLog | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("maintenance_logs")
     .select(MAINTENANCE_COLUMNS)
     .eq("id", logId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -114,9 +115,9 @@ export async function createMaintenanceLog(
   documentId: string | null = null,
 ): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId, organizationId } = await requireFleetWriter();
 
-  // Ownership of the vehicle is enforced here (getVehicleById is owner-scoped).
+  // Vehicle membership is enforced here (getVehicleById is organization-scoped).
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
 
@@ -134,7 +135,7 @@ export async function createMaintenanceLog(
 
   if (error) throw error;
 
-  await maybeRaiseVehicleMileage(supabase, userId, vehicle, input.mileage);
+  await maybeRaiseVehicleMileage(supabase, organizationId, vehicle, input.mileage);
   return data.id as string;
 }
 
@@ -145,7 +146,7 @@ export async function updateMaintenanceLog(
   input: MaintenanceInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -158,12 +159,12 @@ export async function updateMaintenanceLog(
     .update(maintenanceInputToRow(input))
     .eq("id", logId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
 
-  await maybeRaiseVehicleMileage(supabase, userId, vehicle, input.mileage);
+  await maybeRaiseVehicleMileage(supabase, organizationId, vehicle, input.mileage);
 }
 
 /** Soft delete: set deleted_at. Never hard-deletes. */
@@ -172,14 +173,14 @@ export async function softDeleteMaintenanceLog(
   logId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("maintenance_logs")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", logId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;

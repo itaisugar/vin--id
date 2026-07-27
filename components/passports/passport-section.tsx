@@ -43,7 +43,7 @@ export async function PassportSection({
           </p>
         ) : (
           <>
-            <div className="grid gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
               {recent.map((passport) => (
                 <PassportCard
                   key={passport.id}

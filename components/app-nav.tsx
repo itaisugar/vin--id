@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { navItems, type NavItem } from "@/components/nav-config";
+import { driverNavItems, navItems, type NavItem } from "@/components/nav-config";
 import { PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -13,13 +13,14 @@ function useIsActive() {
 }
 
 /** Desktop: vertical sidebar navigation (hidden on mobile). */
-export function SidebarNav() {
+export function SidebarNav({ isDriver = false }: { isDriver?: boolean }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
+  const items = isDriver ? driverNavItems : navItems;
 
   return (
     <nav className="flex flex-col gap-1" aria-label="Primary">
-      {navItems.map(({ key, href, icon: Icon, enabled }) => {
+      {items.map(({ key, href, icon: Icon, enabled }) => {
         const active = enabled && isActive(href);
         const content = (
           <>
@@ -103,9 +104,33 @@ function BottomNavSlot({
  * Mobile: fixed bottom navigation bar (hidden on desktop). Five slots — two nav
  * items, the raised amber quick-action FAB, then the remaining two nav items.
  */
-export function BottomNav() {
+export function BottomNav({ isDriver = false }: { isDriver?: boolean }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
+
+  // A driver gets a simple two-slot bar. The centre FAB is the document scanner,
+  // which creates fleet records — a write path drivers do not have — so it is
+  // omitted rather than rendered into a permission error.
+  if (isDriver) {
+    return (
+      <nav
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[rgba(16,19,23,0.92)] pb-[calc(0.625rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+        aria-label="Primary"
+      >
+        <ul className="grid grid-cols-2 items-center pt-2.5">
+          {driverNavItems.map((item) => (
+            <li key={item.key}>
+              <BottomNavSlot
+                item={item}
+                active={item.enabled && isActive(item.href)}
+                label={t(item.key)}
+              />
+            </li>
+          ))}
+        </ul>
+      </nav>
+    );
+  }
 
   const left = navItems.slice(0, 2);
   const right = navItems.slice(2);

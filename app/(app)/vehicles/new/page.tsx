@@ -1,8 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { createVehicleAction } from "../actions";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
+import { redirectDriversAway } from "@/lib/drivers/guard";
 
 export default async function NewVehiclePage() {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
   const t = await getTranslations("vehicles");
 
   return (

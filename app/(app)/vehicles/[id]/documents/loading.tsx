@@ -5,7 +5,7 @@ export default function DocumentsListLoading() {
         <div className="h-7 w-36 animate-pulse rounded bg-surface-2" />
         <div className="h-10 w-36 animate-pulse rounded-md bg-surface-2" />
       </div>
-      <div className="grid gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-24 animate-pulse rounded-lg bg-surface-2" />
         ))}

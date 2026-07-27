@@ -1,11 +1,11 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
 import {
-  getVehicleById,
-  NotAuthenticatedError,
-} from "@/lib/vehicles/service";
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
+import { createClient } from "@/lib/supabase/server";
+import { getVehicleById } from "@/lib/vehicles/service";
 import {
   REMINDER_COLUMNS,
   reminderInputToRow,
@@ -14,8 +14,8 @@ import {
 } from "./types";
 
 /**
- * Server-only data access for reminders. Relies on Supabase RLS (owner-scoped)
- * AND additionally verifies ownership of the vehicle and the reminder.
+ * Server-only data access for reminders. Relies on Supabase RLS
+ * (organization-scoped) AND additionally filters by organization_id.
  *
  * TODO(notifications): email/push delivery is out of scope for this phase.
  * Urgency is derived and shown in the UI only; no background jobs run.
@@ -46,24 +46,16 @@ export interface ReminderWithVehicle {
   };
 }
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** All non-deleted reminders for a vehicle (any status). */
 export async function listReminders(vehicleId: string): Promise<Reminder[]> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("reminders")
     .select(REMINDER_COLUMNS)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("due_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -78,14 +70,14 @@ export async function getReminder(
   reminderId: string,
 ): Promise<Reminder | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("reminders")
     .select(REMINDER_COLUMNS)
     .eq("id", reminderId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -98,7 +90,7 @@ export async function createReminder(
   input: ReminderInput,
 ): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -127,7 +119,7 @@ export async function updateReminder(
   input: ReminderInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getReminder(vehicleId, reminderId);
   if (!existing) throw new ReminderNotFoundError();
@@ -142,7 +134,7 @@ export async function updateReminder(
     .update({ ...reminderInputToRow(input), completed_at: completedAt })
     .eq("id", reminderId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -155,7 +147,7 @@ export async function setReminderStatus(
   status: "completed" | "dismissed",
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getReminder(vehicleId, reminderId);
   if (!existing) throw new ReminderNotFoundError();
@@ -171,7 +163,7 @@ export async function setReminderStatus(
     })
     .eq("id", reminderId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -183,14 +175,14 @@ export async function softDeleteReminder(
   reminderId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("reminders")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", reminderId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
 
   if (error) throw error;
@@ -204,14 +196,14 @@ export async function listActiveRemindersForUser(): Promise<
   ReminderWithVehicle[]
 > {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("reminders")
     .select(
       `${REMINDER_COLUMNS}, vehicles!inner(id, make, model, current_mileage, status, deleted_at)`,
     )
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .eq("status", "pending")
     .is("deleted_at", null)
     .eq("vehicles.status", "active")

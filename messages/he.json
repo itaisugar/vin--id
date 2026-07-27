@@ -26,11 +26,13 @@
     }
   },
   "nav": {
-    "dashboard": "לוח בקרה",
+    "dashboard": "לוח הצי",
     "vehicles": "רכבים",
     "diagnose": "אבחון",
     "settings": "הגדרות",
-    "scan": "סריקת מסמך"
+    "scan": "סריקת מסמך",
+    "organization": "ארגון",
+    "myVehicle": "הרכב שלי"
   },
   "install": {
     "title": "הוסף את Vin.ID למסך הבית",
@@ -444,7 +446,13 @@
         "invalidMileage": "הזן קילומטראז' תקין.",
         "invalidUrl": "הזן כתובת URL תקינה.",
         "saveFailed": "לא הצלחנו לשמור את הרכב. נסה שוב.",
-        "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב."
+        "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב.",
+        "invalidDate": "הזן תאריך תקין.",
+        "invalidPhone": "הזן מספר טלפון תקין.",
+        "notAuthorized": "אין לך הרשאה לבצע פעולה זו.",
+        "noOrganization": "החשבון שלך אינו משוייך לארגון.",
+        "notFound": "הרכב לא נמצא.",
+        "invalidStatus": "סטטוס לא חוקי."
       }
     }
   },
@@ -685,7 +693,8 @@
         "fileTooLarge": "הקובץ גדול מ-5MB.",
         "uploadFailed": "לא הצלחנו להעלות את הקובץ. נסה שוב.",
         "saveFailed": "לא הצלחנו לשמור את המסמך. נסה שוב.",
-        "deleteFailed": "לא הצלחנו להסיר את המסמך. נסה שוב."
+        "deleteFailed": "לא הצלחנו להסיר את המסמך. נסה שוב.",
+        "notAuthorized": "אין לך הרשאה לבצע פעולה זו."
       }
     },
     "extraction": {
@@ -1199,7 +1208,505 @@
       "vehicleRequired": "בחר רכב.",
       "vehicleNotFound": "הרכב לא נמצא.",
       "saveFailed": "לא הצלחנו לשמור את הרשומה. נסה שוב.",
-      "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP)."
+      "pdfNotSupported": "סריקת PDF עדיין לא נתמכת. אנא העלה תמונה (JPEG, ‏PNG או WebP).",
+      "notAllowed": "אין לך הרשאה להוסיף רשומות עבור רכב זה."
+    }
+  },
+  "fleet": {
+    "title": "לוח הצי",
+    "subtitle": "הצי שלך במבט אחד",
+    "untitledVehicle": "רכב ללא שם",
+    "openIssuesCount": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+    "viewerReadOnly": "יש לך גישת צפייה בלבד.",
+    "status": {
+      "active": "פעיל",
+      "needs_service": "דורש טיפול",
+      "issue_open": "תקלה פתוחה",
+      "out_of_service": "מושבת",
+      "in_garage": "במוסך",
+      "documents_missing": "חסרים מסמכים"
+    },
+    "deadline": {
+      "overdue": "בפיגור",
+      "due_soon": "מתקרב",
+      "upcoming": "עתידי"
+    },
+    "summary": {
+      "heading": "מצב הצי",
+      "totalVehicles": "סה״כ רכבים",
+      "operational": "תקינים",
+      "requiresAttention": "דורשים טיפול",
+      "servicesOverdue": "טיפול באיחור",
+      "servicesDueSoon": "טיפול מתקרב",
+      "documentsExpired": "מסמכים שפגו",
+      "documentsExpiringSoon": "מסמכים לקראת פקיעה",
+      "openIssues": "תקלות פתוחות",
+      "monthCost": "עלות החודש",
+      "mixedCurrencyNote": "עלויות החודש נרשמו ביותר ממטבע אחד. מסוכם רק המטבע הנפוץ ביותר — לא מתבצעת המרה."
+    },
+    "attention": {
+      "heading": "רכבים הדורשים טיפול",
+      "empty": "אין רכבים הדורשים טיפול."
+    },
+    "reasons": {
+      "openIssues": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+      "service": {
+        "overdue": "טיפול בפיגור ({date})",
+        "due_soon": "טיפול בתאריך {date}",
+        "upcoming": "טיפול בתאריך {date}"
+      },
+      "serviceNoDate": {
+        "overdue": "טיפול בפיגור",
+        "due_soon": "טיפול מתקרב",
+        "upcoming": "טיפול מתוכנן"
+      },
+      "serviceKm": {
+        "overdue": "עבר קילומטראז׳ טיפול ({km})",
+        "due_soon": "טיפול ב-{km}",
+        "upcoming": "טיפול ב-{km}"
+      },
+      "test": {
+        "overdue": "הטסט פג ({date})",
+        "due_soon": "הטסט פג ב-{date}",
+        "upcoming": "הטסט פג ב-{date}"
+      },
+      "insurance": {
+        "overdue": "הביטוח פג ({date})",
+        "due_soon": "הביטוח פג ב-{date}",
+        "upcoming": "הביטוח פג ב-{date}"
+      }
+    },
+    "deadlines": {
+      "heading": "טיפולים ומסמכים מתקרבים",
+      "empty": "אין טיפולים או מסמכים שמסתיימים ב-30 הימים הקרובים.",
+      "kind": {
+        "next_service": "טיפול הבא",
+        "test_expiry": "תפוגת טסט",
+        "insurance_expiry": "תפוגת ביטוח",
+        "document_expiry": "תפוגת מסמך",
+        "reminder": "תזכורת"
+      }
+    },
+    "filters": {
+      "label": "סינון רכבים",
+      "all": "הכל",
+      "needs_attention": "דורש טיפול",
+      "active": "פעיל",
+      "needs_service": "דורש טיפול",
+      "issue_open": "תקלה פתוחה",
+      "out_of_service": "מושבת",
+      "in_garage": "במוסך",
+      "documents_missing": "חסרים מסמכים",
+      "service_overdue": "טיפול באיחור",
+      "service_due_soon": "טיפול בקרוב",
+      "document_expiring": "מסמכים",
+      "open_issues": "תקלות פתוחות",
+      "driver_assigned": "עם נהג",
+      "driver_unassigned": "ללא נהג"
+    },
+    "sort": {
+      "label": "מיון לפי",
+      "status": "סטטוס",
+      "license_plate": "מספר רישוי",
+      "next_service": "טיפול הבא",
+      "document_expiry": "תפוגה הקרובה",
+      "recently_updated": "עודכן לאחרונה",
+      "urgency": "דחיפות",
+      "name": "שם הרכב",
+      "cost": "עלות החודש"
+    },
+    "vehicles": {
+      "title": "רכבי הצי",
+      "noneForFilter": "אין רכבים התואמים ל״{filter}״.",
+      "clearFilter": "הצג את כל הרכבים",
+      "showing": "מוצגים {shown} מתוך {total}",
+      "noneForSearch": "לא נמצאו רכבים התואמים \"{term}\"."
+    },
+    "fields": {
+      "operationalStatus": "סטטוס תפעולי",
+      "vehicleType": "סוג רכב",
+      "vehicleTypePlaceholder": "למשל: מסחרית",
+      "assignedDriver": "נהג משוייך",
+      "driverPhone": "טלפון נהג",
+      "currentKm": "ק\"מ נוכחי",
+      "nextService": "טיפול הבא",
+      "nextServiceKm": "ק\"מ לטיפול הבא",
+      "testExpiry": "תפוגת טסט",
+      "insuranceExpiry": "תפוגת ביטוח",
+      "nearestExpiry": "פקיעה קרובה",
+      "openIssues": "תקלות פתוחות",
+      "monthCost": "עלות החודש"
+    },
+    "vehicleTypes": {
+      "car": "רכב פרטי",
+      "van": "מסחרית",
+      "pickup": "טנדר",
+      "truck": "משאית",
+      "motorcycle": "אופנוע",
+      "bus": "אוטובוס",
+      "other": "אחר"
+    },
+    "formSection": {
+      "title": "פרטי צי",
+      "hint": "אופציונלי"
+    },
+    "infoCard": {
+      "title": "מידע צי",
+      "timelineSoon": "ציר זמן מלא של אירועי הרכב יגיע בשלב מאוחר יותר."
+    },
+    "emptyFleet": {
+      "heading": "הוסף את הרכב הראשון",
+      "explainer": "Vin.ID Fleet Lite מרכז את הרכבים, הטיפולים, המסמכים והתאריכים במקום אחד — במקום גליונות ותיקיות.",
+      "step1": "הוסף רכב עם מספר רישוי וק\"מ נוכחי",
+      "step2": "קבע תאריכי טסט, ביטוח וטיפול הבא",
+      "step3": "הלוח יראה לך מה דורש טיפול",
+      "cta": "הוסף רכב"
+    },
+    "noOrganization": {
+      "title": "לא נמצא ארגון",
+      "body": "החשבון שלך עדיין לא משוייך לארגון, לכן אין צי להציג.",
+      "hint": "פנה לתמיכה — לא אבד שום מידע."
+    },
+    "errors": {
+      "notAuthorized": "אין לך הרשאה לבצע פעולה זו.",
+      "noOrganization": "החשבון שלך אינו משוייך לארגון.",
+      "notFound": "הרכב לא נמצא.",
+      "saveFailed": "לא הצלחנו לשמור את השינוי. נסה שוב.",
+      "invalidStatus": "סטטוס לא חוקי."
+    },
+    "actions": {
+      "heading": "דורש טיפול היום",
+      "allClear": "אין מה לטפל היום.",
+      "allClearBody": "אין טיפולים באיחור, מסמכים שפגו או תקלות פתוחות בצי.",
+      "untitledVehicle": "רכב ללא שם",
+      "urgency": {
+        "critical": "באיחור",
+        "high": "דחוף",
+        "soon": "בקרוב",
+        "info": "לבדיקה"
+      },
+      "reasons": {
+        "service_overdue": "הטיפול באיחור",
+        "service_due_soon": "טיפול נדרש ב-{date}",
+        "document_expired": "{count, plural, one {מסמך אחד פג תוקף} other {# מסמכים פגי תוקף}}",
+        "document_expiring": "{count, plural, one {מסמך אחד לקראת פקיעה} other {# מסמכים לקראת פקיעה}}",
+        "issue_high_priority": "{count, plural, one {תקלה דחופה אחת פתוחה} other {# תקלות דחופות פתוחות}}",
+        "issue_open": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
+        "status_unavailable": "הרכב אינו זמין לעבודה",
+        "missing_service_data": "לא הוגדר תאריך טיפול או יעד קילומטראז׳",
+        "cost_anomaly": "עלויות גבוהות משמעותית מממוצע הצי החודש"
+      }
+    },
+    "insights": {
+      "heading": "תובנות צי",
+      "aVehicle": "רכב",
+      "mostExpensive": "{vehicle} הוא היקר ביותר החודש — {amount}.",
+      "repeatedIssues": "ל{vehicle} יש {count} תקלות פתוחות.",
+      "serviceDataMissing": "{count, plural, one {לרכב אחד אין תאריך טיפול או יעד קילומטראז׳} other {ל-# רכבים אין תאריך טיפול או יעד קילומטראז׳}}, ולכן לא ניתן לחשב את מצב הטיפול.",
+      "costAnomaly": "העלות של {vehicle} החודש היא {amount} — יותר מכפליים מהממוצע בצי, {average}.",
+      "documentChangedAction": "מסמך {type} שאושר עדכן את מה שנדרש עבור {vehicle}.",
+      "recordTypes": {
+        "maintenance": "טיפול",
+        "insurance": "ביטוח",
+        "registration": "רישיון",
+        "inspection": "טסט"
+      }
+    },
+    "search": {
+      "label": "חיפוש רכבים",
+      "placeholder": "מספר רישוי, יצרן, דגם או נהג",
+      "clear": "ניקוי"
+    },
+    "vehicleStatus": {
+      "heading": "מצב תפעולי",
+      "upcoming": "דורש טיפול",
+      "source": {
+        "calculated": "מחושב",
+        "records": "מתוך רשומות",
+        "missing": "לא הוגדר"
+      },
+      "service": {
+        "label": "הטיפול הבא",
+        "unknown": "לא הוגדר יעד",
+        "atKm": "ב-{km}"
+      },
+      "documents": {
+        "label": "פקיעת המסמך הקרובה",
+        "none": "לא נמצאו",
+        "flaggedMissing": "סומן כחסר",
+        "counts": "{expired} פגו · {expiring} לקראת פקיעה"
+      },
+      "issues": {
+        "label": "תקלות פתוחות",
+        "highPriority": "{count} דחופות"
+      },
+      "cost": {
+        "label": "עלות החודש",
+        "none": "לא נרשמה"
+      }
+    },
+    "actionsCount": "{count, plural, one {פעולה אחת} other {# פעולות}}",
+    "intake": {
+      "title": "הוספה ממסמך",
+      "subtitle": "צלמו חשבונית, תעודת ביטוח, רישיון רכב או דוח טסט. שום דבר לא נשמר עד שתבדקו ותאשרו.",
+      "addFromDocument": "הוספת רישום ממסמך",
+      "noVehicles": "יש להוסיף רכב לפני ייבוא מסמכים.",
+      "fileLabel": "תמונת המסמך",
+      "fileHelp": "JPEG,‏ PNG או WebP, עד ‎10‎ מגה-בייט. קובצי PDF אינם נתמכים עדיין.",
+      "vehicleOptionalLabel": "רכב (לא חובה)",
+      "vehicleUnknown": "שהמסמך יקבע",
+      "vehicleOptionalHelp": "אפשר להשאיר ריק — מספר הרישוי או מספר השלדה שעל המסמך משמשים לזיהוי הרכב, ואתם מאשרים את ההתאמה לפני שנשמר משהו.",
+      "uploadAndExtract": "העלאה וקריאת המסמך",
+      "extracting": "קורא את המסמך…",
+      "consentNote": "התמונה נשלחת לספק החילוץ מהשרת שלנו כדי לקרוא את תוכנה. היא לעולם אינה משותפת בפומבי.",
+      "reviewTitle": "בדיקה לפני שמירה",
+      "reviewSubtitle": "בדקו כל ערך. עדיין לא נשמר דבר.",
+      "nothingSavedYet": "לא נוצר רישום עד שתלחצו על אישור. ביטול משאיר את הצי ללא שינוי.",
+      "vehicleSection": "רכב",
+      "detailsSection": "פרטים",
+      "vehicleLabel": "שמירת המסמך עבור",
+      "chooseVehicle": "בחירת רכב…",
+      "mustChooseVehicle": "לא ניתן היה לזהות את הרכב בוודאות — יש לבחור אותו ידנית.",
+      "identifiersFound": "נמצא במסמך — מספר רישוי: {registration}, מספר שלדה: {vin}",
+      "noIdentifiers": "לא נמצאו מספר רישוי או מספר שלדה במסמך, לכן יש לבחור את הרכב ידנית.",
+      "vehicleConflict": "המזהים שבמסמך אינם תואמים לרכב שממנו התחלתם. יש לבחור את הרכב הנכון לפני האישור.",
+      "categoryLabel": "סוג המסמך",
+      "chooseCategory": "בחירת סוג…",
+      "categories": {
+        "maintenance": "חשבונית טיפול או תיקון",
+        "insurance": "ביטוח",
+        "registration": "רישיון רכב",
+        "inspection": "טסט שנתי"
+      },
+      "lowConfidence": "לא ניתן היה לקבוע את סוג המסמך. יש לבחור אותו ידנית.",
+      "checkCategory": "נא לבדוק את סוג המסמך — הזיהוי לא היה ודאי.",
+      "duplicateWarning": "הקובץ הזה כבר הועלה {count, plural, one {פעם אחת} other {# פעמים}}. יש לאשר רק אם מדובר באמת ברישום נפרד.",
+      "aiSuggested": "נקרא מהמסמך: {value}",
+      "aiFoundNothing": "לא נמצא במסמך — אפשר להוסיף ידנית אם צריך.",
+      "youChanged": "שיניתם את זה",
+      "fields": {
+        "date": "תאריך",
+        "garage": "מוסך או ספק",
+        "serviceType": "סוג העבודה",
+        "description": "מה בוצע",
+        "mileage": "קילומטראז'",
+        "cost": "סכום כולל",
+        "nextServiceDate": "הטיפול הבא בתאריך",
+        "nextServiceKm": "הטיפול הבא בקילומטראז'",
+        "insurer": "חברת ביטוח",
+        "insuranceType": "סוג הכיסוי",
+        "startDate": "בתוקף מ",
+        "endDate": "בתוקף עד",
+        "notes": "הערות"
+      },
+      "confirm": "אישור ושמירה",
+      "confirming": "שומר…",
+      "cancel": "ביטול",
+      "retry": "ניסיון עם מסמך אחר",
+      "startOver": "התחלה מחדש",
+      "extractionFailed": "לא ניתן היה לקרוא את המסמך",
+      "extractionFailedBody": "שום דבר לא נשמר. אפשר לנסות תמונה ברורה יותר, או להוסיף את הרישום ידנית.",
+      "noLongerAvailable": "הבדיקה הזו כבר אינה זמינה. היא בוטלה או הוחלפה בהעלאה חדשה יותר.",
+      "errors": {
+        "notAuthenticated": "יש להתחבר מחדש.",
+        "notAuthorized": "אין לך הרשאה לייבא מסמכים.",
+        "extractionNotFound": "בדיקת המסמך הזו כבר לא קיימת.",
+        "vehicleNotFound": "הרכב הזה כבר לא זמין.",
+        "vehicleRequired": "יש לבחור רכב.",
+        "categoryRequired": "יש לבחור סוג מסמך.",
+        "invalidCategory": "לא ניתן לשמור את סוג המסמך הזה.",
+        "invalidPayload": "יש לבדוק את הערכים המסומנים ולנסות שוב.",
+        "stale": "הבדיקה הזו בוטלה ולא ניתן לאשר אותה יותר.",
+        "fileRequired": "יש לבחור תמונת מסמך.",
+        "invalidFileType": "יש להשתמש בתמונת JPEG,‏ PNG או WebP.",
+        "fileTooLarge": "התמונה גדולה מדי. יש להשתמש בתמונה עד ‎10‎ מגה-בייט.",
+        "extractFailed": "לא ניתן היה לקרוא את המסמך. שום דבר לא נשמר.",
+        "uploadFailed": "ההעלאה נכשלה. שום דבר לא נשמר.",
+        "saveFailed": "לא ניתן היה לשמור. יש לנסות שוב."
+      }
+    }
+  },
+  "organization": {
+    "roles": {
+      "owner": "בעלים",
+      "admin": "מנהל",
+      "fleet_manager": "מנהל צי",
+      "viewer": "צופה",
+      "driver": "נהג"
+    },
+    "team": {
+      "title": "ארגון",
+      "subtitle": "הצוות שלך ומי מורשה לעשות מה.",
+      "yourRole": "התפקיד שלך בארגון",
+      "untitledOrganization": "ארגון ללא שם",
+      "noOrganization": "החשבון שלך עדיין לא משויך לארגון. בקש מבעלים או ממנהל להזמין אותך.",
+      "readOnlyNotice": "רק בעלים ומנהלים יכולים לנהל חברי צוות והזמנות.",
+      "cancel": "ביטול",
+      "members": {
+        "title": "חברי צוות",
+        "empty": "אין עדיין חברי צוות.",
+        "you": "(אתה)",
+        "roleLabel": "תפקיד",
+        "remove": "הסרה",
+        "removing": "מסיר…",
+        "removed": "חבר הצוות הוסר.",
+        "roleUpdated": "התפקיד עודכן.",
+        "thisMember": "חבר צוות זה",
+        "confirmRemoveTitle": "להסיר את חבר הצוות?",
+        "confirmRemoveBody": "{name} יאבד מיד גישה לרכבים ולמסמכים של הארגון הזה."
+      },
+      "invite": {
+        "title": "הזמנת עמית",
+        "help": "הוא יקבל קישור לשימוש חד-פעמי, שתקף רק לכתובת המייל שלו.",
+        "emailLabel": "כתובת מייל",
+        "emailPlaceholder": "colleague@company.com",
+        "roleLabel": "תפקיד",
+        "roleHelp": "מנהלי צי יכולים לערוך רכבים ומסמכים. צופים יכולים לצפות בכל הצי בלבד. נהגים רואים רק את הרכב שהוקצה להם. מנהלים יכולים גם לנהל את הצוות.",
+        "submit": "יצירת הזמנה",
+        "creating": "יוצר…",
+        "created": "נוצרה הזמנה עבור {email}.",
+        "copyOnce": "העתק את הקישור עכשיו ושלח אותו — הוא מוצג פעם אחת בלבד ולא ניתן לשחזור.",
+        "copy": "העתקת קישור",
+        "copied": "הועתק"
+      },
+      "invitations": {
+        "title": "הזמנות ממתינות",
+        "empty": "אין הזמנות ממתינות.",
+        "expiresAt": "פג תוקף ב-{date}",
+        "revoke": "ביטול",
+        "revoking": "מבטל…",
+        "revoked": "ההזמנה בוטלה.",
+        "confirmRevokeTitle": "לבטל את ההזמנה?",
+        "confirmRevokeBody": "הקישור שנשלח אל {email} יפסיק לעבוד מיד."
+      },
+      "errors": {
+        "notAuthorized": "אין לך הרשאה לבצע פעולה זו.",
+        "invalidEmail": "הזן כתובת מייל תקינה.",
+        "invalidRole": "בחר תפקיד תקין.",
+        "alreadyMember": "האדם הזה כבר חבר בארגון.",
+        "duplicatePending": "כבר קיימת הזמנה ממתינה לכתובת הזו. בטל אותה כדי לשלוח חדשה.",
+        "linkUnavailable": "לא ניתן היה ליצור את קישור ההזמנה כי כתובת האפליקציה אינה מוגדרת.",
+        "memberNotFound": "חבר הצוות הזה כבר לא קיים.",
+        "lastOwner": "בארגון חייב להישאר לפחות בעלים אחד. מנה מישהו אחר כבעלים תחילה.",
+        "cannotManageOwner": "רק בעלים יכול לשנות או להסיר בעלים אחר.",
+        "copyFailed": "ההעתקה האוטומטית נכשלה. סמן את הקישור והעתק ידנית.",
+        "saveFailed": "משהו השתבש. נסה שוב."
+      }
+    }
+  },
+  "invite": {
+    "heading": "הוזמנת אל {organization}",
+    "roleLine": "תצטרף בתפקיד {role}.",
+    "sentTo": "ההזמנה נשלחה אל",
+    "signInPrompt": "התחבר או צור חשבון כדי לאשר אותה.",
+    "signIn": "התחברות",
+    "signUp": "יצירת חשבון",
+    "signedInAs": "אתה מחובר בתור",
+    "switchAccount": "התחברות עם חשבון אחר",
+    "accept": "אישור ההזמנה",
+    "accepting": "מאשר…",
+    "goToApp": "מעבר לאפליקציה",
+    "roles": {
+      "admin": "מנהל",
+      "fleet_manager": "מנהל צי",
+      "viewer": "צופה",
+      "driver": "נהג"
+    },
+    "states": {
+      "success": {
+        "title": "הצטרפת!",
+        "body": "יש לך עכשיו גישה לצי של הארגון."
+      },
+      "invalid": {
+        "title": "קישור ההזמנה אינו תקין",
+        "body": "ודא שהעתקת את הקישור המלא, או בקש הזמנה חדשה."
+      },
+      "expired": {
+        "title": "תוקף ההזמנה פג",
+        "body": "קישורי הזמנה תקפים ל-7 ימים. בקש קישור חדש."
+      },
+      "revoked": {
+        "title": "ההזמנה בוטלה",
+        "body": "בקש מבעלים או ממנהל בארגון לשלוח הזמנה חדשה."
+      },
+      "accepted": {
+        "title": "ההזמנה כבר נוצלה",
+        "body": "אם זה היית אתה, פשוט התחבר. אחרת בקש הזמנה חדשה."
+      },
+      "email_mismatch": {
+        "title": "ההזמנה מיועדת לכתובת מייל אחרת",
+        "body": "התחבר עם הכתובת שאליה נשלחה ההזמנה ופתח שוב את הקישור."
+      },
+      "not_authenticated": {
+        "title": "צריך להתחבר קודם",
+        "body": "התחבר עם כתובת המייל שהוזמנה ופתח שוב את הקישור."
+      },
+      "already_member": {
+        "title": "אתה כבר שייך לארגון אחר",
+        "body": "חשבון יכול להיות בארגון אחד בכל רגע. בקש להסיר אותך מהארגון הנוכחי תחילה."
+      },
+      "failed": {
+        "title": "משהו השתבש",
+        "body": "לא ניתן היה לאשר את ההזמנה. נסה שוב."
+      }
+    }
+  },
+  "driver": {
+    "title": "הרכב שלי",
+    "subtitle": "הוקצה לך על ידי {organization}",
+    "untitled": "רכב",
+    "assignedSince": "הוקצה לך מתאריך {date}",
+    "noAssignment": {
+      "title": "עדיין לא הוקצה רכב",
+      "body": "לאחר שמנהל הצי יקצה לך רכב, הפרטים שלו, היסטוריית הטיפולים והמסמכים המשותפים יופיעו כאן."
+    },
+    "fields": {
+      "plate": "מספר רישוי",
+      "mileage": "קילומטראז'",
+      "nextService": "הטיפול הבא",
+      "testExpiry": "תוקף הטסט",
+      "insuranceExpiry": "תוקף הביטוח",
+      "vin": "מספר שלדה"
+    },
+    "maintenance": {
+      "title": "היסטוריית טיפולים",
+      "empty": "אין עדיין רישומי טיפולים.",
+      "untyped": "טיפול"
+    },
+    "reminders": {
+      "title": "תזכורות",
+      "due": "לביצוע עד {date}"
+    },
+    "documents": {
+      "title": "מסמכים משותפים",
+      "empty": "מנהל הצי לא שיתף מסמכים עבור הרכב הזה.",
+      "untitled": "מסמך",
+      "open": "פתיחה"
+    },
+    "assignment": {
+      "title": "הנהג המשויך",
+      "none": "לא הוקצה נהג לרכב הזה.",
+      "unnamed": "נהג ללא שם",
+      "assign": "הקצאת נהג",
+      "assignLabel": "הקצאת נהג",
+      "replace": "החלפת נהג",
+      "replaceLabel": "החלפה ל",
+      "unassign": "ביטול הקצאה",
+      "choose": "בחירת נהג…",
+      "noEligibleDrivers": "אף אחד בארגון הזה לא מוגדר עדיין כנהג. יש להזמין נהג ממסך הארגון תחילה.",
+      "noteLabel": "הערה (לא חובה)",
+      "notePlaceholder": "לדוגמה: משמרת ימי חול",
+      "noteHelp": "גלוי למנהלים בלבד — הנהג לעולם לא רואה את ההערה הזו.",
+      "willMove": "הנהג הזה משויך כרגע לרכב אחר. הקצאה כאן תסיים את השיוך הקודם.",
+      "history": "הקצאות קודמות"
+    },
+    "errors": {
+      "notAuthenticated": "יש להתחבר מחדש.",
+      "notAuthorized": "אין לך הרשאה לשנות הקצאות נהגים.",
+      "vehicleNotFound": "הרכב הזה כבר לא זמין.",
+      "memberNotFound": "המשתמש הזה כבר לא בארגון.",
+      "notADriver": "רק חברי צוות בתפקיד נהג יכולים לקבל רכב.",
+      "saveFailed": "לא ניתן היה לשמור את ההקצאה. יש לנסות שוב."
     }
   }
 }

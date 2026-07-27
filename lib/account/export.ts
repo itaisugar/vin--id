@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/server";
  * Server-only data export for the signed-in user (Phase 6G-lite).
  *
  * Every query uses the user's own RLS-scoped client, so a user can only ever
- * export their own rows. We additionally redact internal/sensitive fields:
- *  - `owner_user_id` is stripped from every row (internal).
+ * export rows their organization can see. We additionally redact
+ * internal/sensitive fields:
+ *  - `owner_user_id` and `organization_id` are stripped from every row
+ *    (internal identifiers — an export should never hand out tenant ids).
  *  - `storage_path` is stripped from documents (private bucket path).
  *  - `transfer_tokens` (token_hash) and `app_events` are NOT exported at all.
  *  - `beta_feedback` is NOT exported (insert-only RLS — not readable by design).
@@ -42,7 +44,7 @@ async function requireUser() {
   return { supabase, user };
 }
 
-const INTERNAL = ["owner_user_id"];
+const INTERNAL = ["owner_user_id", "organization_id"];
 
 /**
  * Build the full JSON export payload for the current user. All collections are

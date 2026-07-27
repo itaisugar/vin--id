@@ -7,6 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FleetInfoCard } from "@/components/fleet/fleet-info-card";
+import { OperationalStatusBadge } from "@/components/fleet/operational-status-badge";
+import { VehicleFleetStatus } from "@/components/fleet/vehicle-fleet-status";
 import { ArchiveVehicleButton } from "@/components/vehicles/archive-vehicle-button";
 import { VehicleStatusBadge } from "@/components/vehicles/vehicle-status-badge";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
@@ -19,17 +22,32 @@ import { listIssues } from "@/lib/issues/service";
 import { listDocuments } from "@/lib/documents/service";
 import { listReminders } from "@/lib/reminders/service";
 import { listPassports } from "@/lib/passports/service";
+import { getFleetVehicleDetail } from "@/lib/fleet/service";
+import { getCurrentRole } from "@/lib/organizations/service";
+import { canManageAssignments, canWriteFleetData } from "@/lib/organizations/types";
+import { DriverAssignmentCard } from "@/components/drivers/driver-assignment-card";
+import { redirectDriversAway } from "@/lib/drivers/guard";
+import {
+  getCurrentAssignment,
+  getVehicleAssignmentHistory,
+  listEligibleDrivers,
+} from "@/lib/drivers/service";
 import { getVehicleById } from "@/lib/vehicles/service";
 
 export default async function VehicleDetailPage({
   params,
   searchParams,
 }: PageProps<"/vehicles/[id]">) {
+  // A driver has no Fleet vehicle detail screen — RLS would return nothing for
+  // most of it anyway. Send them to their own view.
+  await redirectDriversAway();
+
   const { id } = await params;
   const { accepted } = await searchParams;
   const t = await getTranslations("vehicles");
   const tp = await getTranslations("passports.accept");
   const tdiag = await getTranslations("diagnose");
+  const tIntake = await getTranslations("fleet.intake");
   const locale = await getLocale();
 
   const vehicle = await getVehicleById(id);
@@ -43,14 +61,33 @@ export default async function VehicleDetailPage({
     dateStyle: "medium",
   }).format(new Date(vehicle.created_at));
 
-  const [maintenanceLogs, issues, documents, reminders, passports] =
+  const [maintenanceLogs, issues, documents, reminders, passports, role, fleetRow] =
     await Promise.all([
       listMaintenanceLogs(vehicle.id),
       listIssues(vehicle.id),
       listDocuments(vehicle.id),
       listReminders(vehicle.id),
       listPassports(vehicle.id),
+      getCurrentRole(),
+      // Same rules as the dashboard, so the two screens can never disagree.
+      // Resolves within the caller's organization only: a forged id is simply
+      // absent from that org-scoped set and yields null.
+      getFleetVehicleDetail(vehicle.id),
     ]);
+
+  // Viewers see everything but may not change anything.
+  const canWrite = role != null && canWriteFleetData(role);
+  const canAssign = canManageAssignments(role);
+
+  // Assignment data is fetched only for the roles that may act on it; for
+  // everyone else the RPCs would return empty anyway (they self-check the role).
+  const [eligibleDrivers, assignmentHistory, currentAssignment] = canAssign
+    ? await Promise.all([
+        listEligibleDrivers(),
+        getVehicleAssignmentHistory(vehicle.id),
+        getCurrentAssignment(vehicle.id),
+      ])
+    : [[], [], null];
 
   return (
     <div className="space-y-6">
@@ -79,13 +116,17 @@ export default async function VehicleDetailPage({
             >
               {tdiag("vehicleCta")}
             </Link>
-            <Link
-              href={`/vehicles/${vehicle.id}/edit`}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
-            >
-              {t("edit.action")}
-            </Link>
-            {vehicle.status === "active" ? (
+            {/* Mutating controls are hidden from viewers. The server action and
+                RLS enforce the same rule — this is only the affordance. */}
+            {canWrite ? (
+              <Link
+                href={`/vehicles/${vehicle.id}/edit`}
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-4 text-sm font-medium transition hover:bg-surface active:scale-[.98]"
+              >
+                {t("edit.action")}
+              </Link>
+            ) : null}
+            {canWrite && vehicle.status === "active" ? (
               <ArchiveVehicleButton vehicleId={vehicle.id} />
             ) : null}
           </div>
@@ -96,7 +137,13 @@ export default async function VehicleDetailPage({
             <h1 className="break-words text-2xl font-extrabold tracking-tight">
               {title}
             </h1>
-            <VehicleStatusBadge status={vehicle.status} />
+            {/* Operational status first — it answers "can this vehicle work
+                today?". The lifecycle badge is only shown once the vehicle
+                leaves active service, to avoid two competing "active" chips. */}
+            <OperationalStatusBadge status={vehicle.operational_status} />
+            {vehicle.status !== "active" ? (
+              <VehicleStatusBadge status={vehicle.status} />
+            ) : null}
           </div>
           {vehicle.license_plate || vehicle.year != null ? (
             <p className="num text-sm text-ink-2">
@@ -116,6 +163,37 @@ export default async function VehicleDetailPage({
           ) : null}
         </div>
       </div>
+
+      {/* Operational fleet status: service, documents, issues, cost, actions */}
+      {fleetRow ? (
+        <VehicleFleetStatus row={fleetRow.row} currency={fleetRow.currency} />
+      ) : null}
+
+      {/* Fleet information (Fleet Lite Phase 1) */}
+      <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />
+
+      {/* Fleet intake for THIS vehicle. The vehicle is preselected, but the
+          server still re-verifies access and warns if the document's own
+          identifiers point at a different vehicle. */}
+      {canWrite ? (
+        <Link
+          href={`/fleet-intake?vehicle=${vehicle.id}`}
+          className="flex items-center justify-center gap-2 rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent transition hover:bg-accent/15"
+        >
+          {tIntake("addFromDocument")}
+        </Link>
+      ) : null}
+
+      {/* Driver assignment — owner/admin/fleet_manager only. Hiding the card is
+          presentation; the actions and RPCs behind it re-check the role. */}
+      {canAssign ? (
+        <DriverAssignmentCard
+          vehicleId={vehicle.id}
+          current={currentAssignment}
+          eligible={eligibleDrivers}
+          history={assignmentHistory}
+        />
+      ) : null}
 
       {/* Details */}
       <Card>

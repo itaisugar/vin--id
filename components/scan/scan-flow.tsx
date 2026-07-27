@@ -29,6 +29,10 @@ export interface ScanVehicleOption {
 const EMPTY_EXTRACTION: ScanExtraction = {
   document_category: "unknown",
   confidence: null,
+  // Vehicle identifiers exist on every category (Fleet intake matches on them).
+  // Manual fallback has none to offer.
+  vehicle_registration: null,
+  vin: null,
 };
 
 type Confirm = {

@@ -145,7 +145,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   return (
     <section className="space-y-2">
       <h3 className="text-sm font-semibold text-ink-2">{title}</h3>
-      <div className="grid gap-2">{children}</div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2">{children}</div>
     </section>
   );
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
 import { trackEvent } from "@/lib/analytics/track";
+import { NotAuthorizedError, OrganizationMissingError } from "@/lib/auth/errors";
 import {
   createDocument,
   softDeleteDocument,
@@ -41,6 +42,15 @@ function revalidateVehicle(vehicleId: string) {
   revalidatePath(`/vehicles/${vehicleId}/documents`);
 }
 
+/** Map a thrown error to a translation key without leaking DB detail. */
+function toActionError(error: unknown, fallback: string): DocumentActionState {
+  if (error instanceof NotAuthorizedError) return { error: "notAuthorized" };
+  if (error instanceof OrganizationMissingError) {
+    return { error: "notAuthorized" };
+  }
+  return { error: fallback };
+}
+
 /**
  * Persist metadata for a file the client already uploaded to Storage. The file
  * descriptor (storage_path/mime/size) is validated and the path ownership is
@@ -56,8 +66,8 @@ export async function createDocumentAction(
 
   try {
     await createDocument(vehicleId, parsed.data);
-  } catch {
-    return { error: "saveFailed" };
+  } catch (error) {
+    return toActionError(error, "saveFailed");
   }
 
   // file_type is coarse (pdf/image) — never the filename, which may be personal.
@@ -86,8 +96,8 @@ export async function updateDocumentAction(
 
   try {
     await updateDocument(vehicleId, documentId, parsed.data);
-  } catch {
-    return { error: "saveFailed" };
+  } catch (error) {
+    return toActionError(error, "saveFailed");
   }
 
   revalidateVehicle(vehicleId);
@@ -100,8 +110,8 @@ export async function deleteDocumentAction(
 ): Promise<DocumentActionState> {
   try {
     await softDeleteDocument(vehicleId, documentId);
-  } catch {
-    return { error: "deleteFailed" };
+  } catch (error) {
+    return toActionError(error, "deleteFailed");
   }
 
   revalidateVehicle(vehicleId);

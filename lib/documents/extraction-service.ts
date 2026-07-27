@@ -1,8 +1,10 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
-import { NotAuthenticatedError } from "@/lib/vehicles/service";
 import { runMockDocumentExtraction } from "@/lib/server/ai/mock-document-extraction";
 import { getDocument } from "./service";
 import {
@@ -11,7 +13,7 @@ import {
 } from "./extraction-types";
 
 /**
- * Server-only document extraction (MOCK). Relies on Supabase RLS (owner-scoped)
+ * Server-only document extraction (MOCK). Relies on Supabase RLS (organization-scoped)
  * AND verifies the document/extraction belong to the user. Extraction is NEVER
  * auto-applied — it is saved as pending and the user must confirm.
  */
@@ -32,26 +34,18 @@ export class ExtractionNotFoundError extends Error {
 const EXTRACTION_COLUMNS =
   "id, document_id, status, extracted_data, created_at";
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** The latest pending extraction for a document (the one under review), or null. */
 export async function getLatestPendingExtraction(
   documentId: string,
 ): Promise<DocumentExtraction | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("document_extractions")
     .select(EXTRACTION_COLUMNS)
     .eq("document_id", documentId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .eq("status", "pending_confirmation")
     .order("created_at", { ascending: false })
     .limit(1)
@@ -70,7 +64,7 @@ export async function runExtraction(
   documentId: string,
 ): Promise<string> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId, organizationId } = await requireFleetWriter();
 
   const doc = await getDocument(vehicleId, documentId);
   if (!doc) throw new DocumentNotFoundError();
@@ -86,7 +80,7 @@ export async function runExtraction(
     .from("document_extractions")
     .delete()
     .eq("document_id", documentId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .eq("status", "pending_confirmation");
 
   const { data, error } = await supabase
@@ -116,13 +110,13 @@ export async function confirmExtraction(
   input: ConfirmExtractionInput,
 ): Promise<{ vehicleId: string | null; documentId: string }> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const { data: extraction, error: exErr } = await supabase
     .from("document_extractions")
     .select("id, document_id, vehicle_id, status")
     .eq("id", extractionId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .maybeSingle();
   if (exErr) throw exErr;
   if (!extraction) throw new ExtractionNotFoundError();
@@ -141,7 +135,7 @@ export async function confirmExtraction(
       currency: input.currency,
     })
     .eq("id", documentId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
   if (docErr) throw docErr;
 
@@ -153,7 +147,7 @@ export async function confirmExtraction(
       confirmed_at: new Date().toISOString(),
     })
     .eq("id", extractionId)
-    .eq("owner_user_id", userId);
+    .eq("organization_id", organizationId);
   if (updErr) throw updErr;
 
   return {
@@ -165,13 +159,13 @@ export async function confirmExtraction(
 /** Discard a pending extraction (no change to the document). */
 export async function discardExtraction(extractionId: string): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const { error } = await supabase
     .from("document_extractions")
     .update({ status: "discarded" })
     .eq("id", extractionId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .eq("status", "pending_confirmation");
   if (error) throw error;
 }

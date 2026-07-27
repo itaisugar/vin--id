@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ScanFlow } from "@/components/scan/scan-flow";
 import { listVehicles } from "@/lib/vehicles/service";
+import { redirectDriversAway } from "@/lib/drivers/guard";
+import { getCurrentRole } from "@/lib/organizations/service";
+import { canWriteFleetData } from "@/lib/organizations/types";
 
 /**
  * Scan a document → AI extraction → confirm → create a maintenance/issue record.
@@ -9,6 +13,16 @@ import { listVehicles } from "@/lib/vehicles/service";
  * user-confirmed record is saved.
  */
 export default async function ScanPage({ searchParams }: PageProps<"/scan">) {
+  // Drivers have their own screen; Fleet queries return nothing for them.
+  await redirectDriversAway();
+
+  // Writers only — and this one is about COST as much as authorization.
+  // Extraction is a paid provider call, so letting a viewer reach this form
+  // would spend money on a record the server and RLS then refuse to save.
+  // The redirect is an affordance; `scanExtractAction` re-checks server-side.
+  const role = await getCurrentRole();
+  if (!role || !canWriteFleetData(role)) redirect("/dashboard");
+
   const { vehicle } = await searchParams;
   const t = await getTranslations("scan");
 

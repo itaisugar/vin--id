@@ -26,11 +26,13 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Fleet Dashboard",
     "vehicles": "Vehicles",
     "diagnose": "Diagnose",
     "settings": "Settings",
-    "scan": "Scan a document"
+    "scan": "Scan a document",
+    "organization": "Organization",
+    "myVehicle": "My Vehicle"
   },
   "install": {
     "title": "Add Vin.ID to your home screen",
@@ -444,7 +446,13 @@
         "invalidMileage": "Enter a valid mileage.",
         "invalidUrl": "Enter a valid URL.",
         "saveFailed": "We couldn't save the vehicle. Please try again.",
-        "archiveFailed": "We couldn't archive the vehicle. Please try again."
+        "archiveFailed": "We couldn't archive the vehicle. Please try again.",
+        "invalidDate": "Enter a valid date.",
+        "invalidPhone": "Enter a valid phone number.",
+        "notAuthorized": "You do not have permission to do that.",
+        "noOrganization": "Your account is not linked to an organization.",
+        "notFound": "That vehicle could not be found.",
+        "invalidStatus": "That status is not valid."
       }
     }
   },
@@ -685,7 +693,8 @@
         "fileTooLarge": "The file is larger than 5 MB.",
         "uploadFailed": "We couldn't upload the file. Please try again.",
         "saveFailed": "We couldn't save this document. Please try again.",
-        "deleteFailed": "We couldn't remove this document. Please try again."
+        "deleteFailed": "We couldn't remove this document. Please try again.",
+        "notAuthorized": "You do not have permission to do that."
       }
     },
     "extraction": {
@@ -1199,7 +1208,505 @@
       "vehicleRequired": "Choose a vehicle.",
       "vehicleNotFound": "That vehicle could not be found.",
       "saveFailed": "We couldn't save the record. Please try again.",
-      "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP)."
+      "pdfNotSupported": "PDF scanning isn't supported yet. Please upload an image (JPEG, PNG, or WebP).",
+      "notAllowed": "You don't have permission to add records for this vehicle."
+    }
+  },
+  "fleet": {
+    "title": "Fleet Dashboard",
+    "subtitle": "Your fleet at a glance",
+    "untitledVehicle": "Untitled vehicle",
+    "openIssuesCount": "{count, plural, one {# open issue} other {# open issues}}",
+    "viewerReadOnly": "You have view-only access.",
+    "status": {
+      "active": "Active",
+      "needs_service": "Needs service",
+      "issue_open": "Open issue",
+      "out_of_service": "Out of service",
+      "in_garage": "In garage",
+      "documents_missing": "Documents missing"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "due_soon": "Due soon",
+      "upcoming": "Upcoming"
+    },
+    "summary": {
+      "heading": "Fleet status",
+      "totalVehicles": "Total vehicles",
+      "operational": "Operational",
+      "requiresAttention": "Need attention",
+      "servicesOverdue": "Service overdue",
+      "servicesDueSoon": "Service due soon",
+      "documentsExpired": "Documents expired",
+      "documentsExpiringSoon": "Documents expiring",
+      "openIssues": "Open issues",
+      "monthCost": "Cost this month",
+      "mixedCurrencyNote": "This month's costs were recorded in more than one currency. Only the most-used currency is totalled — amounts are never converted."
+    },
+    "attention": {
+      "heading": "Vehicles requiring attention",
+      "empty": "No vehicles require attention."
+    },
+    "reasons": {
+      "openIssues": "{count, plural, one {# open issue} other {# open issues}}",
+      "service": {
+        "overdue": "Service overdue ({date})",
+        "due_soon": "Service due {date}",
+        "upcoming": "Service due {date}"
+      },
+      "serviceNoDate": {
+        "overdue": "Service overdue",
+        "due_soon": "Service due soon",
+        "upcoming": "Service scheduled"
+      },
+      "serviceKm": {
+        "overdue": "Past service mileage ({km})",
+        "due_soon": "Service due at {km}",
+        "upcoming": "Service due at {km}"
+      },
+      "test": {
+        "overdue": "Test expired ({date})",
+        "due_soon": "Test expires {date}",
+        "upcoming": "Test expires {date}"
+      },
+      "insurance": {
+        "overdue": "Insurance expired ({date})",
+        "due_soon": "Insurance expires {date}",
+        "upcoming": "Insurance expires {date}"
+      }
+    },
+    "deadlines": {
+      "heading": "Upcoming maintenance & documents",
+      "empty": "No maintenance or document deadlines in the next 30 days.",
+      "kind": {
+        "next_service": "Next service",
+        "test_expiry": "Test expiry",
+        "insurance_expiry": "Insurance expiry",
+        "document_expiry": "Document expiry",
+        "reminder": "Reminder"
+      }
+    },
+    "filters": {
+      "label": "Filter vehicles",
+      "all": "All",
+      "needs_attention": "Needs attention",
+      "active": "Active",
+      "needs_service": "Needs service",
+      "issue_open": "Open issue",
+      "out_of_service": "Out of service",
+      "in_garage": "In garage",
+      "documents_missing": "Documents missing",
+      "service_overdue": "Service overdue",
+      "service_due_soon": "Service soon",
+      "document_expiring": "Documents",
+      "open_issues": "Open issues",
+      "driver_assigned": "Has driver",
+      "driver_unassigned": "No driver"
+    },
+    "sort": {
+      "label": "Sort by",
+      "status": "Status",
+      "license_plate": "License plate",
+      "next_service": "Next service",
+      "document_expiry": "Closest document expiry",
+      "recently_updated": "Recently updated",
+      "urgency": "Urgency",
+      "name": "Vehicle name",
+      "cost": "Cost this month"
+    },
+    "vehicles": {
+      "title": "Fleet vehicles",
+      "noneForFilter": "No vehicles match “{filter}”.",
+      "clearFilter": "Show all vehicles",
+      "showing": "Showing {shown} of {total}",
+      "noneForSearch": "No vehicles match \"{term}\"."
+    },
+    "fields": {
+      "operationalStatus": "Operational status",
+      "vehicleType": "Vehicle type",
+      "vehicleTypePlaceholder": "e.g. Van",
+      "assignedDriver": "Assigned driver",
+      "driverPhone": "Driver phone",
+      "currentKm": "Current KM",
+      "nextService": "Next service",
+      "nextServiceKm": "Next service KM",
+      "testExpiry": "Test expiry",
+      "insuranceExpiry": "Insurance expiry",
+      "nearestExpiry": "Nearest expiry",
+      "openIssues": "Open issues",
+      "monthCost": "Cost this month"
+    },
+    "vehicleTypes": {
+      "car": "Car",
+      "van": "Van",
+      "pickup": "Pickup",
+      "truck": "Truck",
+      "motorcycle": "Motorcycle",
+      "bus": "Bus",
+      "other": "Other"
+    },
+    "formSection": {
+      "title": "Fleet details",
+      "hint": "Optional"
+    },
+    "infoCard": {
+      "title": "Fleet information",
+      "timelineSoon": "A full event timeline for this vehicle is coming in a later phase."
+    },
+    "emptyFleet": {
+      "heading": "Add your first vehicle",
+      "explainer": "Vin.ID Fleet Lite keeps your vehicles, services, documents and deadlines in one place — instead of spreadsheets and folders.",
+      "step1": "Add a vehicle with its license plate and current KM",
+      "step2": "Set its test, insurance and next service dates",
+      "step3": "Watch the dashboard tell you what needs attention",
+      "cta": "Add a vehicle"
+    },
+    "noOrganization": {
+      "title": "No organization found",
+      "body": "Your account is not linked to an organization yet, so there is no fleet to show.",
+      "hint": "Please contact support — no data has been lost."
+    },
+    "errors": {
+      "notAuthorized": "You do not have permission to do that.",
+      "noOrganization": "Your account is not linked to an organization.",
+      "notFound": "That vehicle could not be found.",
+      "saveFailed": "We couldn't save the change. Please try again.",
+      "invalidStatus": "That status is not valid."
+    },
+    "actions": {
+      "heading": "Needs action today",
+      "allClear": "Nothing needs attention today.",
+      "allClearBody": "No overdue service, expiring documents or open issues in your fleet.",
+      "untitledVehicle": "Unnamed vehicle",
+      "urgency": {
+        "critical": "Overdue",
+        "high": "Urgent",
+        "soon": "Soon",
+        "info": "Review"
+      },
+      "reasons": {
+        "service_overdue": "Service is overdue",
+        "service_due_soon": "Service due {date}",
+        "document_expired": "{count, plural, one {# document has expired} other {# documents have expired}}",
+        "document_expiring": "{count, plural, one {# document expires soon} other {# documents expire soon}}",
+        "issue_high_priority": "{count, plural, one {# urgent open issue} other {# urgent open issues}}",
+        "issue_open": "{count, plural, one {# open issue} other {# open issues}}",
+        "status_unavailable": "Vehicle is not available for work",
+        "missing_service_data": "No service date or mileage target set",
+        "cost_anomaly": "Costs well above the fleet average this month"
+      }
+    },
+    "insights": {
+      "heading": "Fleet insights",
+      "aVehicle": "A vehicle",
+      "mostExpensive": "{vehicle} is your highest cost this month at {amount}.",
+      "repeatedIssues": "{vehicle} has {count} open issues.",
+      "serviceDataMissing": "{count, plural, one {# vehicle has no service date or mileage target} other {# vehicles have no service date or mileage target}}, so their service status cannot be calculated.",
+      "costAnomaly": "{vehicle} cost {amount} this month — more than twice the fleet average of {average}.",
+      "documentChangedAction": "A confirmed {type} document updated what {vehicle} needs.",
+      "recordTypes": {
+        "maintenance": "service",
+        "insurance": "insurance",
+        "registration": "registration",
+        "inspection": "test"
+      }
+    },
+    "search": {
+      "label": "Search vehicles",
+      "placeholder": "Plate, make, model or driver",
+      "clear": "Clear"
+    },
+    "vehicleStatus": {
+      "heading": "Fleet status",
+      "upcoming": "Needs action",
+      "source": {
+        "calculated": "Calculated",
+        "records": "From records",
+        "missing": "Not set"
+      },
+      "service": {
+        "label": "Next service",
+        "unknown": "No target set",
+        "atKm": "At {km}"
+      },
+      "documents": {
+        "label": "Nearest document expiry",
+        "none": "None tracked",
+        "flaggedMissing": "Marked as missing",
+        "counts": "{expired} expired · {expiring} expiring soon"
+      },
+      "issues": {
+        "label": "Open issues",
+        "highPriority": "{count} urgent"
+      },
+      "cost": {
+        "label": "Cost this month",
+        "none": "None recorded"
+      }
+    },
+    "actionsCount": "{count, plural, one {# action} other {# actions}}",
+    "intake": {
+      "title": "Add from a document",
+      "subtitle": "Photograph an invoice, insurance certificate, registration or test report. Nothing is saved until you review and confirm it.",
+      "addFromDocument": "Add a record from a document",
+      "noVehicles": "Add a vehicle before importing documents.",
+      "fileLabel": "Document photo",
+      "fileHelp": "JPEG, PNG or WebP, up to 10 MB. PDFs are not supported yet.",
+      "vehicleOptionalLabel": "Vehicle (optional)",
+      "vehicleUnknown": "Let the document decide",
+      "vehicleOptionalHelp": "Leave this if you are not sure — the licence plate or VIN on the document is used to find the vehicle, and you confirm the match before anything is saved.",
+      "uploadAndExtract": "Upload and read document",
+      "extracting": "Reading document…",
+      "consentNote": "The image is sent to the extraction provider from our server to read its contents. It is never shared publicly.",
+      "reviewTitle": "Review before saving",
+      "reviewSubtitle": "Check every value. Nothing has been saved yet.",
+      "nothingSavedYet": "No record exists until you press Confirm. Cancelling leaves your fleet unchanged.",
+      "vehicleSection": "Vehicle",
+      "detailsSection": "Details",
+      "vehicleLabel": "Save this document against",
+      "chooseVehicle": "Choose a vehicle…",
+      "mustChooseVehicle": "The vehicle could not be identified with confidence — please choose it yourself.",
+      "identifiersFound": "Found on the document — plate: {registration}, VIN: {vin}",
+      "noIdentifiers": "No licence plate or VIN was found on this document, so the vehicle must be chosen manually.",
+      "vehicleConflict": "The identifiers on this document do not match the vehicle you started from. Choose the correct vehicle before confirming.",
+      "categoryLabel": "Document type",
+      "chooseCategory": "Choose a type…",
+      "categories": {
+        "maintenance": "Service or repair invoice",
+        "insurance": "Insurance",
+        "registration": "Registration",
+        "inspection": "Annual test / inspection"
+      },
+      "lowConfidence": "The document type could not be determined. Please choose it yourself.",
+      "checkCategory": "Please check the document type — it was not certain.",
+      "duplicateWarning": "This exact file has already been uploaded {count, plural, one {once} other {# times}}. Confirm only if this really is a separate record.",
+      "aiSuggested": "Read from document: {value}",
+      "aiFoundNothing": "Nothing found on the document — add it yourself if you need it.",
+      "youChanged": "you changed this",
+      "fields": {
+        "date": "Date",
+        "garage": "Garage or supplier",
+        "serviceType": "Type of work",
+        "description": "What was done",
+        "mileage": "Mileage",
+        "cost": "Total amount",
+        "nextServiceDate": "Next service due",
+        "nextServiceKm": "Next service mileage",
+        "insurer": "Insurer",
+        "insuranceType": "Cover type",
+        "startDate": "Valid from",
+        "endDate": "Valid until",
+        "notes": "Notes"
+      },
+      "confirm": "Confirm and save",
+      "confirming": "Saving…",
+      "cancel": "Cancel",
+      "retry": "Try another document",
+      "startOver": "Start again",
+      "extractionFailed": "The document could not be read",
+      "extractionFailedBody": "Nothing was saved. Try a clearer photo, or add the record manually.",
+      "noLongerAvailable": "This review is no longer available. It was cancelled or replaced by a newer upload.",
+      "errors": {
+        "notAuthenticated": "Please sign in again.",
+        "notAuthorized": "You do not have permission to import documents.",
+        "extractionNotFound": "This document review no longer exists.",
+        "vehicleNotFound": "That vehicle is no longer available.",
+        "vehicleRequired": "Choose a vehicle.",
+        "categoryRequired": "Choose a document type.",
+        "invalidCategory": "That document type cannot be saved.",
+        "invalidPayload": "Check the highlighted values and try again.",
+        "stale": "This review was cancelled and can no longer be confirmed.",
+        "fileRequired": "Choose a document photo.",
+        "invalidFileType": "Use a JPEG, PNG or WebP image.",
+        "fileTooLarge": "That image is too large. Use one under 10 MB.",
+        "extractFailed": "The document could not be read. Nothing was saved.",
+        "uploadFailed": "The upload failed. Nothing was saved.",
+        "saveFailed": "Could not save. Please try again."
+      }
+    }
+  },
+  "organization": {
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "fleet_manager": "Fleet manager",
+      "viewer": "Viewer",
+      "driver": "Driver"
+    },
+    "team": {
+      "title": "Organization",
+      "subtitle": "Your team and who can do what.",
+      "yourRole": "Your role in this organization",
+      "untitledOrganization": "Untitled organization",
+      "noOrganization": "Your account is not part of an organization yet. Ask an owner or admin to invite you.",
+      "readOnlyNotice": "Only owners and admins can manage team members and invitations.",
+      "cancel": "Cancel",
+      "members": {
+        "title": "Members",
+        "empty": "No members yet.",
+        "you": "(you)",
+        "roleLabel": "Role",
+        "remove": "Remove",
+        "removing": "Removing…",
+        "removed": "Member removed.",
+        "roleUpdated": "Role updated.",
+        "thisMember": "this member",
+        "confirmRemoveTitle": "Remove member?",
+        "confirmRemoveBody": "{name} will immediately lose access to this organization's vehicles and documents."
+      },
+      "invite": {
+        "title": "Invite a colleague",
+        "help": "They will get a link that works once, for their email address only.",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "colleague@company.com",
+        "roleLabel": "Role",
+        "roleHelp": "Fleet managers can edit vehicles and documents. Viewers can only read the whole fleet. Drivers see only the vehicle assigned to them. Admins can also manage the team.",
+        "submit": "Create invitation",
+        "creating": "Creating…",
+        "created": "Invitation created for {email}.",
+        "copyOnce": "Copy this link now and send it to them — it is shown only once and cannot be recovered later.",
+        "copy": "Copy link",
+        "copied": "Copied"
+      },
+      "invitations": {
+        "title": "Pending invitations",
+        "empty": "No pending invitations.",
+        "expiresAt": "Expires {date}",
+        "revoke": "Revoke",
+        "revoking": "Revoking…",
+        "revoked": "Invitation revoked.",
+        "confirmRevokeTitle": "Revoke invitation?",
+        "confirmRevokeBody": "The link sent to {email} will stop working immediately."
+      },
+      "errors": {
+        "notAuthorized": "You do not have permission to do this.",
+        "invalidEmail": "Enter a valid email address.",
+        "invalidRole": "Choose a valid role.",
+        "alreadyMember": "That person is already a member of this organization.",
+        "duplicatePending": "There is already a pending invitation for that address. Revoke it first to send a new one.",
+        "linkUnavailable": "The invitation link could not be generated because the app URL is not configured.",
+        "memberNotFound": "That member no longer exists.",
+        "lastOwner": "This organization must keep at least one owner. Promote someone else to owner first.",
+        "cannotManageOwner": "Only an owner can change or remove another owner.",
+        "copyFailed": "Couldn't copy automatically. Select the link and copy it manually.",
+        "saveFailed": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "invite": {
+    "heading": "You've been invited to {organization}",
+    "roleLine": "You'll join as {role}.",
+    "sentTo": "This invitation was sent to",
+    "signInPrompt": "Sign in or create an account to accept it.",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signedInAs": "You are signed in as",
+    "switchAccount": "Sign in with a different account",
+    "accept": "Accept invitation",
+    "accepting": "Accepting…",
+    "goToApp": "Go to the app",
+    "roles": {
+      "admin": "an admin",
+      "fleet_manager": "a fleet manager",
+      "viewer": "a viewer",
+      "driver": "a driver"
+    },
+    "states": {
+      "success": {
+        "title": "You're in.",
+        "body": "You now have access to this organization's fleet."
+      },
+      "invalid": {
+        "title": "This invitation link isn't valid",
+        "body": "Check that you copied the whole link, or ask for a new invitation."
+      },
+      "expired": {
+        "title": "This invitation has expired",
+        "body": "Invitation links are valid for 7 days. Ask for a new one."
+      },
+      "revoked": {
+        "title": "This invitation was revoked",
+        "body": "Ask an owner or admin of the organization to send a new one."
+      },
+      "accepted": {
+        "title": "This invitation was already used",
+        "body": "If that was you, just sign in. Otherwise ask for a new invitation."
+      },
+      "email_mismatch": {
+        "title": "This invitation is for a different email address",
+        "body": "Sign in with the address the invitation was sent to, then open the link again."
+      },
+      "not_authenticated": {
+        "title": "You need to sign in first",
+        "body": "Sign in with the invited email address, then open the link again."
+      },
+      "already_member": {
+        "title": "You already belong to another organization",
+        "body": "An account can be in one organization at a time. Ask to be removed from your current one first."
+      },
+      "failed": {
+        "title": "Something went wrong",
+        "body": "The invitation could not be accepted. Please try again."
+      }
+    }
+  },
+  "driver": {
+    "title": "My Vehicle",
+    "subtitle": "Assigned to you by {organization}",
+    "untitled": "Vehicle",
+    "assignedSince": "Assigned to you since {date}",
+    "noAssignment": {
+      "title": "No vehicle assigned yet",
+      "body": "Once your fleet manager assigns you a vehicle, its details, service history and shared documents appear here."
+    },
+    "fields": {
+      "plate": "Licence plate",
+      "mileage": "Mileage",
+      "nextService": "Next service",
+      "testExpiry": "Test expires",
+      "insuranceExpiry": "Insurance expires",
+      "vin": "VIN"
+    },
+    "maintenance": {
+      "title": "Service history",
+      "empty": "No service records yet.",
+      "untyped": "Service"
+    },
+    "reminders": {
+      "title": "Reminders",
+      "due": "Due {date}"
+    },
+    "documents": {
+      "title": "Shared documents",
+      "empty": "Your fleet manager has not shared any documents for this vehicle.",
+      "untitled": "Document",
+      "open": "Open"
+    },
+    "assignment": {
+      "title": "Assigned driver",
+      "none": "No driver is assigned to this vehicle.",
+      "unnamed": "Unnamed driver",
+      "assign": "Assign driver",
+      "assignLabel": "Assign a driver",
+      "replace": "Replace driver",
+      "replaceLabel": "Replace with",
+      "unassign": "Unassign",
+      "choose": "Choose a driver…",
+      "noEligibleDrivers": "No one in this organization holds the driver role yet. Invite a driver from the Organization screen first.",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "e.g. weekday shift",
+      "noteHelp": "Visible to managers only — the driver never sees this note.",
+      "willMove": "This driver is currently assigned to another vehicle. Assigning them here will end that assignment.",
+      "history": "Past assignments"
+    },
+    "errors": {
+      "notAuthenticated": "Please sign in again.",
+      "notAuthorized": "You do not have permission to change driver assignments.",
+      "vehicleNotFound": "That vehicle is no longer available.",
+      "memberNotFound": "That member is no longer in this organization.",
+      "notADriver": "Only members with the driver role can be assigned a vehicle.",
+      "saveFailed": "Could not save the assignment. Please try again."
     }
   }
 }

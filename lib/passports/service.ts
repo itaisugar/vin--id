@@ -1,17 +1,17 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveAppBaseUrl } from "@/lib/app-url";
+import {
+  requireFleetWriter,
+  requireOrganization,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { listDocuments } from "@/lib/documents/service";
 import { listIssues } from "@/lib/issues/service";
 import { listMaintenanceLogs } from "@/lib/maintenance/service";
 import { listReminders } from "@/lib/reminders/service";
-import {
-  getVehicleById,
-  NotAuthenticatedError,
-} from "@/lib/vehicles/service";
+import { getVehicleById } from "@/lib/vehicles/service";
 import { backedMaintenanceCount, hasRecentService } from "./analysis";
 import { computeRecordConfidence } from "./confidence";
 import { generateTransferToken, hashSnapshot } from "./snapshot";
@@ -66,14 +66,6 @@ export interface PassportCounts {
   documentsNonShareable: number;
 }
 
-async function getUserId(supabase: SupabaseClient): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new NotAuthenticatedError();
-  return user.id;
-}
-
 /** Available item counts per scope, for the create page. */
 export async function getPassportCounts(
   vehicleId: string,
@@ -109,7 +101,7 @@ export async function createPassport(
   options: PassportOptions,
 ): Promise<{ passportId: string; shareUrl: string | null }> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { userId } = await requireFleetWriter();
 
   const vehicle = await getVehicleById(vehicleId);
   if (!vehicle) throw new VehicleNotFoundError();
@@ -316,13 +308,13 @@ export async function listPassports(
   vehicleId: string,
 ): Promise<PassportListItem[]> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicle_passports")
     .select(PASSPORT_LIST_COLUMNS)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
@@ -335,14 +327,14 @@ export async function getPassport(
   passportId: string,
 ): Promise<VehiclePassport | null> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireOrganization();
 
   const { data, error } = await supabase
     .from("vehicle_passports")
     .select(PASSPORT_COLUMNS)
     .eq("id", passportId)
     .eq("vehicle_id", vehicleId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -356,7 +348,7 @@ export async function revokePassport(
   passportId: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const userId = await getUserId(supabase);
+  const { organizationId } = await requireFleetWriter();
 
   const existing = await getPassport(vehicleId, passportId);
   if (!existing) throw new PassportNotFoundError();
@@ -365,7 +357,7 @@ export async function revokePassport(
     .from("vehicle_passports")
     .update({ status: "revoked", revoked_at: new Date().toISOString() })
     .eq("id", passportId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .is("deleted_at", null);
   if (pErr) throw pErr;
 
@@ -373,7 +365,7 @@ export async function revokePassport(
     .from("transfer_tokens")
     .update({ status: "revoked" })
     .eq("passport_id", passportId)
-    .eq("owner_user_id", userId)
+    .eq("organization_id", organizationId)
     .eq("status", "active");
   if (tErr) throw tErr;
 }
