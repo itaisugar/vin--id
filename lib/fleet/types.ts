@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+import type { DeadlineState } from "./dates";
+
 // -----------------------------------------------------------------------------
 // Operational status
 // -----------------------------------------------------------------------------
@@ -39,6 +41,65 @@ export const ATTENTION_STATUSES: readonly OperationalStatus[] =
 
 export function needsAttention(status: OperationalStatus): boolean {
   return status !== "active";
+}
+
+// -----------------------------------------------------------------------------
+// Effective operational status
+// -----------------------------------------------------------------------------
+/**
+ * Statuses a human declares, which are never recomputed away.
+ *
+ * `documents_missing` is here for the reason given on {@link DocumentStatus}:
+ * "missing" is not derivable from any table, so the explicit flag is the only
+ * honest signal there is. Clearing it automatically would delete information.
+ */
+export const DECLARED_OPERATIONAL_STATUSES: readonly OperationalStatus[] = [
+  "out_of_service",
+  "in_garage",
+  "documents_missing",
+];
+
+export function isDeclaredOperationalStatus(
+  status: OperationalStatus,
+): boolean {
+  return (DECLARED_OPERATIONAL_STATUSES as readonly string[]).includes(status);
+}
+
+/** Live facts that decide a derived status. */
+export interface OperationalSignals {
+  /** Issues in an OPEN_ISSUE_STATUSES state right now. */
+  openIssueCount: number;
+  /** Worst of the date- and mileage-based service signals. */
+  serviceState: DeadlineState | null;
+}
+
+/**
+ * THE authoritative operational status for display, filtering and counting.
+ *
+ * A declared status always wins. Otherwise the status is recomputed from live
+ * rows every time it is read, so it cannot go stale:
+ *
+ *   * at least one open issue      -> issue_open
+ *   * service overdue or due soon  -> needs_service
+ *   * neither                      -> active
+ *
+ * The stored column keeps its value in the database — this never writes, and a
+ * vehicle that a user manually set to `issue_open` simply resolves to `active`
+ * once no open issue remains, which is the whole point.
+ *
+ * Precedence between the two derived states follows STATUS_RANK in ./types:
+ * `issue_open` (1) is more urgent than `needs_service` (2).
+ */
+export function effectiveOperationalStatus(
+  stored: OperationalStatus,
+  signals: OperationalSignals,
+): OperationalStatus {
+  if (isDeclaredOperationalStatus(stored)) return stored;
+  if (signals.openIssueCount > 0) return "issue_open";
+  if (signals.serviceState === "overdue" || signals.serviceState === "due_soon") {
+    return "needs_service";
+  }
+  return "active";
 }
 
 /**
