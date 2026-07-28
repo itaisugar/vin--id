@@ -17,6 +17,7 @@ export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
   const tOrg = await getTranslations("organization.team");
+  const tNav = await getTranslations("nav");
   const locale = await getLocale();
 
   const supabase = await createClient();
@@ -80,11 +81,14 @@ export default async function SettingsPage() {
         ) : null}
       </Card>
 
-      {/* Team management lives on its own screen; the bottom nav keeps four
-          slots on mobile, so it is reached from here. */}
+      {/* Team & Access. On desktop this is a sidebar item; the mobile bottom
+          nav keeps five slots (four items plus the scanner), so on a phone this
+          card is the way in. Same label in both places so the screen has one
+          name. The card is always rendered — /organization guards itself and
+          explains the state to a non-admin rather than 404ing. */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{tOrg("title")}</CardTitle>
+          <CardTitle className="text-base">{tNav("teamAccess")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Link

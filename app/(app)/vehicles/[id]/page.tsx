@@ -7,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FleetInfoCard } from "@/components/fleet/fleet-info-card";
+import {
+  FleetInfoCard,
+  LegacyDriverNote,
+} from "@/components/fleet/fleet-info-card";
 import { OperationalStatusBadge } from "@/components/fleet/operational-status-badge";
 import { VehicleFleetStatus } from "@/components/fleet/vehicle-fleet-status";
 import { ArchiveVehicleButton } from "@/components/vehicles/archive-vehicle-button";
@@ -140,7 +143,12 @@ export default async function VehicleDetailPage({
             {/* Operational status first — it answers "can this vehicle work
                 today?". The lifecycle badge is only shown once the vehicle
                 leaves active service, to avoid two competing "active" chips. */}
-            <OperationalStatusBadge status={vehicle.operational_status} />
+            {/* The EFFECTIVE status, so this page, the fleet list and the
+                dashboard always agree. Falls back to the stored value only when
+                the fleet row is unavailable. */}
+            <OperationalStatusBadge
+              status={fleetRow?.row.effectiveStatus ?? vehicle.operational_status}
+            />
             {vehicle.status !== "active" ? (
               <VehicleStatusBadge status={vehicle.status} />
             ) : null}
@@ -169,8 +177,13 @@ export default async function VehicleDetailPage({
         <VehicleFleetStatus row={fleetRow.row} currency={fleetRow.currency} />
       ) : null}
 
-      {/* Fleet information (Fleet Lite Phase 1) */}
-      <FleetInfoCard vehicle={vehicle} canWrite={canWrite} />
+      {/* Service & Compliance — the operational fields, each linking to the one
+          form that owns it. */}
+      <FleetInfoCard
+        vehicle={vehicle}
+        canWrite={canWrite}
+        effectiveStatus={fleetRow?.row.effectiveStatus}
+      />
 
       {/* Fleet intake for THIS vehicle. The vehicle is preselected, but the
           server still re-verifies access and warns if the document's own
@@ -194,6 +207,11 @@ export default async function VehicleDetailPage({
           history={assignmentHistory}
         />
       ) : null}
+
+      {/* Any legacy free-text driver value, labelled as a contact note so it is
+          never read as an assignment. Shown to the same roles that may act on
+          assignments, since they are the ones who would migrate it. */}
+      {canAssign ? <LegacyDriverNote vehicle={vehicle} /> : null}
 
       {/* Details */}
       <Card>

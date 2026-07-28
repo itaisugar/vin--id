@@ -240,13 +240,23 @@ export const EMPTY_FLEET_FORM: FleetVehicleFormValues = {
 /**
  * Map validated fleet fields onto a Supabase row payload. Empty optional values
  * become `null` (never `""`) so the column stays consistently nullable.
+ *
+ * `assigned_driver_name` / `assigned_driver_phone` are DELIBERATELY ABSENT.
+ * They were free text that looked like a driver assignment while granting no
+ * access whatsoever — the authoritative assignment is a `driver_assignments`
+ * row, created through `assign_driver()`. The inputs are gone from the form, so
+ * including the columns here would write NULL over whatever a fleet manager
+ * typed before this change. Omitting them from the payload leaves every
+ * historical value exactly where it is (it is still read and displayed by
+ * <LegacyDriverNote>) while making it impossible to set a new one.
+ *
+ * The schema still accepts both keys so any older caller keeps validating; they
+ * simply no longer reach the database.
  */
 export function fleetFieldsToRow(input: FleetVehicleFields) {
   return {
     operational_status: input.operational_status,
     vehicle_type: input.vehicle_type ?? null,
-    assigned_driver_name: input.assigned_driver_name ?? null,
-    assigned_driver_phone: input.assigned_driver_phone ?? null,
     next_service_date: input.next_service_date ?? null,
     next_service_km: input.next_service_km ?? null,
     test_expiry_date: input.test_expiry_date ?? null,

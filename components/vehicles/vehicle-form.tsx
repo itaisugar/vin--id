@@ -52,11 +52,11 @@ const FIELD_NAMES: (keyof VehicleFormValues)[] = [
   "mileage",
   "mileage_unit",
   "photo_url",
-  // Fleet Lite fields
+  // Fleet Lite fields. The two `assigned_driver_*` keys are intentionally not
+  // here: they have no input any more, so submitting them would only carry a
+  // stale value back to a server action that no longer persists it.
   "operational_status",
   "vehicle_type",
-  "assigned_driver_name",
-  "assigned_driver_phone",
   "next_service_date",
   "next_service_km",
   "test_expiry_date",
@@ -240,10 +240,17 @@ export function VehicleForm({
         registration={register("photo_url")}
       />
 
-      {/* Fleet details — collapsed by default so the required fields stay
-          minimal and the form does not become a wall of inputs. Every field
-          in here is optional except the status, which has a sane default. */}
-      <details className="rounded-xl border border-line bg-surface-2/40 open:bg-transparent">
+      {/* Service & compliance.
+          CREATE: collapsed, so a first vehicle stays a short form.
+          EDIT:   OPEN. Production QA reported these fields as "not editable
+          after creation" — they always were, but they sat behind a closed
+          disclosure with nothing on the vehicle page pointing at them. Opening
+          it in edit mode is also what makes the `#next_service_date` style deep
+          links from the vehicle page land on a visible field. */}
+      <details
+        open={mode === "edit"}
+        className="rounded-xl border border-line bg-surface-2/40 open:bg-transparent"
+      >
         <summary className="cursor-pointer select-none rounded-xl px-3 py-2.5 text-sm font-semibold text-ink marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">
           {tf("formSection.title")}
           <span className="ms-2 text-xs font-normal text-ink-3">
@@ -279,21 +286,14 @@ export function VehicleForm({
             ))}
           </datalist>
 
-          <Field
-            name="assigned_driver_name"
-            label={tf("fields.assignedDriver")}
-            error={fieldError("assigned_driver_name")}
-            registration={register("assigned_driver_name")}
-          />
-          <Field
-            name="assigned_driver_phone"
-            label={tf("fields.driverPhone")}
-            type="tel"
-            inputMode="tel"
-            className="num"
-            error={fieldError("assigned_driver_phone")}
-            registration={register("assigned_driver_phone")}
-          />
+          {/* No free-text driver here. Typing a name granted nobody any access,
+              which is exactly how a fleet manager came to believe a driver was
+              assigned when they were not. Assignment happens on the vehicle page
+              through the assignment card, which writes `driver_assignments` —
+              the only source RLS honours. */}
+          <p className="rounded-lg border border-line bg-surface-2/60 px-3 py-2 text-xs text-ink-2">
+            {tf("formSection.driverMovedHint")}
+          </p>
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field

@@ -4,11 +4,18 @@ import {
   DashboardIcon,
   DiagnoseIcon,
   SettingsIcon,
+  TeamIcon,
 } from "@/components/icons";
 
 export interface NavItem {
   /** Translation key under `nav`. */
-  key: "dashboard" | "vehicles" | "diagnose" | "settings" | "myVehicle";
+  key:
+    | "dashboard"
+    | "vehicles"
+    | "diagnose"
+    | "settings"
+    | "myVehicle"
+    | "teamAccess";
   href: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   enabled: boolean;
@@ -35,3 +42,23 @@ export const driverNavItems: NavItem[] = [
   { key: "myVehicle", href: "/my-vehicle", icon: CarIcon, enabled: true },
   { key: "settings", href: "/settings", icon: SettingsIcon, enabled: true },
 ];
+
+/**
+ * Team & Access — member and invitation management.
+ *
+ * DESKTOP SIDEBAR ONLY. The mobile bar has exactly five slots (four items plus
+ * the scanner FAB) and a sixth would not fit at 320px, so on a phone this screen
+ * keeps its existing route in from Settings, under the same name.
+ *
+ * Shown only when `canManageOrganization(role)` — owner and admin. That is not a
+ * cosmetic choice: `list_organization_members()` and every invitation policy
+ * require `is_org_admin()`, so a fleet_manager or viewer would reach a screen
+ * that can only tell them they may not use it. Hiding it is presentation; the
+ * route, the service layer and RLS each still enforce the rule independently.
+ */
+export const teamAccessNavItem: NavItem = {
+  key: "teamAccess",
+  href: "/organization",
+  icon: TeamIcon,
+  enabled: true,
+};

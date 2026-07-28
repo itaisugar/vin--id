@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireOrganization } from "@/lib/organizations/service";
+import { canManageAssignments, type OrgRole } from "@/lib/organizations/types";
 import { createClient } from "@/lib/supabase/server";
 import { VEHICLE_COLUMNS, type Vehicle } from "@/lib/vehicles/types";
 import {
@@ -11,6 +12,7 @@ import {
 } from "./dates";
 import {
   compareActions,
+  effectiveOperationalStatus,
   getServiceStatus,
   isHighPriorityIssue,
   operationalGroup,
@@ -179,8 +181,25 @@ interface DocRow {
 
 export interface FleetVehicleRow {
   vehicle: Vehicle;
+  /**
+   * The operational status to DISPLAY, count and filter on. Recomputed from
+   * live rows on every read (see `effectiveOperationalStatus`), so a resolved
+   * issue clears the badge instead of leaving `vehicle.operational_status`
+   * stale. `vehicle.operational_status` remains the raw stored value and is
+   * what the edit form writes.
+   */
+  effectiveStatus: OperationalStatus;
   openIssueCount: number;
   highPriorityIssueCount: number;
+  /**
+   * Whether a driver is officially assigned, from `driver_assignments` — the
+   * only source that grants access. `null` = the caller may not read
+   * assignments; render "not visible", never "unassigned".
+   *
+   * `vehicle.assigned_driver_name` is NOT this. It is a free-text contact note
+   * that grants nothing and is deliberately not consulted here.
+   */
+  hasAssignedDriver: boolean | null;
   service: ServiceStatus;
   documents: DocumentStatus;
   /** Current-month cost, or null when this vehicle recorded none. */
@@ -201,6 +220,7 @@ function buildRows(
   issues: IssueRow[],
   docs: DocRow[],
   costs: FleetCostSummary,
+  assignedVehicleIds: Set<string> | null,
 ): FleetVehicleRow[] {
   const byId = new Map(vehicles.map((v) => [v.id, v]));
 
@@ -373,8 +393,15 @@ function buildRows(
 
     return {
       vehicle: v,
+      effectiveStatus: effectiveOperationalStatus(v.operational_status, {
+        openIssueCount: vehicleIssues.length,
+        serviceState: service.state,
+      }),
       openIssueCount: vehicleIssues.length,
       highPriorityIssueCount: highPriority.length,
+      hasAssignedDriver: assignedVehicleIds
+        ? assignedVehicleIds.has(v.id)
+        : null,
       service,
       documents,
       monthCost,
@@ -386,14 +413,30 @@ function buildRows(
   });
 }
 
-/** The org-scoped queries every fleet surface shares. */
-async function fetchFleetData(organizationId: string) {
+/**
+ * The org-scoped queries every fleet surface shares.
+ *
+ * `role` decides only whether the driver-assignment query is issued at all:
+ * `driver_assignments_select` requires `can_manage_driver_assignments()`, so for
+ * a viewer the query would return zero rows and every vehicle would read as
+ * "no driver" — a confident wrong answer. Skipping it lets the UI say "not
+ * visible to you" instead of inventing an empty result.
+ */
+async function fetchFleetData(organizationId: string, role: OrgRole) {
   const supabase = await createClient();
   const from = monthStartIso();
   const to = nextMonthStartIso();
+  const mayReadAssignments = canManageAssignments(role);
 
-  const [vehiclesRes, issuesRes, docsRes, remindersRes, costsRes, intakeRes] =
-    await Promise.all([
+  const [
+    vehiclesRes,
+    issuesRes,
+    docsRes,
+    remindersRes,
+    costsRes,
+    intakeRes,
+    assignmentsRes,
+  ] = await Promise.all([
       // The operating fleet = lifecycle-active vehicles. Archived/sold vehicles
       // are history, not fleet, so they are excluded from every count.
       supabase
@@ -447,6 +490,16 @@ async function fetchFleetData(organizationId: string) {
         .not("vehicle_id", "is", null)
         .order("confirmed_at", { ascending: false })
         .limit(1),
+
+      // ACTIVE driver assignments — the authoritative "who drives this".
+      // One org-scoped query for the whole list, never one per vehicle.
+      mayReadAssignments
+        ? supabase
+            .from("driver_assignments")
+            .select("vehicle_id")
+            .eq("organization_id", organizationId)
+            .is("unassigned_at", null)
+        : Promise.resolve({ data: null, error: null }),
     ]);
 
   if (vehiclesRes.error) throw vehiclesRes.error;
@@ -460,12 +513,33 @@ async function fetchFleetData(organizationId: string) {
     console.error("[fleet] intake trail unavailable:", { code: intakeRes.error.code });
   }
 
+  // Same rule as the intake trail: a failure here must degrade to "unknown",
+  // never to a confident "nobody is assigned".
+  if (assignmentsRes.error) {
+    console.error("[fleet] driver assignments unavailable:", {
+      code: assignmentsRes.error.code,
+    });
+  }
+
   const intakeRow = (intakeRes.data ?? [])[0] as
     | { vehicle_id: string; created_record_type: string; confirmed_at: string }
     | undefined;
 
   return {
     lastConfirmedIntake: intakeRow ?? null,
+    /**
+     * Vehicle ids with an active assignment, or `null` when the caller may not
+     * read assignments (viewer) or the query failed. `null` means UNKNOWN and
+     * must never be rendered as "unassigned".
+     */
+    assignedVehicleIds:
+      mayReadAssignments && !assignmentsRes.error
+        ? new Set(
+            ((assignmentsRes.data ?? []) as { vehicle_id: string }[]).map(
+              (r) => r.vehicle_id,
+            ),
+          )
+        : null,
     vehicles: (vehiclesRes.data ?? []) as Vehicle[],
     issues: (issuesRes.data ?? []) as unknown as IssueRow[],
     docs: (docsRes.data ?? []) as unknown as DocRow[],
@@ -484,16 +558,25 @@ async function fetchFleetData(organizationId: string) {
 // Overview (dashboard)
 // -----------------------------------------------------------------------------
 export async function getFleetOverview(): Promise<FleetOverview> {
-  const { organizationId } = await requireOrganization();
-  const { vehicles, issues, docs, reminders, costs, lastConfirmedIntake } =
-    await fetchFleetData(organizationId);
+  const { organizationId, role } = await requireOrganization();
+  const {
+    vehicles,
+    issues,
+    docs,
+    reminders,
+    costs,
+    lastConfirmedIntake,
+    assignedVehicleIds,
+  } = await fetchFleetData(organizationId, role);
 
-  const rows = buildRows(vehicles, issues, docs, costs);
+  const rows = buildRows(vehicles, issues, docs, costs, assignedVehicleIds);
   const byId = new Map(vehicles.map((v) => [v.id, v]));
 
   // --- summary ---------------------------------------------------------------
+  // Grouped on the EFFECTIVE status, so the dashboard tiles agree with the
+  // fleet-list badges and both clear when the last open issue is resolved.
   const groupCount = (g: ReturnType<typeof operationalGroup>) =>
-    vehicles.filter((v) => operationalGroup(v.operational_status) === g).length;
+    rows.filter((r) => operationalGroup(r.effectiveStatus) === g).length;
 
   const summary: FleetSummary = {
     totalVehicles: vehicles.length,
@@ -714,13 +797,21 @@ function matchesFilter(row: FleetVehicleRow, f: FleetFilter): boolean {
       return row.documents.expiredCount > 0 || row.documents.expiringCount > 0;
     case "open_issues":
       return row.openIssueCount > 0;
+    // Both driver filters read the AUTHORITATIVE assignment. They used to read
+    // `assigned_driver_name`, so a vehicle with a name typed into the form
+    // counted as "driver assigned" while that driver had no access at all.
+    // `null` (caller may not read assignments) matches neither filter rather
+    // than guessing.
     case "driver_assigned":
-      return Boolean(row.vehicle.assigned_driver_name?.trim());
+      return row.hasAssignedDriver === true;
     case "driver_unassigned":
-      return !row.vehicle.assigned_driver_name?.trim();
+      return row.hasAssignedDriver === false;
     default:
-      // The remaining filters are the operational statuses themselves.
-      return row.vehicle.operational_status === f;
+      // The remaining filters are the operational statuses themselves. They
+      // match the EFFECTIVE status: filtering by "issue_open" must return the
+      // vehicles that actually have an open issue, not the ones whose stored
+      // column was never cleared.
+      return row.effectiveStatus === f;
   }
 }
 
@@ -752,10 +843,11 @@ export async function listFleetVehicles(
   options: ListFleetVehiclesOptions = {},
 ): Promise<FleetVehiclesResult> {
   const { filter = "all", sort = "urgency", search = "" } = options;
-  const { organizationId } = await requireOrganization();
-  const { vehicles, issues, docs, costs } = await fetchFleetData(organizationId);
+  const { organizationId, role } = await requireOrganization();
+  const { vehicles, issues, docs, costs, assignedVehicleIds } =
+    await fetchFleetData(organizationId, role);
 
-  const allRows = buildRows(vehicles, issues, docs, costs);
+  const allRows = buildRows(vehicles, issues, docs, costs, assignedVehicleIds);
   const needle = normalizeSearch(search);
 
   // Search narrows first, so the filter counts describe what the user is
@@ -803,8 +895,8 @@ export async function listFleetVehicles(
         return (b.monthCost ?? -1) - (a.monthCost ?? -1) || plate(a).localeCompare(plate(b));
       case "status": {
         const byStatus = compareOperationalStatus(
-          a.vehicle.operational_status,
-          b.vehicle.operational_status,
+          a.effectiveStatus,
+          b.effectiveStatus,
         );
         return byStatus !== 0 ? byStatus : plate(a).localeCompare(plate(b));
       }
@@ -831,11 +923,12 @@ export async function listFleetVehicles(
 export async function getFleetVehicleDetail(
   vehicleId: string,
 ): Promise<{ row: FleetVehicleRow; currency: string } | null> {
-  const { organizationId } = await requireOrganization();
-  const { vehicles, issues, docs, costs } = await fetchFleetData(organizationId);
+  const { organizationId, role } = await requireOrganization();
+  const { vehicles, issues, docs, costs, assignedVehicleIds } =
+    await fetchFleetData(organizationId, role);
   // The vehicle must be in the caller's organization: a forged id simply is not
   // in this org-scoped set, so it resolves to null rather than leaking.
-  const rows = buildRows(vehicles, issues, docs, costs);
+  const rows = buildRows(vehicles, issues, docs, costs, assignedVehicleIds);
   const row = rows.find((r) => r.vehicle.id === vehicleId);
   return row ? { row, currency: costs.currency } : null;
 }

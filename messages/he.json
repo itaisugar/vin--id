@@ -32,7 +32,8 @@
     "settings": "הגדרות",
     "scan": "סריקת מסמך",
     "organization": "ארגון",
-    "myVehicle": "הרכב שלי"
+    "myVehicle": "הרכב שלי",
+    "teamAccess": "צוות והרשאות"
   },
   "install": {
     "title": "הוסף את Vin.ID למסך הבית",
@@ -1024,6 +1025,13 @@
       "generated": "עותק להדפסה של תמונת מצב היסטוריית רכב חסינת-שינוי.",
       "passportId": "מזהה דרכון",
       "shareNote": "קישור השיתוף מוצג רק בעת יצירת הדרכון ואינו נכלל כאן."
+    },
+    "section": {
+      "currentBody": "לרכב הזה יש דרכון רכב פעיל.",
+      "noneBody": "אין דרכון רכב פעיל. צרו דרכון כדי לשתף את היסטוריית הרכב המאומתת.",
+      "open": "פתיחת דרכון",
+      "create": "יצירת דרכון",
+      "history": "{count, plural, one {דרכון אחד בהיסטוריה} other {# דרכונים בהיסטוריה}}"
     }
   },
   "diagnose": {
@@ -1216,6 +1224,7 @@
     "title": "לוח הצי",
     "subtitle": "הצי שלך במבט אחד",
     "untitledVehicle": "רכב ללא שם",
+    "driverAssigned": "נהג משובץ",
     "openIssuesCount": "{count, plural, one {תקלה פתוחה אחת} other {# תקלות פתוחות}}",
     "viewerReadOnly": "יש לך גישת צפייה בלבד.",
     "status": {
@@ -1326,14 +1335,12 @@
       "operationalStatus": "סטטוס תפעולי",
       "vehicleType": "סוג רכב",
       "vehicleTypePlaceholder": "למשל: מסחרית",
-      "assignedDriver": "נהג משוייך",
       "driverPhone": "טלפון נהג",
       "currentKm": "ק\"מ נוכחי",
       "nextService": "טיפול הבא",
       "nextServiceKm": "ק\"מ לטיפול הבא",
       "testExpiry": "תפוגת טסט",
       "insuranceExpiry": "תפוגת ביטוח",
-      "nearestExpiry": "פקיעה קרובה",
       "openIssues": "תקלות פתוחות",
       "monthCost": "עלות החודש"
     },
@@ -1348,7 +1355,8 @@
     },
     "formSection": {
       "title": "פרטי צי",
-      "hint": "אופציונלי"
+      "hint": "אופציונלי",
+      "driverMovedHint": "שיבוץ הנהג עבר לעמוד הרכב, שם שיבוץ נהג באמת מעניק לו גישה."
     },
     "infoCard": {
       "title": "מידע צי",
@@ -1524,6 +1532,17 @@
         "uploadFailed": "ההעלאה נכשלה. שום דבר לא נשמר.",
         "saveFailed": "לא ניתן היה לשמור. יש לנסות שוב."
       }
+    },
+    "serviceCompliance": {
+      "title": "טיפולים וציות",
+      "subtitle": "הטיפול הבא, טסט וביטוח עבור הרכב הזה.",
+      "edit": "עריכה",
+      "notSet": "לא הוגדר"
+    },
+    "driverNote": {
+      "title": "פרטי קשר של נהג",
+      "help": "שם שהוקלד בטופס הרכב לפני שקיימו שיבוצים. זו הערת קשר בלבד והיא אינה מעניקה גישה — השתמשו בשיבוץ נהג למעלה כדי להעניק גישה לנהג.",
+      "name": "שם רשום"
     }
   },
   "organization": {

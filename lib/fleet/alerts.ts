@@ -166,11 +166,25 @@ export function classifyDocumentExpiry(
 // Operational status
 // -----------------------------------------------------------------------------
 /**
- * Operational status is STORED, never inferred. A vehicle explicitly marked
- * `out_of_service` stays out of service even if all of its deadlines are clean,
- * and a vehicle marked `active` is never silently re-labelled by this module —
- * derived signals (overdue service, expired documents, open issues) are surfaced
- * as their own alerts alongside the stored status rather than overwriting it.
+ * Operational status has TWO kinds of value, and the difference is what makes
+ * "Needs attention" correct:
+ *
+ *   DECLARED  out_of_service | in_garage | documents_missing
+ *             A human statement about the vehicle that no query can contradict.
+ *             "This van is in the garage" stays true until somebody says
+ *             otherwise, and "paperwork is missing" cannot be derived at all —
+ *             the schema has no per-organization policy of which documents are
+ *             required (see DocumentStatus above). These are always honoured.
+ *
+ *   DERIVED   issue_open | needs_service
+ *             Both are fully computable from live rows: open/monitoring issues
+ *             and the service deadlines. Storing them created the production
+ *             defect this rule fixes — resolving the last issue left the stored
+ *             `issue_open` behind forever, because nothing recomputed it.
+ *
+ * {@link effectiveOperationalStatus} is the single authoritative rule. Every
+ * surface — dashboard counts, fleet-list badge, filters, sort and vehicle
+ * detail — reads it, so the four can never disagree again.
  */
 export const OPERATIONAL_GROUPS = {
   /** Available for work. */
@@ -191,6 +205,62 @@ export function operationalGroup(status: OperationalStatus): OperationalGroup {
     return "unavailable";
   }
   return "attention";
+}
+
+/**
+ * Statuses a human declares, which are never recomputed away.
+ *
+ * `documents_missing` is here for the reason given on {@link DocumentStatus}:
+ * "missing" is not derivable from any table, so the explicit flag is the only
+ * honest signal there is. Clearing it automatically would delete information.
+ */
+export const DECLARED_OPERATIONAL_STATUSES: readonly OperationalStatus[] = [
+  "out_of_service",
+  "in_garage",
+  "documents_missing",
+];
+
+export function isDeclaredOperationalStatus(
+  status: OperationalStatus,
+): boolean {
+  return (DECLARED_OPERATIONAL_STATUSES as readonly string[]).includes(status);
+}
+
+/** Live facts that decide a derived status. */
+export interface OperationalSignals {
+  /** Issues in an OPEN_ISSUE_STATUSES state right now. */
+  openIssueCount: number;
+  /** Worst of the date- and mileage-based service signals. */
+  serviceState: DeadlineState | null;
+}
+
+/**
+ * THE authoritative operational status for display, filtering and counting.
+ *
+ * A declared status always wins. Otherwise the status is recomputed from live
+ * rows every time it is read, so it cannot go stale:
+ *
+ *   * at least one open issue      -> issue_open
+ *   * service overdue or due soon  -> needs_service
+ *   * neither                      -> active
+ *
+ * The stored column keeps its value in the database — this never writes, and a
+ * vehicle that a user manually set to `issue_open` simply resolves to `active`
+ * once no open issue remains, which is the whole point.
+ *
+ * Precedence between the two derived states follows STATUS_RANK in ./types:
+ * `issue_open` (1) is more urgent than `needs_service` (2).
+ */
+export function effectiveOperationalStatus(
+  stored: OperationalStatus,
+  signals: OperationalSignals,
+): OperationalStatus {
+  if (isDeclaredOperationalStatus(stored)) return stored;
+  if (signals.openIssueCount > 0) return "issue_open";
+  if (signals.serviceState === "overdue" || signals.serviceState === "due_soon") {
+    return "needs_service";
+  }
+  return "active";
 }
 
 // -----------------------------------------------------------------------------
