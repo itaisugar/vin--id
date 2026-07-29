@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentRole } from "@/lib/organizations/service";
-import { isDriverRole } from "@/lib/organizations/types";
+import { canManageOrganization, isDriverRole } from "@/lib/organizations/types";
 import { SidebarNav, BottomNav } from "@/components/app-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
@@ -26,7 +26,11 @@ export default async function AppLayout({
 
   // Drivers get a reduced navigation set. Presentation only — every Fleet screen
   // also guards itself, and RLS denies the data regardless of what is rendered.
-  const isDriver = isDriverRole(await getCurrentRole());
+  const role = await getCurrentRole();
+  const isDriver = isDriverRole(role);
+  // Team & Access appears for owner/admin, the same set the organization screen,
+  // list_organization_members() and the invitation policies all require.
+  const canManageTeam = role != null && canManageOrganization(role);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -49,7 +53,7 @@ export default async function AppLayout({
       <div className="mx-auto flex w-full max-w-6xl flex-1">
         {/* Desktop sidebar */}
         <aside className="hidden w-60 shrink-0 border-e border-line p-4 md:flex md:flex-col md:justify-between print:hidden">
-          <SidebarNav isDriver={isDriver} />
+          <SidebarNav isDriver={isDriver} canManageOrganization={canManageTeam} />
           <LogoutButton className="w-full justify-start" />
         </aside>
 

@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+import type { DeadlineState } from "./dates";
+
 // -----------------------------------------------------------------------------
 // Operational status
 // -----------------------------------------------------------------------------
@@ -39,6 +41,65 @@ export const ATTENTION_STATUSES: readonly OperationalStatus[] =
 
 export function needsAttention(status: OperationalStatus): boolean {
   return status !== "active";
+}
+
+// -----------------------------------------------------------------------------
+// Effective operational status
+// -----------------------------------------------------------------------------
+/**
+ * Statuses a human declares, which are never recomputed away.
+ *
+ * `documents_missing` is here for the reason given on {@link DocumentStatus}:
+ * "missing" is not derivable from any table, so the explicit flag is the only
+ * honest signal there is. Clearing it automatically would delete information.
+ */
+export const DECLARED_OPERATIONAL_STATUSES: readonly OperationalStatus[] = [
+  "out_of_service",
+  "in_garage",
+  "documents_missing",
+];
+
+export function isDeclaredOperationalStatus(
+  status: OperationalStatus,
+): boolean {
+  return (DECLARED_OPERATIONAL_STATUSES as readonly string[]).includes(status);
+}
+
+/** Live facts that decide a derived status. */
+export interface OperationalSignals {
+  /** Issues in an OPEN_ISSUE_STATUSES state right now. */
+  openIssueCount: number;
+  /** Worst of the date- and mileage-based service signals. */
+  serviceState: DeadlineState | null;
+}
+
+/**
+ * THE authoritative operational status for display, filtering and counting.
+ *
+ * A declared status always wins. Otherwise the status is recomputed from live
+ * rows every time it is read, so it cannot go stale:
+ *
+ *   * at least one open issue      -> issue_open
+ *   * service overdue or due soon  -> needs_service
+ *   * neither                      -> active
+ *
+ * The stored column keeps its value in the database — this never writes, and a
+ * vehicle that a user manually set to `issue_open` simply resolves to `active`
+ * once no open issue remains, which is the whole point.
+ *
+ * Precedence between the two derived states follows STATUS_RANK in ./types:
+ * `issue_open` (1) is more urgent than `needs_service` (2).
+ */
+export function effectiveOperationalStatus(
+  stored: OperationalStatus,
+  signals: OperationalSignals,
+): OperationalStatus {
+  if (isDeclaredOperationalStatus(stored)) return stored;
+  if (signals.openIssueCount > 0) return "issue_open";
+  if (signals.serviceState === "overdue" || signals.serviceState === "due_soon") {
+    return "needs_service";
+  }
+  return "active";
 }
 
 /**
@@ -240,13 +301,23 @@ export const EMPTY_FLEET_FORM: FleetVehicleFormValues = {
 /**
  * Map validated fleet fields onto a Supabase row payload. Empty optional values
  * become `null` (never `""`) so the column stays consistently nullable.
+ *
+ * `assigned_driver_name` / `assigned_driver_phone` are DELIBERATELY ABSENT.
+ * They were free text that looked like a driver assignment while granting no
+ * access whatsoever — the authoritative assignment is a `driver_assignments`
+ * row, created through `assign_driver()`. The inputs are gone from the form, so
+ * including the columns here would write NULL over whatever a fleet manager
+ * typed before this change. Omitting them from the payload leaves every
+ * historical value exactly where it is (it is still read and displayed by
+ * <LegacyDriverNote>) while making it impossible to set a new one.
+ *
+ * The schema still accepts both keys so any older caller keeps validating; they
+ * simply no longer reach the database.
  */
 export function fleetFieldsToRow(input: FleetVehicleFields) {
   return {
     operational_status: input.operational_status,
     vehicle_type: input.vehicle_type ?? null,
-    assigned_driver_name: input.assigned_driver_name ?? null,
-    assigned_driver_phone: input.assigned_driver_phone ?? null,
     next_service_date: input.next_service_date ?? null,
     next_service_km: input.next_service_km ?? null,
     test_expiry_date: input.test_expiry_date ?? null,

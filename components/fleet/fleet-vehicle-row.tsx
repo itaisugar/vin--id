@@ -28,7 +28,7 @@ export async function FleetVehicleRow({
   row: Row;
   currency: string;
 }) {
-  const { vehicle: v, openIssueCount, highPriorityIssueCount, service, documents, monthCost, actions } = row;
+  const { vehicle: v, openIssueCount, highPriorityIssueCount, service, monthCost, actions } = row;
   const t = await getTranslations("fleet");
   const tv = await getTranslations("vehicles");
   const locale = await getLocale();
@@ -65,9 +65,16 @@ export async function FleetVehicleRow({
                 {v.year != null ? <span className="num"> · {v.year}</span> : null}
               </span>
             </div>
-            {v.vehicle_type || v.assigned_driver_name ? (
+            {/* `assigned_driver_name` used to sit here beside the vehicle type
+                and read exactly like an assignment. It is free text that grants
+                nothing, so the official assignment is shown instead — and only
+                to callers allowed to read it. */}
+            {v.vehicle_type || row.hasAssignedDriver === true ? (
               <p className="text-xs text-ink-3">
-                {[v.vehicle_type, v.assigned_driver_name]
+                {[
+                  v.vehicle_type,
+                  row.hasAssignedDriver === true ? t("driverAssigned") : null,
+                ]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
@@ -98,12 +105,14 @@ export async function FleetVehicleRow({
                 {t("openIssuesCount", { count: openIssueCount })}
               </span>
             ) : null}
-            <OperationalStatusBadge status={v.operational_status} />
+            {/* The EFFECTIVE status: a resolved issue clears this badge, the
+                stored column alone would not. */}
+            <OperationalStatusBadge status={row.effectiveStatus} />
           </div>
         </div>
 
         {/* Operational data */}
-        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-3 sm:grid-cols-5">
+        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-3 sm:grid-cols-4">
           <Field
             label={t("fields.currentKm")}
             value={
@@ -123,11 +132,10 @@ export async function FleetVehicleRow({
             }
             state={service.state}
           />
-          <Field
-            label={t("fields.nearestExpiry")}
-            value={formatDate(documents.nearestExpiry)}
-            state={documents.worst}
-          />
+          {/* Nearest document expiry deliberately does NOT appear here. It is
+              still computed (`row.documents`) and still drives the Dashboard
+              expiry alerts and the vehicle-detail document view — it was simply
+              one column too many on a phone. */}
           <Field
             label={t("fields.openIssues")}
             value={String(openIssueCount)}

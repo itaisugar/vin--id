@@ -32,7 +32,8 @@
     "settings": "Settings",
     "scan": "Scan a document",
     "organization": "Organization",
-    "myVehicle": "My Vehicle"
+    "myVehicle": "My Vehicle",
+    "teamAccess": "Team & Access"
   },
   "install": {
     "title": "Add Vin.ID to your home screen",
@@ -1024,6 +1025,13 @@
       "generated": "Printable copy of a tamper-evident vehicle history snapshot.",
       "passportId": "Passport ID",
       "shareNote": "The shareable link is shown only when the Passport is created and is not included here."
+    },
+    "section": {
+      "currentBody": "This vehicle has a current Vehicle Passport.",
+      "noneBody": "No current Vehicle Passport. Create one to share this vehicle's verified history.",
+      "open": "Open Passport",
+      "create": "Create Passport",
+      "history": "{count, plural, one {# passport in history} other {# passports in history}}"
     }
   },
   "diagnose": {
@@ -1216,6 +1224,7 @@
     "title": "Fleet Dashboard",
     "subtitle": "Your fleet at a glance",
     "untitledVehicle": "Untitled vehicle",
+    "driverAssigned": "Driver assigned",
     "openIssuesCount": "{count, plural, one {# open issue} other {# open issues}}",
     "viewerReadOnly": "You have view-only access.",
     "status": {
@@ -1326,14 +1335,12 @@
       "operationalStatus": "Operational status",
       "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "e.g. Van",
-      "assignedDriver": "Assigned driver",
       "driverPhone": "Driver phone",
       "currentKm": "Current KM",
       "nextService": "Next service",
       "nextServiceKm": "Next service KM",
       "testExpiry": "Test expiry",
       "insuranceExpiry": "Insurance expiry",
-      "nearestExpiry": "Nearest expiry",
       "openIssues": "Open issues",
       "monthCost": "Cost this month"
     },
@@ -1348,7 +1355,8 @@
     },
     "formSection": {
       "title": "Fleet details",
-      "hint": "Optional"
+      "hint": "Optional",
+      "driverMovedHint": "Driver assignment moved to the vehicle page, where assigning a driver actually grants them access."
     },
     "infoCard": {
       "title": "Fleet information",
@@ -1524,6 +1532,17 @@
         "uploadFailed": "The upload failed. Nothing was saved.",
         "saveFailed": "Could not save. Please try again."
       }
+    },
+    "serviceCompliance": {
+      "title": "Service & Compliance",
+      "subtitle": "Next service, statutory test and insurance for this vehicle.",
+      "edit": "Edit",
+      "notSet": "Not set"
+    },
+    "driverNote": {
+      "title": "Driver contact note",
+      "help": "A name typed on the vehicle form before assignments existed. It is a contact note only and grants no access — use Driver assignment above to give a driver access.",
+      "name": "Name on file"
     }
   },
   "organization": {
@@ -1707,6 +1726,22 @@
       "memberNotFound": "That member is no longer in this organization.",
       "notADriver": "Only members with the driver role can be assigned a vehicle.",
       "saveFailed": "Could not save the assignment. Please try again."
+    }
+  },
+  "workspace": {
+    "title": "Workspace",
+    "help": "Your personal vehicles and any organizations you belong to. Switching changes what you see — it never changes who owns anything.",
+    "personal": "Personal",
+    "personalHelp": "Your own vehicles.",
+    "businessHelp": "An organization you belong to.",
+    "active": "Active",
+    "switch": "Switch",
+    "switching": "Switching…",
+    "none": "No workspace available.",
+    "errors": {
+      "notAMember": "You are no longer a member of that workspace.",
+      "notAuthenticated": "Please sign in again.",
+      "failed": "Could not switch workspace. Try again."
     }
   }
 }

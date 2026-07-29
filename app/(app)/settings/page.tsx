@@ -11,13 +11,19 @@ import { LogoutButton } from "@/components/logout-button";
 import { DataPrivacySection } from "@/components/settings/data-privacy";
 import { FeedbackForm } from "@/components/settings/feedback-form";
 import { InstallInstructions } from "@/components/pwa/install-instructions";
+import { WorkspaceSwitcher } from "@/components/organization/workspace-switcher";
+import { listWorkspaces } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tc = await getTranslations("common");
   const tOrg = await getTranslations("organization.team");
+  const tNav = await getTranslations("nav");
+  const tWorkspace = await getTranslations("workspace");
   const locale = await getLocale();
+
+  const workspaces = await listWorkspaces();
 
   const supabase = await createClient();
   const {
@@ -80,11 +86,29 @@ export default async function SettingsPage() {
         ) : null}
       </Card>
 
-      {/* Team management lives on its own screen; the bottom nav keeps four
-          slots on mobile, so it is reached from here. */}
+      {/* Workspace selector. Minimal by design — the final switcher belongs in
+          the app chrome, and moving it there is a navigation change this task
+          excludes. It lists only workspaces the caller is a member of:
+          `list_my_workspaces()` returns nothing else, so an inaccessible
+          organization is not merely hidden here, it is never sent. */}
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-base">{tWorkspace("title")}</CardTitle>
+          <p className="text-sm text-ink-2">{tWorkspace("help")}</p>
+        </CardHeader>
+        <CardContent>
+          <WorkspaceSwitcher workspaces={workspaces} />
+        </CardContent>
+      </Card>
+
+      {/* Team & Access. On desktop this is a sidebar item; the mobile bottom
+          nav keeps five slots (four items plus the scanner), so on a phone this
+          card is the way in. Same label in both places so the screen has one
+          name. The card is always rendered — /organization guards itself and
+          explains the state to a non-admin rather than 404ing. */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{tOrg("title")}</CardTitle>
+          <CardTitle className="text-base">{tNav("teamAccess")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Link

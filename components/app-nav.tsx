@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { driverNavItems, navItems, type NavItem } from "@/components/nav-config";
+import {
+  driverNavItems,
+  navItems,
+  teamAccessNavItem,
+  type NavItem,
+} from "@/components/nav-config";
 import { PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -12,11 +17,27 @@ function useIsActive() {
   return (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Desktop: vertical sidebar navigation (hidden on mobile). */
-export function SidebarNav({ isDriver = false }: { isDriver?: boolean }) {
+/**
+ * Desktop: vertical sidebar navigation (hidden on mobile).
+ *
+ * `canManageOrganization` adds Team & Access. It is resolved on the server from
+ * the membership row and passed down — this client component never decides who
+ * may manage a team, it only decides what to draw.
+ */
+export function SidebarNav({
+  isDriver = false,
+  canManageOrganization = false,
+}: {
+  isDriver?: boolean;
+  canManageOrganization?: boolean;
+}) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
-  const items = isDriver ? driverNavItems : navItems;
+  const items = isDriver
+    ? driverNavItems
+    : canManageOrganization
+      ? [...navItems, teamAccessNavItem]
+      : navItems;
 
   return (
     <nav className="flex flex-col gap-1" aria-label="Primary">

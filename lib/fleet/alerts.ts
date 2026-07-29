@@ -20,6 +20,20 @@ import {
 } from "./dates";
 import type { OperationalStatus } from "./types";
 
+/**
+ * The effective-status rule lives in ./types, which imports nothing at runtime.
+ * That is deliberate: it keeps the rule loadable by the validation harnesses
+ * (Node's type-stripping loader cannot resolve extensionless relative imports),
+ * so the tests exercise the shipped function rather than a copy of it.
+ * Re-exported here because this is where callers look for alert rules.
+ */
+export {
+  DECLARED_OPERATIONAL_STATUSES,
+  effectiveOperationalStatus,
+  isDeclaredOperationalStatus,
+  type OperationalSignals,
+} from "./types";
+
 // -----------------------------------------------------------------------------
 // Documented thresholds
 // -----------------------------------------------------------------------------
@@ -166,11 +180,25 @@ export function classifyDocumentExpiry(
 // Operational status
 // -----------------------------------------------------------------------------
 /**
- * Operational status is STORED, never inferred. A vehicle explicitly marked
- * `out_of_service` stays out of service even if all of its deadlines are clean,
- * and a vehicle marked `active` is never silently re-labelled by this module —
- * derived signals (overdue service, expired documents, open issues) are surfaced
- * as their own alerts alongside the stored status rather than overwriting it.
+ * Operational status has TWO kinds of value, and the difference is what makes
+ * "Needs attention" correct:
+ *
+ *   DECLARED  out_of_service | in_garage | documents_missing
+ *             A human statement about the vehicle that no query can contradict.
+ *             "This van is in the garage" stays true until somebody says
+ *             otherwise, and "paperwork is missing" cannot be derived at all —
+ *             the schema has no per-organization policy of which documents are
+ *             required (see DocumentStatus above). These are always honoured.
+ *
+ *   DERIVED   issue_open | needs_service
+ *             Both are fully computable from live rows: open/monitoring issues
+ *             and the service deadlines. Storing them created the production
+ *             defect this rule fixes — resolving the last issue left the stored
+ *             `issue_open` behind forever, because nothing recomputed it.
+ *
+ * {@link effectiveOperationalStatus} is the single authoritative rule. Every
+ * surface — dashboard counts, fleet-list badge, filters, sort and vehicle
+ * detail — reads it, so the four can never disagree again.
  */
 export const OPERATIONAL_GROUPS = {
   /** Available for work. */
@@ -192,6 +220,7 @@ export function operationalGroup(status: OperationalStatus): OperationalGroup {
   }
   return "attention";
 }
+
 
 // -----------------------------------------------------------------------------
 // Action urgency
