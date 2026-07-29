@@ -1727,5 +1727,21 @@
       "notADriver": "Only members with the driver role can be assigned a vehicle.",
       "saveFailed": "Could not save the assignment. Please try again."
     }
+  },
+  "workspace": {
+    "title": "Workspace",
+    "help": "Your personal vehicles and any organizations you belong to. Switching changes what you see — it never changes who owns anything.",
+    "personal": "Personal",
+    "personalHelp": "Your own vehicles.",
+    "businessHelp": "An organization you belong to.",
+    "active": "Active",
+    "switch": "Switch",
+    "switching": "Switching…",
+    "none": "No workspace available.",
+    "errors": {
+      "notAMember": "You are no longer a member of that workspace.",
+      "notAuthenticated": "Please sign in again.",
+      "failed": "Could not switch workspace. Try again."
+    }
   }
 }

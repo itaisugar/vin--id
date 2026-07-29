@@ -11,6 +11,8 @@ import { LogoutButton } from "@/components/logout-button";
 import { DataPrivacySection } from "@/components/settings/data-privacy";
 import { FeedbackForm } from "@/components/settings/feedback-form";
 import { InstallInstructions } from "@/components/pwa/install-instructions";
+import { WorkspaceSwitcher } from "@/components/organization/workspace-switcher";
+import { listWorkspaces } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
@@ -18,7 +20,10 @@ export default async function SettingsPage() {
   const tc = await getTranslations("common");
   const tOrg = await getTranslations("organization.team");
   const tNav = await getTranslations("nav");
+  const tWorkspace = await getTranslations("workspace");
   const locale = await getLocale();
+
+  const workspaces = await listWorkspaces();
 
   const supabase = await createClient();
   const {
@@ -79,6 +84,21 @@ export default async function SettingsPage() {
             {t("account.joinedAt")} · <span className="num">{joinedAt}</span>
           </p>
         ) : null}
+      </Card>
+
+      {/* Workspace selector. Minimal by design — the final switcher belongs in
+          the app chrome, and moving it there is a navigation change this task
+          excludes. It lists only workspaces the caller is a member of:
+          `list_my_workspaces()` returns nothing else, so an inaccessible
+          organization is not merely hidden here, it is never sent. */}
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-base">{tWorkspace("title")}</CardTitle>
+          <p className="text-sm text-ink-2">{tWorkspace("help")}</p>
+        </CardHeader>
+        <CardContent>
+          <WorkspaceSwitcher workspaces={workspaces} />
+        </CardContent>
       </Card>
 
       {/* Team & Access. On desktop this is a sidebar item; the mobile bottom
