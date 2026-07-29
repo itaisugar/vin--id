@@ -8,7 +8,147 @@ behaves today. M4 (the irreversible cardinality change), M5 and M6 are held for
 R2 and are **absent from this branch**, which is the mechanism that keeps
 `db push` away from them.
 
-Nothing here has been applied. Production was read-only throughout.
+**Status: APPLIED to production 2026-07-29T09:49:16Z–09:49:20Z.** See §0.
+
+---
+
+## 0. Release record — M1-M3 applied to production
+
+Applied from `release/multi-workspace-r1` at `ecee036`, project
+`jsthfmgvcdrfzpgkpwvt`, over the IPv4 session pooler. Database-only release: no
+merge, no deploy, no Vercel change. The application was already running from
+`main` (`7583066`), which includes the Settings fallback.
+
+### Boundary and dry run
+
+37 migrations applied on both sides, **3 pending**, zero drift in either
+direction. `db push --dry-run` listed exactly:
+
+```
+20260729120000_organization_kind.sql
+20260729130000_active_organization.sql
+20260729140000_membership_helpers_multi.sql
+```
+
+A statement scan of the three files found no `drop table`, `drop column`,
+`truncate` or `delete`. The single `drop constraint if exists
+organizations_kind_check` is M1's own idempotency guard for a constraint it
+creates two lines later. The only DML is the `kind` backfill.
+
+### Backup
+
+`/Users/itai/Desktop/vin-id-production-backups/20260729-094655-r1-premigration/`
+— schema.sql (146,526 B), data.sql (107,674 B), roles.sql, migration-state.txt,
+storage-inventory.txt, row-counts.txt. **All six SHA-256 checksums verified.**
+
+### Applied
+
+| | |
+| --- | --- |
+| start / end | 2026-07-29T09:49:16Z → 09:49:20Z |
+| result | all three OK, no error |
+| notices | `constraint "organizations_kind_check" … does not exist, skipping` (expected); `organization_kind: 4 organizations, 3 classified personal` |
+| history | 37 → **40** applied; the three added are exactly M1-M3 |
+
+### Classification — matched the approved audit exactly
+
+**3 personal, 1 business, 0 null or invalid.** No manual repair was needed and
+none was performed; the §5 contingency plan was not executed.
+
+| Organization | kind | Approved |
+| --- | --- | --- |
+| `e4149df3…` | personal | ✓ |
+| `89a499fc…` | personal | ✓ (the one flagged for optional confirmation) |
+| `5917ba63…` | personal | ✓ |
+| `5a754ce7…` | business | ✓ (holds the pending third-party invitation) |
+
+Invariant holds: every `personal` organization has exactly one member.
+
+### Active organization pointer
+
+4 profiles, **0 pointers set, 4 NULL** — no backfill, as designed. No profile
+points at an organization it is not a member of. Column nullable, FK
+`on delete set null`.
+
+The forged-pointer test was **not** run against production: it requires a write,
+and the release used a read-only session throughout. It was verified locally on
+the identical schema — a pointer aimed at a non-member organization is not
+honoured, resolution falls back to the user's own workspace, and zero rows leak.
+
+### Helpers and resolution, under real production identities
+
+All nine SECURITY DEFINER functions carry `search_path=""`. `is_personal_workspace`
+grants EXECUTE to `authenticated` only — `anon` is revoked.
+
+Each of the four production users was impersonated in a read-only transaction:
+
+| Resolved to own organization | Role matches membership | Vehicles visible |
+| --- | --- | --- |
+| 4 / 4 | 4 / 4 | 2, 4, 0, 1 — each equal to its own organization's count |
+
+Determinism: 5 consecutive `current_org_id()` calls per user, **0
+non-deterministic users**. Anonymous: `current_org_id()` NULL, `is_org_writer`
+and `is_org_admin` false, and every private table refused at the privilege layer
+(`42501 permission denied`) — stronger than RLS returning zero rows.
+
+`UNIQUE(user_id)` still in force. M4, M5 and M6 confirmed absent.
+
+### Integrity
+
+**Row counts identical in every table**, pre- versus post-migration (`diff`
+clean across all 22 public tables plus `auth.users` and `storage.objects`). No
+user, profile, organization, membership, vehicle, document, Passport, token or
+driver assignment created, deleted or moved. Storage bucket still private, 4
+objects, 3,689,919 bytes unchanged. Zero new NULL organization IDs, zero
+cross-organization child rows. All 4 auth sessions remained valid — nobody was
+logged out.
+
+### Application verification
+
+Verified against the live production API, which is what the deployed app uses:
+
+* `POST /rest/v1/rpc/list_my_workspaces` → **PGRST202**, precisely the code the
+  deployed fallback keys on. The Settings page therefore takes the fallback path
+  and renders one active workspace with no Switch button.
+* PostgREST's hint suggests `public.is_personal_workspace` — proof its **schema
+  cache reloaded** and knows the objects M3 just created.
+* Anonymous: `42501 permission denied` on `vehicles`, `profiles`,
+  `organization_members` and `vehicle_documents`. No private data exposed.
+
+**Not performed:** the authenticated browser smoke test (Dashboard, vehicles,
+documents, Passport, Team & Access, Service & Compliance, Driver Assignment) and
+the Vercel runtime log review. The deployed URL is not recorded in the repository
+and the Vercel MCP server requires an OAuth authorization this session cannot
+complete; logging in would also need production credentials, and modifying Auth
+users was out of scope. **This remains open for the founder** — see §0a.
+
+Database-side logs were reviewed instead: 0 application events and 0 auth audit
+entries since the migration (nobody has used the app in the interval), and no SQL
+error, RLS recursion or multiple-row subquery failure in any probe.
+
+---
+
+## 0a. Open items for the founder
+
+1. **Authenticated smoke test.** Log in and walk Dashboard → vehicles →
+   maintenance → issues → reminders → documents → Passport → Settings → Team &
+   Access. The specific thing to confirm is that **Settings loads without a 500**
+   and shows exactly one workspace with no Switch button.
+2. **Vercel runtime logs** — check for Settings 500s or missing-RPC errors.
+3. **`89a499fc…` is now labelled Personal.** Evidence supported it (one member,
+   never invited anyone, name never edited). If it is really a company, say so and
+   it becomes a one-row `kind` correction. Nothing depends on it: `kind` grants no
+   authorization, and R2's M5 promotes it automatically the moment anyone joins.
+
+---
+
+## 0b. Deviation from the release brief
+
+The brief expected **two** Auth users and two profiles at preflight. Production
+has **four** users, four profiles, four organizations and four memberships —
+identical to the audit these classification decisions were approved from, so
+nothing had changed and this was not treated as a blocker. The brief's figure was
+stale.
 
 ---
 
@@ -465,6 +605,42 @@ Before M4 there is nothing irreversible. R1 rolls back by dropping
 helper bodies — but the correct response to an R1 problem is almost always to
 redeploy the previous application build and leave the additive columns in place,
 since old code cannot observe them.
+
+---
+
+## 8b. Soak gate — R1 is applied, not yet declared stable
+
+R1 counts as stable once, and only once, all of the following hold:
+
+* M1-M3 applied — **done**, 2026-07-29T09:49Z
+* all audits clean — **done**
+* every existing user retains access — **done**, verified under real identities
+* no unexpected row change — **done**, counts identical
+* classification correct — **done**, 3 personal / 1 business as approved
+* Settings works in the browser with no RPC runtime error — **outstanding**
+  (§0a item 1)
+* production stable under the founder's normal use for the soak period —
+  **outstanding**
+
+### R2 entry audit — a personal organization with more than one member
+
+Run before R2. M5 maintains this invariant; M5 is R2; so nothing maintains it
+during the soak (§6).
+
+```sql
+select o.id, count(m.*) as members
+  from public.organizations o
+  join public.organization_members m on m.organization_id = o.id
+ where o.kind = 'personal'
+ group by o.id having count(m.*) <> 1;
+```
+
+Expected: **zero rows**, or every result reviewed and corrected to `business`.
+At release time this returned zero rows.
+
+The pending-invitation limitation is unchanged by R1: an invitee who owns any
+vehicle still receives `already_member` and cannot join. That is fixed by M5 in
+R2, not here.
 
 ---
 
