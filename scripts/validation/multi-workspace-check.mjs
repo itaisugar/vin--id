@@ -27,7 +27,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import {
   addMembership,
   cleanupUsers,
@@ -136,6 +136,97 @@ async function main() {
 
       (await personalOrgsOf(admin, alice.id)).length === 1
         ? P("exactly one personal workspace") : F("wrong number of personal workspaces");
+    }
+
+    // ---------------------------------------------------------------------
+    // R1 MODE. The R1 release ships M1-M3 only: the additive schema and the
+    // multi-membership-safe helpers, with `UNIQUE(user_id)` deliberately still
+    // in force. Everything from section 2 onward exercises behaviour that M4-M6
+    // introduce, so on an R1 database it would be asserting against code that is
+    // not supposed to be there yet.
+    //
+    // Rather than a second suite that drifts from this one, the suite detects
+    // which release it is running against and asserts what that release
+    // actually promises. On R1 that promise is a strong one: nothing changed.
+    // ---------------------------------------------------------------------
+    const { error: probe } = await admin.rpc("list_my_workspaces");
+    const isR1 = probe?.code === "PGRST202" || probe?.code === "42883";
+
+    if (isR1) {
+      section("R1. Additive schema, unchanged behaviour");
+      {
+        // M1 — the fact is recorded, and signup records it.
+        const { data: personal } = await admin.from("organizations")
+          .select("kind").eq("id", alicePersonal).single();
+        personal?.kind === "personal"
+          ? P("signup records kind='personal' (M1)") : F(`kind is ${personal?.kind}`);
+
+        // M2 — the pointer exists, and is untouched until someone switches.
+        const { data: prof } = await admin.from("profiles")
+          .select("active_organization_id").eq("id", alice.id).single();
+        prof && "active_organization_id" in prof
+          ? P("profiles.active_organization_id exists (M2)") : F("M2 column missing");
+        prof?.active_organization_id === null
+          ? P("it is NULL for an existing user — no backfill") : F("the pointer was backfilled");
+
+        // M4 must NOT have run: this is the whole point of R1.
+        const { error: second } = await admin.from("organization_members")
+          .insert({ organization_id: orgA, user_id: alice.id, role: "viewer" });
+        second?.code === "23505"
+          ? P("UNIQUE(user_id) still rejects a second membership (M4 absent)")
+          : F(`a second membership was accepted — M4 leaked into R1 (${second?.code})`);
+
+        // M6 must NOT have run.
+        const { error: sw } = await admin.rpc("set_active_organization", { p_organization: orgA });
+        sw?.code === "PGRST202" || sw?.code === "42883"
+          ? P("set_active_organization is absent (M6 absent)") : F("M6 leaked into R1");
+
+        // M3 — resolution is deterministic and a forged pointer grants nothing.
+        await setActiveOrg(admin, alice.id, outsiderOrg);
+        const c = await reSignIn(alice.email);
+        (await activeOrg(c)) === alicePersonal
+          ? P("a forged active pointer falls back to her own workspace")
+          : F("a forged pointer was honoured (!)");
+        const { data: leaked } = await c.from("vehicles")
+          .select("id").eq("organization_id", outsiderOrg);
+        (leaked ?? []).length === 0
+          ? P("and leaks no row from the organization it names") : F("cross-tenant leak (!)");
+        await setActiveOrg(admin, alice.id, null);
+
+        const seen = new Set();
+        for (let i = 0; i < 5; i++) seen.add(await activeOrg(c));
+        seen.size === 1 ? P("resolution is deterministic across calls") : F("resolution varies");
+      }
+
+      section("R1. The release boundary is real");
+      {
+        const held = [
+          "20260729150000_membership_cardinality.sql",
+          "20260729160000_accept_invitation_multi.sql",
+          "20260729170000_switch_workspace.sql",
+        ].filter((f) => existsSync(`supabase/migrations/${f}`));
+        held.length === 0
+          ? P("M4-M6 are absent from the release branch, so db push cannot apply them")
+          : F(`M4-M6 present on an R1 branch: ${held.join(", ")}`);
+
+        const kind = readFileSync("supabase/migrations/20260729120000_organization_kind.sql", "utf8");
+        /on conflict \(user_id\) do nothing/.test(kind)
+          ? P("handle_new_user still targets the constraint that exists")
+          : F("signup would break: conflict target names a constraint R1 does not have");
+      }
+
+      for (const id of [alicePersonal, orgA, orgB, outsiderOrg].filter(Boolean)) {
+        await admin.from("vehicles").delete().eq("organization_id", id);
+      }
+      // Tear down and report here rather than returning: a bare `return` inside
+      // this try/finally would skip the summary below and exit 0 whatever
+      // failed. `users` is emptied so the finally block has nothing left to do.
+      await cleanupUsers(admin, users);
+      users.length = 0;
+      console.log(`\n${"=".repeat(64)}`);
+      console.log(`Multi-workspace (R1 mode): ${passes} passed, ${fails} failed`);
+      console.log("=".repeat(64));
+      process.exit(fails === 0 ? 0 : 1);
     }
 
     // ---------------------------------------------------------------------

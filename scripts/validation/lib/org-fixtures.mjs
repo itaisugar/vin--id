@@ -62,6 +62,28 @@ export async function personalOrgsOf(admin, userId) {
   return (orgs ?? []).filter((o) => o.kind === "personal").map((o) => o.id);
 }
 
+/**
+ * Whether this database can hold more than one membership per user — i.e.
+ * whether M4 has been applied.
+ *
+ * R1 ships M1-M3 and keeps `UNIQUE(user_id)`, so suites that assert on
+ * membership cardinality have to assert what the release under test actually
+ * promises rather than what the finished feature will. Probing the constraint
+ * directly (rather than the schema catalog, which PostgREST does not expose)
+ * keeps this honest: it tests the thing that matters.
+ */
+let multiMembership = null;
+
+export async function hasMultiMembership(admin) {
+  if (multiMembership !== null) return multiMembership;
+  const { error } = await admin.rpc("set_active_organization", {
+    p_organization: null,
+  });
+  // Present only from M6, which ships in the same release as M4.
+  multiMembership = !(error?.code === "PGRST202" || error?.code === "42883");
+  return multiMembership;
+}
+
 /** Every organization this user belongs to, oldest first. */
 export async function orgsOf(admin, userId) {
   const { data } = await admin
@@ -92,7 +114,15 @@ export async function roleOf(admin, userId, organizationId) {
       .maybeSingle();
     orgId = data?.active_organization_id;
   }
-  if (!orgId) return null;
+  if (!orgId) {
+    // No pointer. Before M4/M5 nothing ever writes one, and `UNIQUE(user_id)`
+    // means the user holds at most one membership — so the sole membership is
+    // not a guess, it is the complete answer. With several memberships and no
+    // pointer there genuinely is no "the" role, and null is the honest result.
+    const memberships = await orgsOf(admin, userId);
+    if (memberships.length !== 1) return null;
+    return memberships[0].role;
+  }
 
   const { data } = await admin
     .from("organization_members")
@@ -113,18 +143,54 @@ export async function setActiveOrg(admin, userId, organizationId) {
 }
 
 /**
+ * Upsert a membership against whichever unique constraint the database has.
+ *
+ * The R1 release ships M1-M3 and keeps `UNIQUE(user_id)`; M4 replaces it with
+ * `UNIQUE(organization_id, user_id)`. The fixtures have to run on both, so the
+ * conflict target is discovered rather than assumed — otherwise every suite
+ * dies in the harness before asserting anything, which is exactly what happened
+ * the first time R1 was tried.
+ *
+ * Discovery is one failed attempt, memoised for the process. 42P10 is
+ * "no unique or exclusion constraint matching the ON CONFLICT specification";
+ * any other error is a real failure and is returned to the caller.
+ */
+let membershipConflictTarget = null;
+
+async function upsertMembership(admin, row) {
+  const attempt = (target) =>
+    admin.from("organization_members").upsert(row, { onConflict: target });
+
+  if (membershipConflictTarget) {
+    const { error } = await attempt(membershipConflictTarget);
+    return error;
+  }
+
+  const { error } = await attempt("organization_id,user_id");
+  if (!error) {
+    membershipConflictTarget = "organization_id,user_id";
+    return null;
+  }
+  if (error.code !== "42P10") return error;
+
+  const { error: legacyError } = await attempt("user_id");
+  if (!legacyError) membershipConflictTarget = "user_id";
+  return legacyError;
+}
+
+/**
  * ADD a membership without disturbing any the user already holds.
  *
- * This is what `accept_invitation()` now does. `joinOrg` below keeps the old
- * "move" semantics for the tests that still exercise a single-workspace user.
+ * This is what `accept_invitation()` does from M5 onward. It requires M4: under
+ * `UNIQUE(user_id)` a second membership is rejected, which is the constraint
+ * R1 deliberately keeps.
  */
 export async function addMembership(admin, userId, organizationId, role) {
-  const { error } = await admin
-    .from("organization_members")
-    .upsert(
-      { organization_id: organizationId, user_id: userId, role },
-      { onConflict: "organization_id,user_id" },
-    );
+  const error = await upsertMembership(admin, {
+    organization_id: organizationId,
+    user_id: userId,
+    role,
+  });
   if (error) throw new Error(`addMembership(${role}): ${error.message}`);
   await setActiveOrg(admin, userId, organizationId);
 }
@@ -174,12 +240,11 @@ export async function joinOrg(admin, userId, organizationId, role) {
     }
   }
 
-  const { error } = await admin
-    .from("organization_members")
-    .upsert(
-      { organization_id: organizationId, user_id: userId, role },
-      { onConflict: "organization_id,user_id" },
-    );
+  const error = await upsertMembership(admin, {
+    organization_id: organizationId,
+    user_id: userId,
+    role,
+  });
   if (error) throw new Error(`joinOrg(${role}): ${error.message}`);
 
   // Keep the (non-authoritative) profile cache consistent with reality, and

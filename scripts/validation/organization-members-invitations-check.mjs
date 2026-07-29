@@ -26,6 +26,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
   cleanupUsers,
+  hasMultiMembership,
   joinOrg,
   orgOf,
   personalOrgsOf,
@@ -126,11 +127,20 @@ async function main() {
         ? P("duplicate membership in the SAME organization: rejected")
         : F("duplicate membership in one organization allowed (!)");
 
+      // Cardinality is the whole point of the R1/R2 split, so assert what the
+      // release under test promises. R1 keeps UNIQUE(user_id) deliberately; a
+      // second membership succeeding there would mean M4 had leaked in.
       const { error: otherOrg } = await admin.from("organization_members")
         .insert({ organization_id: orgB, user_id: aOwner.id, role: "viewer" });
-      !otherOrg
-        ? P("membership in a SECOND organization: allowed")
-        : F(`second-organization membership rejected: ${otherOrg.message}`);
+      if (await hasMultiMembership(admin)) {
+        !otherOrg
+          ? P("membership in a SECOND organization: allowed")
+          : F(`second-organization membership rejected: ${otherOrg.message}`);
+      } else {
+        otherOrg?.code === "23505"
+          ? P("membership in a SECOND organization: rejected (R1 keeps UNIQUE(user_id))")
+          : F(`R1 accepted a second membership — M4 leaked in (${otherOrg?.code ?? "no error"})`);
+      }
       // Leave the fixture as it was: this user is org A's owner elsewhere.
       await admin.from("organization_members").delete()
         .eq("user_id", aOwner.id).eq("organization_id", orgB);
@@ -281,6 +291,12 @@ async function main() {
 
     const invC = await signIn(invExisting.email);
     {
+      // Captured BEFORE accepting, by identity. Counting "how many personal
+      // workspaces do they have afterwards" is not enough: the inviting
+      // organization is itself signup-created and therefore also kind
+      // 'personal', so a deleted workspace and a surviving one both count 1.
+      const invPersonalBefore = await orgOf(admin, invExisting.id);
+
       const ok = await accept(invC, valid.raw);
       ok?.state === "ok" && ok.organization_id === orgA
         ? P("accept: matching existing user succeeds") : F(`accept existing -> ${ok?.state}`);
@@ -294,10 +310,23 @@ async function main() {
         .eq("user_id", invExisting.id).eq("organization_id", orgA);
       count === 1 ? P("accept: exactly one membership in the inviting org") : F(`accept produced ${count} memberships in org A`);
 
-      const kept = await personalOrgsOf(admin, invExisting.id);
-      kept.length === 1
-        ? P("accept: the invitee KEEPS their personal workspace")
-        : F(`accept left ${kept.length} personal workspaces (expected 1)`);
+      const { data: stillThere } = await admin.from("organizations")
+        .select("id").eq("id", invPersonalBefore).maybeSingle();
+
+      if (await hasMultiMembership(admin)) {
+        const kept = await personalOrgsOf(admin, invExisting.id);
+        stillThere?.id === invPersonalBefore && kept.length === 1
+          ? P("accept: the invitee KEEPS their personal workspace")
+          : F(`accept destroyed the invitee's personal workspace (${kept.length} left)`);
+      } else {
+        // R1 ships the pre-M5 function, which makes room under UNIQUE(user_id)
+        // by deleting the invitee's own organization. Asserting it explicitly
+        // records that R1 is knowingly no better than production here, and will
+        // fail loudly if M5 ever leaks into R1.
+        !stillThere
+          ? P("accept: R1 consumes the invitee's personal workspace (pre-M5 behaviour)")
+          : F("R1 preserved the personal workspace — M5 leaked into R1");
+      }
       const { data } = await admin.from("organization_invitations").select("status, accepted_by").eq("id", valid.id).single();
       data.status === "accepted" && data.accepted_by === invExisting.id
         ? P("accept: consumption + membership are atomic (status + accepted_by set)") : F("invitation not consumed");
