@@ -199,13 +199,90 @@ export interface WorkspaceSummary {
   joinedAt: string;
 }
 
+/**
+ * Whether the database simply has no multi-workspace support yet.
+ *
+ * The application is deployed from `main`, which carries the multi-workspace
+ * migrations, but a database only gains them when someone runs `db push`. That
+ * leaves a real window — however short — in which the deployed code is ahead of
+ * the schema. A user opening Settings in that window must not meet an error
+ * page over a feature that has not been switched on yet.
+ *
+ * Narrow on purpose. It matches ONLY "this function does not exist"; any other
+ * failure (permission, connectivity, a genuine bug in the RPC) still throws,
+ * because silently showing one workspace to a user who has several would be a
+ * far worse outcome than an error.
+ */
+function isMissingWorkspaceSupport(error: { code?: string | null }): boolean {
+  return (
+    error.code === "42883" || // Postgres: undefined_function
+    error.code === "PGRST202" // PostgREST: not found in the schema cache
+  );
+}
+
+/**
+ * The one workspace a pre-migration database can describe.
+ *
+ * Before the multi-workspace migrations, `UNIQUE(user_id)` on
+ * `organization_members` means a user has at most one membership, so this is
+ * not an approximation — it is the complete answer for that schema.
+ *
+ * Reads only columns that exist before the migrations: no `organizations.kind`,
+ * no `profiles.active_organization_id`. Two plain queries rather than an
+ * embed, because an ambiguous PostgREST relationship resolves to an empty
+ * result instead of an error.
+ */
+async function legacySingleWorkspace(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<WorkspaceSummary[]> {
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("organization_id, role, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (membershipError) throw membershipError;
+  if (!membership) return [];
+
+  const { data: organization, error: organizationError } = await supabase
+    .from("organizations")
+    .select("id, name")
+    .eq("id", membership.organization_id)
+    .maybeSingle();
+
+  if (organizationError) throw organizationError;
+
+  return [
+    {
+      organizationId: membership.organization_id,
+      name: organization?.name ?? "",
+      // A schema without `kind` has no notion of a personal workspace, so the
+      // selector shows the organization's name — exactly what it showed before
+      // the multi-workspace work began.
+      kind: "business",
+      role: isOrgRole(membership.role) ? membership.role : "viewer",
+      // It is the only membership that can exist here, so it is the active one.
+      isActive: true,
+      joinedAt: membership.created_at,
+    },
+  ];
+}
+
 export const listWorkspaces = cache(async (): Promise<WorkspaceSummary[]> => {
   const userId = await getAuthUserId();
   if (!userId) return [];
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("list_my_workspaces");
-  if (error) throw error;
+  if (error) {
+    if (isMissingWorkspaceSupport(error)) {
+      return await legacySingleWorkspace(supabase, userId);
+    }
+    throw error;
+  }
 
   return ((data ?? []) as {
     organization_id: string;
