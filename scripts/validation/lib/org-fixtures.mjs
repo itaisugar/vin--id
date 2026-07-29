@@ -16,24 +16,117 @@
  * memberships and invitations), then the users.
  */
 
-/** The organization auto-created for a user by the signup trigger. */
+/**
+ * The user's PERSONAL organization — the one the signup trigger created.
+ *
+ * Since the multi-workspace change a user may hold several memberships, so
+ * `.maybeSingle()` here would throw. The personal workspace is now identified by
+ * `organizations.kind`, not by "the only one they have".
+ */
 export async function orgOf(admin, userId) {
-  const { data } = await admin
+  // Two plain queries rather than a PostgREST embed. `organization_members` has
+  // several relationships that reach `organizations` (its own FK, plus the
+  // composite keys driver_assignments uses), and an ambiguous embed resolves to
+  // an empty result rather than an error — a silent wrong answer in a fixture
+  // helper that half the suites depend on.
+  const { data: rows } = await admin
     .from("organization_members")
     .select("organization_id")
     .eq("user_id", userId)
-    .maybeSingle();
-  return data?.organization_id ?? null;
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+  const ids = (rows ?? []).map((r) => r.organization_id);
+  if (ids.length === 0) return null;
+
+  const { data: orgs } = await admin
+    .from("organizations")
+    .select("id, kind")
+    .in("id", ids);
+  const personal = (orgs ?? []).find((o) => o.kind === "personal");
+  // Fall back to the oldest membership, mirroring current_org_id().
+  return personal?.id ?? ids[0];
 }
 
-/** The user's effective role, straight from the membership row. */
-export async function roleOf(admin, userId) {
+/** Every PERSONAL organization this user belongs to (expected: exactly one). */
+export async function personalOrgsOf(admin, userId) {
+  const { data: rows } = await admin
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", userId);
+  const ids = (rows ?? []).map((r) => r.organization_id);
+  if (ids.length === 0) return [];
+  const { data: orgs } = await admin
+    .from("organizations")
+    .select("id, kind")
+    .in("id", ids);
+  return (orgs ?? []).filter((o) => o.kind === "personal").map((o) => o.id);
+}
+
+/** Every organization this user belongs to, oldest first. */
+export async function orgsOf(admin, userId) {
+  const { data } = await admin
+    .from("organization_members")
+    .select("organization_id, role, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+  return data ?? [];
+}
+
+/**
+ * The user's role in one organization. `organizationId` is required now that a
+ * user can hold a different role in each — there is no such thing as "the"
+ * user's role any more.
+ */
+export async function roleOf(admin, userId, organizationId) {
+  // No organization named -> the ACTIVE workspace, which is the one the user is
+  // acting in and the one accept_invitation() leaves them in. Falling back to
+  // "oldest membership" would answer about the personal workspace instead, and
+  // report `owner` for someone who was just invited as a viewer.
+  let orgId = organizationId;
+  if (!orgId) {
+    const { data } = await admin
+      .from("profiles")
+      .select("active_organization_id")
+      .eq("id", userId)
+      .maybeSingle();
+    orgId = data?.active_organization_id;
+  }
+  if (!orgId) return null;
+
   const { data } = await admin
     .from("organization_members")
     .select("role")
     .eq("user_id", userId)
+    .eq("organization_id", orgId)
     .maybeSingle();
   return data?.role ?? null;
+}
+
+/** Point the user's active workspace at an organization (fixtures only). */
+export async function setActiveOrg(admin, userId, organizationId) {
+  const { error } = await admin
+    .from("profiles")
+    .update({ active_organization_id: organizationId })
+    .eq("id", userId);
+  if (error) throw new Error(`setActiveOrg: ${error.message}`);
+}
+
+/**
+ * ADD a membership without disturbing any the user already holds.
+ *
+ * This is what `accept_invitation()` now does. `joinOrg` below keeps the old
+ * "move" semantics for the tests that still exercise a single-workspace user.
+ */
+export async function addMembership(admin, userId, organizationId, role) {
+  const { error } = await admin
+    .from("organization_members")
+    .upsert(
+      { organization_id: organizationId, user_id: userId, role },
+      { onConflict: "organization_id,user_id" },
+    );
+  if (error) throw new Error(`addMembership(${role}): ${error.message}`);
+  await setActiveOrg(admin, userId, organizationId);
 }
 
 /**
@@ -85,25 +178,50 @@ export async function joinOrg(admin, userId, organizationId, role) {
     .from("organization_members")
     .upsert(
       { organization_id: organizationId, user_id: userId, role },
-      { onConflict: "user_id" },
+      { onConflict: "organization_id,user_id" },
     );
   if (error) throw new Error(`joinOrg(${role}): ${error.message}`);
 
-  // Keep the (non-authoritative) profile cache consistent with reality.
+  // Keep the (non-authoritative) profile cache consistent with reality, and
+  // point the active workspace at the organization the fixture just joined —
+  // otherwise current_org_id() would fall back to the personal workspace and
+  // the persona would be acting somewhere the test did not intend.
   await admin
     .from("profiles")
-    .update({ organization_id: organizationId, role })
+    .update({
+      organization_id: organizationId,
+      role: role === "driver" ? "viewer" : role,
+      active_organization_id: organizationId,
+    })
     .eq("id", userId);
 }
 
 /** Set a member's role in place, without touching their organization. */
-export async function setRole(admin, userId, role) {
+export async function setRole(admin, userId, role, organizationId) {
+  // With several memberships, "the user's role" is not a thing — a role belongs
+  // to one membership. When no organization is named, change the role in the
+  // user's ACTIVE workspace, which is the one the persona is acting in.
+  let orgId = organizationId;
+  if (!orgId) {
+    const { data } = await admin
+      .from("profiles")
+      .select("active_organization_id")
+      .eq("id", userId)
+      .maybeSingle();
+    orgId = data?.active_organization_id ?? (await orgOf(admin, userId));
+  }
+
   const { error } = await admin
     .from("organization_members")
     .update({ role })
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("organization_id", orgId);
   if (error) throw new Error(`setRole(${role}): ${error.message}`);
-  await admin.from("profiles").update({ role }).eq("id", userId);
+  // profiles.role predates the driver role and its CHECK does not allow it.
+  await admin
+    .from("profiles")
+    .update({ role: role === "driver" ? "viewer" : role })
+    .eq("id", userId);
 }
 
 /**

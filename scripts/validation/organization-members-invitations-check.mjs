@@ -28,6 +28,7 @@ import {
   cleanupUsers,
   joinOrg,
   orgOf,
+  personalOrgsOf,
   roleOf,
   setProfileCache,
   setRole,
@@ -115,9 +116,24 @@ async function main() {
       data === 1 ? P("every active organization has an owner") : F(`owner count=${data}`);
     }
     {
-      const { error } = await admin.from("organization_members")
+      // A user may now belong to several organizations, so a membership in a
+      // SECOND organization is legitimate. What must still be impossible is a
+      // duplicate membership in the SAME organization — that is what makes
+      // invitation replay idempotent at the database level.
+      const { error: sameOrg } = await admin.from("organization_members")
+        .insert({ organization_id: orgA, user_id: aOwner.id, role: "viewer" });
+      sameOrg
+        ? P("duplicate membership in the SAME organization: rejected")
+        : F("duplicate membership in one organization allowed (!)");
+
+      const { error: otherOrg } = await admin.from("organization_members")
         .insert({ organization_id: orgB, user_id: aOwner.id, role: "viewer" });
-      error ? P("duplicate membership for one user: rejected") : F("duplicate membership allowed (!)");
+      !otherOrg
+        ? P("membership in a SECOND organization: allowed")
+        : F(`second-organization membership rejected: ${otherOrg.message}`);
+      // Leave the fixture as it was: this user is org A's owner elsewhere.
+      await admin.from("organization_members").delete()
+        .eq("user_id", aOwner.id).eq("organization_id", orgB);
     }
 
     await joinOrg(admin, aAdmin.id, orgA, "admin");
@@ -270,9 +286,18 @@ async function main() {
         ? P("accept: matching existing user succeeds") : F(`accept existing -> ${ok?.state}`);
       (await roleOf(admin, invExisting.id)) === "fleet_manager"
         ? P("accept: the invited role is assigned") : F("accept: wrong role assigned");
+      // Exactly one membership IN THE INVITING ORGANIZATION. The invitee also
+      // keeps their personal workspace — that is the point of the change, and
+      // it is asserted immediately below.
       const { count } = await admin.from("organization_members")
-        .select("id", { count: "exact", head: true }).eq("user_id", invExisting.id);
-      count === 1 ? P("accept: exactly one membership exists (duplicate prevented)") : F(`accept produced ${count} memberships`);
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", invExisting.id).eq("organization_id", orgA);
+      count === 1 ? P("accept: exactly one membership in the inviting org") : F(`accept produced ${count} memberships in org A`);
+
+      const kept = await personalOrgsOf(admin, invExisting.id);
+      kept.length === 1
+        ? P("accept: the invitee KEEPS their personal workspace")
+        : F(`accept left ${kept.length} personal workspaces (expected 1)`);
       const { data } = await admin.from("organization_invitations").select("status, accepted_by").eq("id", valid.id).single();
       data.status === "accepted" && data.accepted_by === invExisting.id
         ? P("accept: consumption + membership are atomic (status + accepted_by set)") : F("invitation not consumed");
@@ -296,10 +321,11 @@ async function main() {
       const results = await Promise.all([1, 2, 3, 4, 5].map(() => accept(c, inv.raw)));
       const okCount = results.filter((r) => r?.state === "ok").length;
       const { count } = await admin.from("organization_members")
-        .select("id", { count: "exact", head: true }).eq("user_id", target.id);
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", target.id).eq("organization_id", orgA);
       okCount === 1 && count === 1
-        ? P("concurrent acceptance creates exactly one membership")
-        : F(`concurrent acceptance: ok=${okCount} memberships=${count}`);
+        ? P("concurrent acceptance creates exactly one membership in the org")
+        : F(`concurrent acceptance: ok=${okCount} memberships in org A=${count}`);
     }
     {
       const inv = await seedInvitation(orgA, invNew.email, "viewer", aOwner.id);
