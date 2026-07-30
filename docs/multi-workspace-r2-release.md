@@ -7,8 +7,13 @@ Database-only release — nothing merged, nothing deployed, no Vercel change. Th
 full application was already live from `main`, so the workspace RPCs it calls
 became available the moment the migrations landed.
 
-Two items are **outstanding** and are recorded honestly in §9: the browser smoke
-test, and removal of three synthetic test accounts.
+**Update 2026-07-30 (§11): synthetic-account cleanup COMPLETE.** Of the three
+synthetic accounts, one was retained as a permanent production QA account and two
+were removed by a guarded, single-transaction, audited cleanup. Production is back
+to a real **5 / 5 / 5 / 5** (five accounts = four founder accounts + one QA), all
+audits clean. The **browser smoke test remains outstanding** — it needs the
+deployed URL and an interactive login, neither available to the tooling in a
+non-interactive session (§9, §11).
 
 ---
 
@@ -196,29 +201,22 @@ workspace and four vehicles — exactly the case the pre-M5 function refused wit
 
 ---
 
-## 9. Outstanding
+## 9. Outstanding (as of the 2026-07-30 cleanup)
 
-1. **Three synthetic accounts remain in production** (`r2-synthetic-*`), each with
-   an empty personal organization. Production therefore reads 7 users / 7
-   organizations / 7 memberships instead of 4 / 4 / 4.
+1. ~~Three synthetic accounts remain in production.~~ **RESOLVED — see §11.** One
+   retained as production QA, two removed. Production is 5 / 5 / 5 / 5.
 
-   They cannot be removed through a supported user flow: the application has **no
-   DELETE policy on `organizations`** (by design), and deleting the auth user
-   first is refused by the last-owner trigger. Removal needs one scoped
-   privileged statement, prepared and guarded at
-   `scratchpad/prodclean.sh` — it refuses to run unless exactly 4 real users and
-   4 real organizations survive, and aborts the transaction if the result is not
-   4/4/4. **It has not been run; it needs approval.**
+2. **Browser smoke test** — still not performed. The deployed URL is not recorded
+   in the repository, `APP_PUBLIC_URL` in `.env.local` is `http://localhost:3000`,
+   and the Vercel MCP server needs an OAuth authorization a non-interactive session
+   cannot complete. It must be done through the founder's interactive browser
+   session using the retained QA account (§11). No browser result has been
+   invented. The full checklist to run is preserved in §11.
 
-2. **Browser smoke test** — not performed. The deployed URL is not recorded in the
-   repository and the Vercel MCP server needs an OAuth authorization this session
-   cannot complete. Worth confirming by hand: Settings loads, the Workspace
-   Selector lists one workspace marked active with no Switch button, Dashboard,
-   Team & Access, documents and Passport all behave.
-
-3. **Vercel runtime logs** — not reviewed, same reason. Database-side logs were:
-   0 application events and 0 auth entries since the release, no SQL error, no RLS
-   recursion, no multiple-row subquery failure in any probe.
+3. **Vercel runtime logs** — still not reviewed, same reason. Database-side logs
+   on 2026-07-30 after cleanup: `auth.audit_log_entries` empty (rotated), 0
+   `app_events` since the cleanup window, no SQL error and no trigger failure —
+   the cleanup transaction committed with every guard passing.
 
 ---
 
@@ -231,3 +229,162 @@ Unchanged by this release, and deliberately out of scope:
 * real invitation email delivery (invitations are shared by Copy Link)
 
 No defect was found in the application code, so nothing was deployed.
+
+---
+
+## 11. Synthetic-account cleanup — 2026-07-30
+
+Founder decision: **keep one** of the three synthetic accounts as a permanent
+production QA account, **remove the other two** via a guarded audited cleanup, and
+do not run the earlier "delete all three" script (`scratchpad/prodclean.sh`, now
+superseded).
+
+### 11.1 Inventory of the three synthetic accounts (read-only)
+
+All identifiers masked. Every account was created 2026-07-29T10:18:46Z through the
+public signup flow, confirmed, with a password from the validation-suite
+convention.
+
+| account | uid | created (sub-sec) | profile | org | kind | memb / role | vehicles | maint | issues | reminders | docs | extractions | passports | tokens | driver asg | invitations | storage |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| joiner   | `f2fb4001` | .119180 | ✓ | `179f231d` | personal | 1 / owner | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| companyb | `c183f745` | .569358 | ✓ | `bc9d4522` | personal | 1 / owner | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| companyc | `221ece20` | .755052 | ✓ | `b239e9bd` | personal | 1 / owner | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+A dynamic census across **every** foreign key of `auth.users` and
+`organizations` confirmed the only rows referencing any of the three are each
+account's own profile, own membership, and its profile's self-pointers to its own
+personal org. Nothing else in 22 tables references them.
+
+### 11.2 Retained QA account — selection
+
+All three are identical on every deterministic criterion (confirmed auth · valid
+profile · single personal org · exactly one owner membership · no vehicle/record
+data · no invitations · no storage objects). The tiebreak was **earliest creation
+timestamp**, which selects **`f2fb4001` (`r2-synthetic-joiner-…@…`)**. It is also
+the semantically correct choice — the "joiner" account was designed to *join*
+other workspaces, exactly the QA-tester role. Its personal org is `179f231d`
+(`R2 Synthetic joiner`, kind `personal`).
+
+**This account is production QA. Exclude it from all product and traction
+metrics.** Its full email is not recorded here; the masked prefix is
+`r2***@e***` on an `example.com` address (undeliverable by design — no real
+mailbox, so no password reset).
+
+### 11.3 Two accounts removed
+
+`c183f745` (companyb, org `bc9d4522`) and `221ece20` (companyc, org `b239e9bd`).
+
+### 11.4 Cleanup guards and method
+
+A fresh production backup was taken first:
+`/Users/itai/Desktop/vin-id-production-backups/20260730-135120-r2-precleanup/`
+(schema.sql, data.sql, roles.sql, migration-state, storage-inventory, row-counts;
+all six SHA-256 checksums verified). PITR is off, so this is the recovery point.
+
+The cleanup ran as **one transaction** (`ON_ERROR_STOP`, so any failed guard
+rolls the whole thing back). It uses **hardcoded UUIDs only** — no `LIKE`/pattern
+match is ever used to pick a row to delete, so a real account cannot be caught by
+accident.
+
+**Before-guards (abort unless all hold):** exactly 7 auth users / 7 profiles /
+7 orgs · all 4 originals present · all 3 synthetics present · the retained QA id
+explicitly excluded from the target set · **each** target has exactly one profile,
+one personal org, one sole-owner membership, and **zero** of vehicles, maintenance,
+issues, reminders, documents, extractions, passports, tokens, driver assignments,
+invitations, inspection/insurance/registration, ownership transfers, audit logs,
+app events, beta feedback, diagnosis rows, and storage objects · a dynamic FK
+backstop asserting no reference to either target exists anywhere beyond its own
+profile + membership self-rows.
+
+**Order (derived from the real FKs + the last-owner trigger):** for each target,
+`organizations` first, then `profiles`, then `auth.users`. The
+`protect_last_owner` trigger has an explicit escape hatch — when the parent org
+row is already gone it lets the `organization_members … ON DELETE CASCADE` through
+— so deleting the org first removes the sole-owner membership *without* disabling
+any trigger or RLS. Deleting the org also `SET NULL`s the target profile's org
+pointers (harmless; the profile is deleted next). Deleting the auth user cascades
+its `auth.identities/sessions/…`. **No trigger and no RLS was disabled.**
+
+**After-guards (abort unless all hold):** exactly 5 auth users / 5 profiles /
+5 orgs / 5 memberships · retained QA present and intact (personal org, sole owner,
+active pointer = personal) · all 4 originals present · both targets fully gone
+(user, profile, org, membership) · zero orphan profiles · zero memberships with a
+missing user or org · every org has an owner · zero rows still pointing at a
+deleted org (12 org-scoped tables + profile pointers) · founder counts unchanged
+(vehicles 7, documents 4, passports 15, maintenance 9, issues 7, invitations 1) ·
+storage unchanged (4 objects, 3,689,919 bytes).
+
+The transaction was **rehearsed first with `commit` replaced by `rollback`**
+against live production: it executed all six deletes, passed every after-guard,
+and rolled back, proving correctness on real data before the real run. Both the
+rehearsal and the committed run reported `PRE-GUARDS PASSED` and
+`POST-GUARDS PASSED`.
+
+### 11.5 Before / after counts
+
+| | before | after |
+| --- | --- | --- |
+| auth users | 7 | **5** |
+| profiles | 7 | **5** |
+| organizations | 7 | **5** |
+| memberships | 7 | **5** |
+| org kinds | 4 personal + 1 business (+2 synth personal) | **4 personal + 1 business** |
+| vehicles / documents / passports | 7 / 4 / 15 | 7 / 4 / 15 |
+| maintenance / issues / reminders | 9 / 7 / 2 | 9 / 7 / 2 |
+| tokens / extractions / driver asg | 15 / 3 / 0 | 15 / 3 / 0 |
+| invitations | 1 | 1 |
+| storage objects / bytes | 4 / 3,689,919 | 4 / 3,689,919 |
+
+### 11.6 Final audits — all clean
+
+5 / 5 / 5 / 5 · 4 personal + 1 business · **zero** users with multiple
+memberships · **zero** duplicate memberships · **zero** ownerless organizations ·
+**zero** invalid active pointers · **zero** orphan profiles / memberships ·
+**zero** cross-organization child rows · **zero** NULL `organization_id` on
+org-scoped tables · storage count and bytes unchanged, all 4 objects founder-owned
+(`e2faa5ed`) · founder row counts unchanged · the one real pending invitation
+(`bd259506`, status `pending`, org `5a754ce7`, inviter `dbb35aaa`) **untouched**.
+
+The retained QA account ends with **zero business memberships**, zero vehicles and
+zero records — exactly the Part-4 target state — because the browser validation
+that would have added and then removed a Business membership has not yet run.
+
+### 11.7 Browser validation — STILL PENDING (must be founder-driven)
+
+Not performed. It requires the deployed production URL and an interactive login,
+neither available to a non-interactive session; the Vercel MCP connector is
+unauthorized here. **No browser outcome has been invented.** Run it by hand with
+the retained QA account (`f2fb4001`):
+
+* **Initial Personal state** — login succeeds; Settings loads; one Personal
+  workspace listed and active; no Switch button; no vehicle data; no other org.
+* **Controlled invitation** — from the Business org (`numa dad`, `5a754ce7`),
+  invite the QA account as **Viewer** via **Copy Link** (never email; never touch
+  the real pending invitation `bd259506`). Preview must show the correct Business
+  org, Viewer role, correct recipient, valid state.
+* **Accept** — accept explicitly; replay adds no second membership; Personal
+  workspace and its `personal` kind survive; Business stays `business`; Business
+  becomes active; role is Viewer.
+* **Switching** — selector lists Personal + Business; active clearly indicated;
+  switch both ways; refresh preserves selection; logout/login resolves a valid
+  workspace; no prior-workspace data bleeds through.
+* **Viewer security in Business** — read-only: cannot create/edit vehicles,
+  maintenance, issues; cannot upload/confirm Fleet AI Intake; cannot assign
+  drivers; cannot manage members/invitations; cannot reach another org by direct
+  URL.
+* **Personal isolation** — no Business vehicles, driver data, costs, or documents
+  appear in Personal; Viewer role does not change Personal ownership behaviour.
+* **Stale-pointer** — remove the QA Viewer membership from Business (this is a
+  non-owner membership, so the last-owner invariant is not touched); access is
+  revoked immediately; no stale active-org data leak; safe fallback to Personal;
+  selector lists only Personal; Business direct URLs blocked.
+
+After the test, the QA account must again be left with **zero business
+memberships** — which is already its state now.
+
+### 11.8 Remaining onboarding / email work (unchanged)
+
+* post-signup Personal/Organization onboarding
+* short invitation codes
+* real invitation email delivery (invitations are shared by Copy Link)
