@@ -16,14 +16,19 @@ deployed URL and an interactive login, neither available to the tooling in a
 non-interactive session (§9, §11).
 
 **Update 2026-07-30 (§12): QA account REASSIGNED to a real founder account.** The
-founder changed the QA-account decision: production QA will use the existing real
+founder changed the QA-account decision: production QA uses the existing real
 account `itaibell134@gmail.com` (uid `e2faa5ed…`), **not** the synthetic account.
 No Auth users were merged; no data, org, vehicle, Passport, document or ownership
-was moved or renamed. Read-only audits are done and the single remaining synthetic
-account (`f2fb4001…`) is re-confirmed empty and disposable. Its deletion is
-**staged and rehearsed but deliberately NOT applied** — the founder's sequence
-gates it on the browser test completing first (§12). Current classification:
-**`TARGET QA ACCOUNT READY — MANUAL BROWSER TEST PENDING`**.
+was moved or renamed.
+
+**Update 2026-07-30 (§13): R2 CLOSED.** The founder completed and confirmed the
+manual browser validation; all database consequences were verified independently.
+The temporary Business membership was removed via Team & Access, the target
+profile pointer was normalized, and the last synthetic account (`f2fb4001…`) was
+removed by a guarded, rehearsed, single-transaction cleanup. Production is at a
+real **4 / 4 / 4 / 4** (four legitimate accounts: 3 Personal + 1 Business), every
+audit clean, founder data preserved, migrations unchanged at 43. Final
+classification: **`R2 PRODUCTION RELEASE FULLY VALIDATED`**.
 
 ---
 
@@ -140,10 +145,20 @@ zero driver assignments outside their organization ✓ · storage bucket private
 
 ### A production hardening worth recording
 
-`anon` **and `service_role` both hold zero table privileges** on all 22 public
+`anon` **and `service_role` hold zero _DML_ privileges** on all 22 public
 tables in production; only `authenticated` has SELECT. `service_role` carries
 `BYPASSRLS`, but that is irrelevant without a GRANT — so a leaked service-role
 key cannot read a single application row over PostgREST.
+
+> **Correction (2026-07-30, verified in §13.9).** The precise statement is *zero
+> DML*, not "zero privileges": `anon` does hold the inert Supabase default grants
+> `REFERENCES, TRIGGER, TRUNCATE` on each table (66 rows = 3 × 22 in
+> `role_table_grants`). None of these permit reading or writing rows, and `anon`
+> has **no SELECT/INSERT/UPDATE/DELETE** on any app table — proven by a live
+> `set local role anon; select from profiles` returning `permission denied`.
+> `TRUNCATE` is unreachable for the anon JWT (PostgREST exposes no truncate verb,
+> and `anon` cannot open a direct SQL session). This is unchanged Supabase
+> baseline, not an R2 change.
 
 This is stricter than local Supabase, and it is a good property. It also means
 **production fixtures cannot be built with the service role** — every test
@@ -512,3 +527,176 @@ Four founder accounts intact; the target `e2faa5ed…` intact with all Personal
 data; storage 4 objects / 3,689,919 bytes, all founder-owned; the one real pending
 invitation `bd259506` untouched. Nothing was written to production in this step —
 only read-only audits and a rolled-back rehearsal.
+
+---
+
+## 13. R2 closure — synthetic account removed, release validated (2026-07-30)
+
+This section closes R2. The founder completed the manual browser validation and
+confirmed it passed; every database-side consequence below was verified
+independently, read-only, against production `jsthfmgvcdrfzpgkpwvt` from branch
+`release/multi-workspace-r2`. No application code was deployed and no migration
+was run, added, removed or repaired.
+
+### 13.1 Founder browser-validation confirmation (recorded as evidence)
+
+The founder reported the production browser test passed: invitation acceptance
+worked, the Personal workspace remained, the Business workspace became accessible,
+workspace switching worked, tenant data stayed isolated, and membership removal
+returned the user safely to Personal. This is recorded as founder-supplied
+evidence — no browser observation was invented here. The database traces of that
+test are independently visible: a Viewer invitation `ffe4b6e9` was created and
+accepted by the target at 2026-07-30T11:30:50Z, and the original `fleet_manager`
+invitation `bd259506` was revoked.
+
+### 13.2 A gap the DB check caught, and how it was resolved
+
+On first re-entry the temporary Business **membership was still present** (six
+memberships, target = personal owner + Business viewer). Per the runbook this
+blocked with `TEMPORARY BUSINESS MEMBERSHIP STILL PRESENT`; the founder then
+removed it through Team & Access (no SQL). Re-verification showed 5 memberships
+and the membership gone.
+
+Removal via the owner's Team & Access left the **removed user's own profile
+pointer stale**: `active_organization_id` and the legacy `organization_id`/`role`
+cache still named the Business org. `current_org_id()` already ignores a pointer
+with no live membership (it resolved the target to Personal — matching the UI),
+so it granted nothing, but it registered as one "invalid active pointer" and
+could not be cleared through the product (a single-workspace user has no switch to
+trigger `set_active_organization`). With founder approval, one narrow guarded
+transaction normalized the target profile to the same resting state as the other
+personal owners — `active_organization_id = NULL`, `organization_id =` its own
+personal org `89a499fc…`, `role = owner` — changing no membership, ownership or
+fleet row. Rehearsed with rollback, then applied; invalid active pointers went to
+**0**.
+
+### 13.3 Target QA account — final state (masked)
+
+`itaibell134@gmail.com` → uid `e2faa5ed…`, personal org `89a499fc…` (kind
+`personal`). One membership: **owner of its own Personal org**; **zero Business
+memberships**; active pointer resolves to Personal; no invalid pointer. Personal
+data preserved exactly: **4 vehicles, 9 maintenance, 5 issues, 1 reminder, 4
+documents, 3 extractions, 11 Passports, 11 Passport tokens, 4 Storage objects** —
+identical to the pre-test audit. No ownership or data was moved, renamed or
+merged.
+
+### 13.4 Invitation final state (audit history, left intact)
+
+| invitation | org | recipient | role | status | accepted |
+| --- | --- | --- | --- | --- | --- |
+| `bd259506…` | `5a754ce7…` | `it***@g***` | fleet_manager | **revoked** | — |
+| `ffe4b6e9…` | `5a754ce7…` | `it***@g***` | viewer | **accepted** | 2026-07-30T11:30:50Z by `e2faa5ed…` |
+
+Both rows were preserved as valid audit history; neither was rewritten or deleted.
+
+### 13.5 Backup
+
+`/Users/itai/Desktop/vin-id-production-backups/20260730-145618-r2-final-precleanup/`
+(created 2026-07-30T11:57Z, project `jsthfmgvcdrfzpgkpwvt`). Files: schema.sql
+(156,366 B), data.sql (111,234 B), roles.sql, migration-state.txt,
+storage-inventory.txt, row-counts.txt, RESTORE.md — **all seven SHA-256 checksums
+verified**. Storage inventory recorded 4 objects / 3,689,919 bytes. PITR is off,
+so this is the recovery point. Backup files are outside the repository and are
+not committed.
+
+### 13.6 Cleanup rehearsal and apply
+
+Two separate guarded, single-transaction writes, both hardcoded-UUID only (no
+pattern match), both rehearsed with `rollback` against live production before the
+real commit:
+
+1. **Target-profile normalization** (§13.2) — `UPDATE 1`, pre/post guards passed,
+   applied 2026-07-30T11:59Z.
+2. **Synthetic deletion** (`cleanup2.sql`) — deletes synthetic org `179f231d…`,
+   then profile, then auth user `f2fb4001…` (order dictated by the FK map: the
+   org→membership FK is `ON DELETE CASCADE`, and the enabled `protect_last_owner`
+   trigger has an escape hatch that permits the sole-owner membership to cascade
+   once the org row is gone — no trigger or RLS disabled). Rehearsal:
+   `PRE-GUARDS PASSED` → 3× `DELETE 1` → `POST-GUARDS PASSED` → `ROLLBACK`, and
+   production re-read 5/5/5 afterwards. Apply committed
+   2026-07-30T12:02:48Z→12:02:52Z: `PRE-GUARDS PASSED` → 3× `DELETE 1` →
+   `POST-GUARDS PASSED` → `COMMIT`. Exactly one organization, one profile, one
+   auth user and (by cascade) one membership removed; nothing else changed. One
+   guard value was corrected before apply — the invitation after-guard from 1 to
+   2 — to match the real current state (two invitation audit rows); UUIDs and all
+   other guards were identical between rehearsal and apply.
+
+### 13.7 Before / after counts
+
+| | before (5-acct) | after (4-acct) |
+| --- | --- | --- |
+| auth users / profiles / organizations / memberships | 5 / 5 / 5 / 5 | **4 / 4 / 4 / 4** |
+| organization kinds | 4 personal + 1 business | **3 personal + 1 business** |
+| invalid active pointers | 1 (pre-normalization) → 0 | **0** |
+| vehicles / documents / passports | 7 / 4 / 15 | 7 / 4 / 15 |
+| maintenance / issues / reminders | 9 / 7 / 2 | 9 / 7 / 2 |
+| tokens / extractions / driver asg | 15 / 3 / 0 | 15 / 3 / 0 |
+| invitations (audit rows) | 2 | 2 |
+| storage objects / bytes | 4 / 3,689,919 | 4 / 3,689,919 |
+| migrations applied | 43 | 43 |
+
+### 13.8 Synthetic-account removal — confirmed absent
+
+`f2fb4001…`: auth user absent, profile absent, organization `179f231d…` absent,
+membership absent. No synthetic data remains anywhere. The four founder account
+IDs (`e2faa5ed…`, `b3c52640…`, `bb8b5771…`, `dbb35aaa…`) all survive with their
+data and every organization retains an owner.
+
+### 13.9 Final audits — all clean
+
+Identity/tenancy: **4/4/4/4**, 3 personal + 1 business · 4 legit present, synthetic
+absent · zero users with multiple memberships · zero duplicate memberships · zero
+ownerless organizations · zero invalid active pointers · zero orphan profiles ·
+zero orphan memberships · zero cross-organization rows · zero NULL `organization_id`.
+
+Security suite (production-safe audit SQL + direct checks): fleet tenancy 0
+findings · org membership 0 findings · multi-workspace 0 findings
+(`list_my_workspaces` / `set_active_organization` / `current_org_id` granted to
+`authenticated` only) · Driver RLS — all 14 driver helpers `SECURITY DEFINER` with
+pinned `search_path`, write-gates (`can_manage_driver_assignments`,
+`is_org_writer`, `is_org_admin`) not anon-executable, 0 driver assignments · Fleet
+Manager invariants 0 findings · document Storage 0 findings, bucket private · Fleet
+AI Intake 0 findings · Private Vehicle 0 findings · Passport access — bucket
+private, `vehicle_passports` RLS on, no anon path · app_events privacy: 3 leak
+detectors 0 rows (the two non-empty results are the audit's own informational
+key/name summaries).
+
+Anonymous access **denied** — `set local role anon; select from public.profiles`
+returns `permission denied`; anon holds no DML on any app table (§6 correction).
+Every `SECURITY DEFINER` function in `public` pins `search_path` (0 unpinned).
+Migration history unchanged at 43 applied, M1–M6 present.
+
+### 13.10 Final production architecture
+
+Four legitimate accounts (three Personal, one Business). Multi-workspace
+foundation is live and exercised end-to-end against production with a real
+account: Personal preservation, Business membership, workspace switching,
+organization-specific roles, safe membership removal, tenant isolation, and
+invitation acceptance without deleting Personal data. `itaibell134@gmail.com`
+remains an ordinary account — Personal workspace intact, no temporary Business
+membership, no invalid pointer, all data intact. It is **not** excluded from
+product metrics; only the clearly-labelled R2 QA invitation (`ffe4b6e9`) and the
+temporary Viewer membership (now removed) are excluded from traction metrics.
+
+### 13.11 Remaining product work
+
+Out of scope for R2 and deliberately untouched:
+
+* post-signup Personal vs Organization onboarding
+* invitation email delivery (invitations are shared by Copy Link)
+* individual short invitation codes
+
+No genuine defect was discovered during final verification. The one item the
+verification surfaced — the stale profile pointer left by owner-side membership
+removal — is a minor product gap worth a follow-up: when an owner removes a
+member, that member's own `active_organization_id`/legacy cache is not reset, so
+it lingers until they next switch workspaces (harmless, since `current_org_id()`
+re-validates on every read, but it leaves a cosmetically stale row and, for a
+single-workspace user, cannot be self-cleared through the UI).
+
+### 13.12 Classification
+
+**`R2 PRODUCTION RELEASE FULLY VALIDATED`** — synthetic account removed,
+production at four legitimate accounts, founder data preserved, all audits clean,
+browser validation founder-confirmed with database consequences independently
+verified.
