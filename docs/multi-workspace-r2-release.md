@@ -15,6 +15,16 @@ audits clean. The **browser smoke test remains outstanding** — it needs the
 deployed URL and an interactive login, neither available to the tooling in a
 non-interactive session (§9, §11).
 
+**Update 2026-07-30 (§12): QA account REASSIGNED to a real founder account.** The
+founder changed the QA-account decision: production QA will use the existing real
+account `itaibell134@gmail.com` (uid `e2faa5ed…`), **not** the synthetic account.
+No Auth users were merged; no data, org, vehicle, Passport, document or ownership
+was moved or renamed. Read-only audits are done and the single remaining synthetic
+account (`f2fb4001…`) is re-confirmed empty and disposable. Its deletion is
+**staged and rehearsed but deliberately NOT applied** — the founder's sequence
+gates it on the browser test completing first (§12). Current classification:
+**`TARGET QA ACCOUNT READY — MANUAL BROWSER TEST PENDING`**.
+
 ---
 
 ## 1. Boundary
@@ -388,3 +398,117 @@ memberships** — which is already its state now.
 * post-signup Personal/Organization onboarding
 * short invitation codes
 * real invitation email delivery (invitations are shared by Copy Link)
+
+---
+
+## 12. QA account reassignment — 2026-07-30
+
+**Founder decision:** production QA moves to the existing real account
+`itaibell134@gmail.com` (masked `it***@g***`, uid `e2faa5ed…`). The synthetic
+account retained in §11 is to be retired. Explicit constraints honoured: **no**
+rename of the synthetic to this email, **no** Auth-user merge, **no** transfer of
+vehicles / records / orgs / Passports / documents / ownership between users.
+
+### 12.1 Part 1 — target account audit (read-only)
+
+Exactly one Auth user has normalized email `itaibell134@gmail.com`.
+
+| field | value |
+| --- | --- |
+| uid (masked) | `e2faa5ed…` |
+| created | 2026-06-08T01:45:40Z |
+| last sign-in | 2026-07-28T07:22:05Z |
+| email confirmed | yes |
+| profile | present |
+| personal org | `89a499fc…` ("Itai Bell"), kind `personal` |
+| memberships | **1** — owner of its own personal org; **zero business memberships** |
+| active-org pointer | **NULL** (resolves to personal by fallback) |
+| vehicles / maintenance / issues / reminders | 4 / 9 / 5 / 1 |
+| documents / extractions / passports / tokens | 4 / 3 / 11 / 11 |
+| driver assignments / invitations (as actor) | 0 / 0 |
+| storage objects | 4 |
+
+This is a legitimate, data-rich founder account. **It must NOT be excluded wholesale
+from product metrics** — only the clearly-labelled R2 QA invitation and temporary
+Viewer membership are excluded from traction metrics.
+
+**Important interaction to handle during the browser test:** the one real pending
+invitation `bd259506` is addressed **to this same target account**, from the same
+Business org `5a754ce7…` ("numa dad"), but with role **`fleet_manager`**, not
+Viewer. The founder has **not** identified it as the R2 test invitation and its
+role is wrong, so per the rules it must **not** be used or altered. The R2 test
+must create a **separate Viewer invitation**. Because `accept_invitation` matches
+on `(organization, email)`, having two pending invitations for the same recipient
+in the same org is a real edge the tester should be conscious of — accept the
+Viewer one deliberately, and confirm the resulting membership role is Viewer.
+
+### 12.2 Part 2 — synthetic still disposable
+
+`f2fb4001…` (org `179f231d…`) re-audited: 1 Auth user · 1 profile · 1 personal org ·
+1 owner membership · **0** business memberships · **0** vehicles, maintenance,
+issues, reminders, documents, extractions, passports, tokens, driver assignments,
+invitations, storage objects. A dynamic FK census across every FK of `auth.users`
+and `organizations` found **zero external references** — only its own profile and
+membership self-rows. It remains safe to delete.
+
+### 12.3 Part 3 — target preparation (plan; execution is browser-side)
+
+The target keeps its Personal workspace and all Personal records untouched. It has
+**no** existing Business membership, so a single **temporary Viewer** membership is
+created for the R2 test via a fresh Copy-Link invitation from the Business org,
+clearly labelled as an R2 QA test — never Owner/Admin/Fleet Manager, never the
+real pending `fleet_manager` invitation, never altering Personal ownership.
+
+### 12.4 Part 4 — browser validation: STILL PENDING (founder-driven)
+
+Not performed and **not invented**. Requires the deployed production URL and an
+interactive login the non-interactive tooling cannot provide (Vercel MCP
+unauthorized here; programmatic login is classifier-blocked as credential use).
+Run by hand as `itaibell134@gmail.com`:
+
+* **Initial** — login; Personal workspace + all its current vehicles/records
+  visible; no unexpected Business org; Settings + Workspace Selector load; active
+  workspace valid. **Record the Personal counts first** (baseline above: 4
+  vehicles, 9 maintenance, 5 issues, 1 reminder, 4 documents, 11 passports).
+* **Invitation** — from Business `5a754ce7…`, create a **Viewer** invite for the
+  target via **Copy Link**; confirm the link uses the production domain; Preview
+  shows the correct org + Viewer role. Do not touch `bd259506`.
+* **Accept** — accept explicitly; exactly one new membership; Personal workspace
+  and all Personal vehicles/records remain; Business becomes active; role is
+  Viewer; replay adds no duplicate.
+* **Switch** — Personal + Business both listed; switch each way; correct vehicles
+  appear/disappear; refresh preserves selection; no stale data.
+* **Viewer restrictions in Business** — cannot create/edit vehicles, create
+  maintenance/issues, upload/confirm Fleet AI Intake, assign drivers, invite/remove
+  members, change roles, or reach another org by direct URL.
+* **Personal isolation** — Viewer role does not restrict Personal ownership;
+  Business vehicles/documents/costs absent from Personal; Personal records
+  unchanged.
+* **Remove temporary membership** — from the Business Owner (`dbb35aaa`), remove
+  only the target's temporary Viewer membership; then as the target: Business
+  access revoked immediately, stale pointer falls back safely to Personal,
+  Business gone from the selector, Business direct URLs blocked, all Personal
+  records intact.
+
+### 12.5 Part 5 — synthetic deletion: STAGED + REHEARSED, NOT APPLIED
+
+The guarded single-target cleanup is written (`scratchpad/cleanup2.sql`,
+hardcoded UUID, no pattern match). It was **rehearsed against live production with
+`commit` replaced by `rollback`**: all three deletes ran (org → profile → auth
+user, using the last-owner trigger's escape hatch — no trigger/RLS disabled),
+before-guards passed (5/5/5, four founders, synthetic empty), after-guards passed
+(4/4/4/4, founders intact, synthetic gone, no orphans, every org owned, storage +
+founder counts unchanged), and it **rolled back** — production stayed 5/5/5.
+
+Per the founder's sequence it is **not committed yet**: deletion is gated on the
+browser test completing. When that is done, the apply is: (1) fresh backup, (2)
+one final rollback rehearsal, (3) run `cleanup2.sql` to commit.
+
+**Expected before:** 5 users / 5 profiles / 5 orgs. **Expected after:** 4 / 4 / 4.
+
+### 12.6 Integrity snapshot at hand-off (production unchanged, still 5/5/5)
+
+Four founder accounts intact; the target `e2faa5ed…` intact with all Personal
+data; storage 4 objects / 3,689,919 bytes, all founder-owned; the one real pending
+invitation `bd259506` untouched. Nothing was written to production in this step —
+only read-only audits and a rolled-back rehearsal.
