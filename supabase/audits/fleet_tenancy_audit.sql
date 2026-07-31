@@ -237,6 +237,24 @@ where exists (
       and not tg.tgisinternal
   );
 
+-- -----------------------------------------------------------------------------
+-- 9. Active-workspace pointer integrity.
+--    Every profiles.active_organization_id must name an organization the user
+--    still belongs to. current_org_id() ignores a dangling pointer on read, but
+--    a lingering one is stale state — after atomic member removal
+--    (20260731120000) the repair trigger keeps this at zero.
+--    Expected: 0 rows.
+-- -----------------------------------------------------------------------------
+select p.id as profile_with_invalid_active_pointer,
+       p.active_organization_id
+from public.profiles p
+where p.active_organization_id is not null
+  and not exists (
+    select 1 from public.organization_members m
+    where m.user_id = p.id
+      and m.organization_id = p.active_organization_id
+  );
+
 -- =============================================================================
 -- End of audit
 -- =============================================================================
