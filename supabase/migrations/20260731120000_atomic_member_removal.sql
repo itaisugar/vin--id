@@ -132,6 +132,16 @@ create trigger organization_members_repair_active_workspace
   for each row
   execute function public.repair_active_workspace_after_member_removal();
 
+-- This function is ONLY ever invoked by the trigger above, never called by name.
+-- A trigger fires regardless of whether the statement's invoker holds EXECUTE on
+-- the trigger function, so no role needs a direct grant — and none should have
+-- one. Revoke the default PUBLIC grant, and revoke from anon/authenticated
+-- explicitly in case Supabase default privileges granted them EXECUTE. It stays
+-- SECURITY DEFINER, so the trigger continues to run as its owner.
+revoke all on function public.repair_active_workspace_after_member_removal() from public;
+revoke all on function public.repair_active_workspace_after_member_removal() from anon;
+revoke all on function public.repair_active_workspace_after_member_removal() from authenticated;
+
 -- -----------------------------------------------------------------------------
 -- 2. The authorized operation. One transaction: authorize, delete exactly one
 --    membership, return a structured result. The trigger above does the pointer

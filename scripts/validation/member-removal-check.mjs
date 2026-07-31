@@ -270,6 +270,41 @@ async function main() {
       }
       bad === 0 ? P("every non-null active pointer is backed by a live membership") : F(`${bad} invalid active pointer(s)`);
     }
+
+    // ---------------------------------------------------------------------
+    section("10. Grant posture + trigger fires on a non-RPC deletion path");
+    // ---------------------------------------------------------------------
+    {
+      // anon (no session) must not be able to call the removal RPC.
+      const anonC = createClient(URL, ANON, { auth: { persistSession: false } });
+      const anonRes = await anonC.rpc("remove_organization_member", { p_member_id: RUN + "-0000-0000-0000-000000000000" });
+      anonRes.error ? P(`anon cannot call remove_organization_member (${anonRes.error.code ?? "err"})`) : F("anon called the removal RPC (!)");
+
+      // authenticated CAN call it (a signed-in owner reaches a real state, not an auth error).
+      await addMembership(admin, alice.id, orgA, "viewer");
+      await setActiveOrg(admin, bossA.id, orgA);
+      const okRes = await remove(bossAC, await memberId(alice.id, orgA));
+      okRes?.state === "ok" ? P("authenticated owner can call remove_organization_member") : F(`authenticated call state ${okRes?.state}`);
+
+      // The trigger function is not a callable RPC for an authenticated client
+      // (it returns `trigger`; PostgREST does not expose it, and no role holds a
+      // direct EXECUTE grant on it).
+      const trigRes = await bossAC.rpc("repair_active_workspace_after_member_removal");
+      trigRes.error ? P(`authenticated cannot directly invoke the trigger function (${trigRes.error.code ?? "err"})`) : F("trigger function was directly invokable (!)");
+
+      // The trigger still fires for a NON-RPC deletion path (direct delete). Give
+      // carol two memberships, point her active at the one we delete directly,
+      // and confirm the pointer is repaired without going through the RPC.
+      const carol = await mkUser("carol");
+      users.push(carol);
+      const carolP = await orgOf(admin, carol.id);
+      await addMembership(admin, carol.id, orgA, "viewer");
+      await setActiveOrg(admin, carol.id, orgA);
+      await admin.from("organization_members").delete().eq("user_id", carol.id).eq("organization_id", orgA);
+      (await activePointer(carol.id)) === carolP
+        ? P("trigger repairs the pointer on a direct (non-RPC) membership delete")
+        : F("direct-delete path left a stale pointer (!)");
+    }
   } finally {
     await cleanupUsers(admin, users);
   }

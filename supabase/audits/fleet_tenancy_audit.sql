@@ -255,6 +255,30 @@ where p.active_organization_id is not null
       and m.organization_id = p.active_organization_id
   );
 
+-- -----------------------------------------------------------------------------
+-- 10. Member-removal grant posture (migration 20260731120000).
+--     remove_organization_member(uuid): authenticated only, anon denied.
+--     repair_active_workspace_after_member_removal(): direct EXECUTE denied to
+--     public, anon AND authenticated — it runs only as a trigger.
+--     Expected: 0 rows (every listed expectation holds).
+-- -----------------------------------------------------------------------------
+select problem from (
+  select 'rpc: authenticated cannot execute' as problem
+   where not has_function_privilege('authenticated', 'public.remove_organization_member(uuid)', 'execute')
+  union all
+  select 'rpc: anon CAN execute'
+   where has_function_privilege('anon', 'public.remove_organization_member(uuid)', 'execute')
+  union all
+  select 'trigger fn: public CAN execute'
+   where has_function_privilege('public', 'public.repair_active_workspace_after_member_removal()', 'execute')
+  union all
+  select 'trigger fn: anon CAN execute'
+   where has_function_privilege('anon', 'public.repair_active_workspace_after_member_removal()', 'execute')
+  union all
+  select 'trigger fn: authenticated CAN execute'
+   where has_function_privilege('authenticated', 'public.repair_active_workspace_after_member_removal()', 'execute')
+) g;
+
 -- =============================================================================
 -- End of audit
 -- =============================================================================
