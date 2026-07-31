@@ -280,3 +280,93 @@ stale-pointer gap. No prior migration is touched.
 trigger, server wiring, tests, audit) is validated against a clean database; no
 UI code changed, so the Team & Access screen, its translations and RTL are
 unaffected. A production apply + browser smoke test remain, per §10.
+
+---
+
+## 12. Production release record — 2026-07-31
+
+Database migration applied to production `jsthfmgvcdrfzpgkpwvt` from
+`fix/stale-active-workspace-removal`. Application deploy (PR merge + Vercel) is
+**pending** — see §12.7. The migration is backward-compatible, so the fix is
+already effective for the currently-deployed app: the repair trigger fires on its
+existing direct-delete path.
+
+### 12.1 Grant hardening (commit `ede3e87`)
+
+`repair_active_workspace_after_member_removal()` had the default `PUBLIC`
+EXECUTE grant. Revoked from `public`, `anon` and `authenticated` — a trigger
+runs without the invoker holding EXECUTE, so no role needs a direct grant. The RPC
+stays `authenticated`-only. Tests added (anon cannot call the RPC → 42501;
+authenticated can; the trigger fn is not directly invokable → PGRST202; the
+trigger still fires on a direct non-RPC delete) and a `has_function_privilege`
+grant-posture query in `fleet_tenancy_audit.sql`.
+
+### 12.2 Approved baseline (real multi-workspace usage)
+
+A founder decision confirmed a real change made 2026-07-31 14:33Z: user
+`b3c52640…` (`ya***`) accepted a Viewer invitation into `89a499fc…`
+(`Itai Bell`), which promoted that org `personal → business` under the M5 rule.
+Approved pre-release baseline: **4 users · 4 profiles · 4 organizations ·
+5 memberships · 2 personal · 2 business · 1 approved multi-membership user · 0
+duplicates · 0 invalid pointers · 0 ownerless · 3 invitation rows · 7 vehicles ·
+4 documents · 15 Passports · 9 maintenance · 7 issues · 4 storage objects /
+3,689,919 bytes**. The `yahlido` Viewer membership is permanent and excluded from
+the controlled removal test.
+
+### 12.3 Backup
+
+`/Users/itai/Desktop/vin-id-production-backups/20260731-181538-member-removal-premigration` — schema.sql, data.sql, roles.sql, migration-state.txt,
+storage-inventory.txt, row-counts.txt, RESTORE.md; **all 7 SHA-256 checksums
+verified**. Captured 4/4/4/5, storage 4 / 3,689,919. PITR off → this is the
+recovery point.
+
+### 12.4 Dry run and apply
+
+Dry run listed exactly `20260731120000_atomic_member_removal.sql` (no replay).
+Applied 2026-07-31 15:20Z; the only notice was the idempotent
+`drop trigger if exists` guard. **History 43 → 44.** Row snapshot identical
+pre/post: 4 users, 4 profiles, 4 orgs, 5 memberships, 1 active pointer set — the
+migration changed **zero application rows**.
+
+### 12.5 Final production grant + object state
+
+* Trigger `organization_members_repair_active_workspace` — `AFTER DELETE … FOR
+  EACH ROW`, enabled.
+* Both functions `SECURITY DEFINER`, `search_path=''`.
+* `remove_organization_member(uuid)`: EXECUTE = authenticated **only** (anon,
+  public denied). Confirmed in the schema cache via PostgREST: anon POST returns
+  **HTTP 401 / 42501** (denied, not 404).
+* `repair_active_workspace_after_member_removal()`: EXECUTE denied to public,
+  anon **and** authenticated.
+
+### 12.6 Post-apply audits — clean
+
+Fleet tenancy audit (incl. #9 active-pointer and #10 grant-posture) every query
+0 rows. Direct checks: 0 invalid active pointers, 0 duplicate memberships, 0
+ownerless organizations. Founder data and storage unchanged.
+
+### 12.7 Remaining — deployment + controlled removal test
+
+Not performed from the release tooling: `gh`/`vercel` CLIs are unavailable and
+the Vercel connector is unauthorized in a non-interactive session. Remaining,
+founder-driven:
+
+1. Open PR `fix/stale-active-workspace-removal` → `main`; the diff is exactly
+   six files (migration 44, `members.ts` RPC wiring, validation suite, audit
+   addition, `package.json`, docs) — no unrelated files. Merge after checks pass.
+2. Let the connected Vercel production deployment run; confirm the deployed commit
+   matches the merge.
+3. Smoke test (login, Dashboard, Settings, Team & Access, vehicles, documents,
+   Passports — no Settings 500, no missing-RPC error).
+4. Controlled removal test with the founder target `itaibell134@gmail.com` in the
+   **separate** Business org `5a754ce7…` (`numa dad`), **not** `yahlido`:
+   invite Viewer → accept (6 memberships) → make `numa dad` active → remove via
+   Team & Access (no SQL) → verify the trigger auto-repairs the active workspace
+   back to `Itai Bell`, temporary membership gone (back to 5 memberships), all
+   founder data intact, `yahlido` untouched. Leave the accepted invitation as
+   audit history.
+
+Expected final production state: 4 users · 4 profiles · 4 organizations ·
+**5 memberships** · 2 personal · 2 business · one approved multi-membership user
+(`b3c52640…`) · no temporary founder membership in `numa dad` · no invalid
+pointers · every org owned · founder data unchanged · migration history 44.
