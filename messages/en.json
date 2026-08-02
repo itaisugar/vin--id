@@ -499,7 +499,7 @@
     },
     "scan": {
       "uploadLabel": "Vehicle registration photo",
-      "uploadHelp": "Take a photo or upload a JPEG/PNG image of the registration document.",
+      "uploadHelp": "Take or upload a photo of the vehicle registration (JPEG, PNG or WebP, up to 10 MB). PDFs are not supported.",
       "privacyNote": "The image is processed to extract vehicle details. Owner details are not saved.",
       "extract": "Extract details",
       "extracting": "Extracting the vehicle details…",
@@ -532,6 +532,7 @@
         "fileTooLarge": "That file is too large.",
         "uploadFailed": "Upload failed. Try again.",
         "extractFailed": "We couldn’t read the document. Try another photo or continue manually.",
+        "extractUnavailable": "Automatic scanning is unavailable right now. Try again later, replace the photo, or add the vehicle manually.",
         "saveFailed": "Something went wrong. Please try again.",
         "notAuthorized": "You do not have permission to do this."
       }
