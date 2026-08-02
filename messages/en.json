@@ -1605,6 +1605,28 @@
         "lastOwner": "This organization must keep at least one owner. Promote someone else to owner first.",
         "cannotManageOwner": "Only an owner can change or remove another owner.",
         "copyFailed": "Couldn't copy automatically. Select the link and copy it manually.",
+        "saveFailed": "Something went wrong. Please try again.",
+        "personalWorkspace": "Personal workspaces can't have members. Create a separate organization first."
+      }
+    },
+    "activation": {
+      "title": "Organization management",
+      "description": "Managing vehicles for a business or team? Create a separate organization workspace and invite members.",
+      "createCta": "Create organization",
+      "personalNote": "Your personal vehicles and records will remain in your Personal workspace.",
+      "form": {
+        "nameLabel": "Organization name",
+        "namePlaceholder": "Acme Fleet",
+        "submit": "Create organization",
+        "creating": "Creating…",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "required": "Enter an organization name.",
+        "tooLong": "That name is too long.",
+        "invalidName": "Enter a valid organization name.",
+        "notAuthenticated": "Please sign in again.",
+        "noProfile": "Your account isn't fully set up yet. Reload and try again.",
         "saveFailed": "Something went wrong. Please try again."
       }
     }
