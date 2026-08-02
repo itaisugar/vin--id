@@ -32,8 +32,9 @@ section("1. Dev-origin fix (the shared root cause)");
 {
   const cfg = read("next.config.ts");
   cfg.includes("allowedDevOrigins") ? P("next.config declares allowedDevOrigins") : F("no allowedDevOrigins");
-  cfg.includes("192.168.1.179") ? P("LAN QA host is allowed for dev resources") : F("LAN host not allowed");
-  cfg.includes("ALLOWED_DEV_ORIGINS") ? P("extensible via ALLOWED_DEV_ORIGINS env (no file edit needed)") : F("not env-extensible");
+  cfg.includes("ALLOWED_DEV_ORIGINS") ? P("LAN dev origins are env-driven (ALLOWED_DEV_ORIGINS)") : F("not env-driven");
+  !/allowedDevOrigins[\s\S]{0,120}?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(cfg)
+    ? P("no machine-specific IP committed in tracked config") : F("hardcoded IP present in next.config");
   // Must remain dev-only: allowedDevOrigins is a dev config; ensure we didn't
   // touch production trust (no CORS '*', no disabled origin checks).
   !/Access-Control-Allow-Origin\s*[:=]\s*["'`]\*/.test(cfg) ? P("no wildcard CORS added") : F("wildcard CORS present");

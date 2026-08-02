@@ -281,10 +281,12 @@ toggle (`<button>` + `setLocale`) were already correct; there was no component
 bug. This affects `next dev` only — `next build`/`next start` and the production
 HTTPS domain are unaffected, so it is **not** a production-code defect.
 
-**Fix:** add a dev-only `allowedDevOrigins` entry in `next.config.ts` (the LAN
-host, plus a comma-separated `ALLOWED_DEV_ORIGINS` env override). No production
-trust boundary, CORS, Auth redirect, cookie, or server-action origin check was
-changed. After the fix the LAN chunk returns 200 and hydration is restored.
+**Fix:** add a dev-only `allowedDevOrigins` in `next.config.ts`, driven entirely
+by the `ALLOWED_DEV_ORIGINS` env var (comma-separated; set in a gitignored
+`.env.development.local` for QA) — **no machine-specific IP is committed**. No
+production trust boundary, CORS, Auth redirect, cookie, or server-action origin
+check was changed. After the fix the LAN chunk returns 200 and hydration is
+restored.
 
 **Affected files:** `next.config.ts` (fix), `scripts/validation/mobile-interaction-check.mjs`
 (new, 21 assertions), `package.json` (script), `scripts/qa/seed-local-qa.mjs`

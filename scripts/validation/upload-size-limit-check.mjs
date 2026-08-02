@@ -52,8 +52,8 @@ section("1. Transport (Server Action) vs application limit");
 section("2. allowedDevOrigins (mobile fix) preserved");
 {
   const cfg = read("next.config.ts");
-  cfg.includes("allowedDevOrigins") && cfg.includes("192.168.1.179")
-    ? P("allowedDevOrigins from the mobile fix is still present") : F("allowedDevOrigins lost");
+  cfg.includes("allowedDevOrigins") && cfg.includes("ALLOWED_DEV_ORIGINS")
+    ? P("env-driven allowedDevOrigins from the mobile fix is still present") : F("allowedDevOrigins lost");
 }
 
 section("3. Server-side size predicate (same constant the service uses)");
