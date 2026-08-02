@@ -9,6 +9,7 @@ import {
   type VehicleLookupActionState,
 } from "@/app/(app)/vehicles/actions";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
+import { ScanRegistrationFlow } from "@/components/vehicles/scan-registration-flow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +29,7 @@ import { EMPTY_VEHICLE_FORM, type VehicleFormValues } from "@/lib/vehicles/types
  * not-found, after any provider failure, and via the review's back action.
  */
 
-type Step = "choose" | "lookup" | "review" | "manual";
+type Step = "choose" | "lookup" | "scan" | "review" | "manual";
 
 function draftToFormValues(draft: VehicleLookupDraft): VehicleFormValues {
   return {
@@ -91,6 +92,14 @@ export function AddVehicleFlow({ cancelHref }: { cancelHref: string }) {
         </button>
         <button
           type="button"
+          onClick={() => setStep("scan")}
+          className="flex w-full flex-col items-start gap-1 rounded-xl border border-line bg-surface-2/40 p-4 text-start transition hover:bg-surface-2"
+        >
+          <span className="font-semibold text-ink">{tl("methods.scan")}</span>
+          <span className="text-sm text-ink-2">{tl("methods.scanHelp")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => setStep("manual")}
           className="flex w-full flex-col items-start gap-1 rounded-xl border border-line bg-surface-2/40 p-4 text-start transition hover:bg-surface-2"
         >
@@ -99,6 +108,11 @@ export function AddVehicleFlow({ cancelHref }: { cancelHref: string }) {
         </button>
       </div>
     );
+  }
+
+  // ---- Scan registration document -------------------------------------------
+  if (step === "scan") {
+    return <ScanRegistrationFlow cancelHref={cancelHref} onBack={() => setStep("choose")} />;
   }
 
   // ---- Manual entry ---------------------------------------------------------

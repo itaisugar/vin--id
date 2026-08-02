@@ -462,7 +462,9 @@
         "registration": "Registration number",
         "registrationHelp": "Enter a registration number and we’ll retrieve available official vehicle details.",
         "manual": "Manual entry",
-        "manualHelp": "Type the vehicle details yourself."
+        "manualHelp": "Type the vehicle details yourself.",
+        "scan": "Scan registration document",
+        "scanHelp": "Photograph or upload the vehicle registration and we’ll extract the details for you."
       },
       "back": "Back",
       "inputPlaceholder": "e.g. 12345678",
@@ -493,6 +495,45 @@
         "expiryUnparseable": "The official registration expiry date couldn’t be read. Enter it manually if needed.",
         "expiryPassed": "The registration expiry date has already passed.",
         "partial": "Some official fields were unavailable. Complete the missing details manually."
+      }
+    },
+    "scan": {
+      "uploadLabel": "Vehicle registration photo",
+      "uploadHelp": "Take a photo or upload a JPEG/PNG image of the registration document.",
+      "privacyNote": "The image is processed to extract vehicle details. Owner details are not saved.",
+      "extract": "Extract details",
+      "extracting": "Extracting the vehicle details…",
+      "wrongDoc": "This doesn’t look like a vehicle registration. Replace the file or continue manually.",
+      "replace": "Replace document",
+      "extracted": "We extracted the details below. Review the registration number before searching the official registry.",
+      "qualityWarning": "Some areas were hard to read — please review the details carefully.",
+      "plateHelp": "Correct the registration number if needed, then search the official registry.",
+      "skipLookup": "Skip and review",
+      "createReminder": "Create a reminder before the test expiry",
+      "reviewTitle": "Review extracted details",
+      "sourceDocument": "Registration document",
+      "sourceGovernment": "Official government data",
+      "notOwnership": "Extracted and official data may not reflect recent physical or ownership changes, and do not verify ownership.",
+      "registrationConflict": "The registration number on the document and in the official registry differ. Resolve it before saving.",
+      "conflictsSummary": "{count} field(s) differ between sources — review",
+      "fields": {
+        "registration_number": "Registration number",
+        "make": "Manufacturer",
+        "model": "Model",
+        "year": "Year",
+        "vin": "Chassis / VIN",
+        "color": "Color",
+        "fuel_type": "Fuel type",
+        "test_expiry_date": "Test expiry"
+      },
+      "errors": {
+        "fileRequired": "Choose a photo or file first.",
+        "invalidFileType": "Use a JPEG, PNG or WebP image.",
+        "fileTooLarge": "That file is too large.",
+        "uploadFailed": "Upload failed. Try again.",
+        "extractFailed": "We couldn’t read the document. Try another photo or continue manually.",
+        "saveFailed": "Something went wrong. Please try again.",
+        "notAuthorized": "You do not have permission to do this."
       }
     }
   },
