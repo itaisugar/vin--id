@@ -313,3 +313,51 @@ English LTR and Hebrew RTL.
 
 **Visual gate:** still **pending** founder confirmation (now including the mobile
 retest above).
+
+## 21. Registration photo upload 1MB limit (found in founder mobile QA)
+
+**Founder-reported defect:** vehicle-registration images larger than ~1MB could
+not be uploaded on mobile, blocking the primary camera flow. The intended
+product limit is JPEG/PNG/WebP up to 10MB.
+
+**Failing layer:** the scan photo is uploaded through a **Next.js Server Action**
+(`createRegistrationIntakeAction`, multipart `FormData`). Server Actions default
+to a **1MB** request-body limit, so anything larger was rejected at the request-
+body boundary *before* the action ran — under-1MB files worked, normal phone
+photos (2–8MB) did not. Application validation already allowed 10MB
+(`MAX_SCAN_FILE_SIZE`); the choke was purely the transport limit. The Next 16
+proxy (`proxy.ts`) does not read the request body, so `proxyClientMaxBodySize`
+was not a factor.
+
+**Fix (transport vs application separation):**
+- Transport ceiling: `experimental.serverActions.bodySizeLimit = "12mb"` in
+  `next.config.ts` — just above 10MB to cover the file + multipart overhead,
+  kept tight to bound request-memory/DoS exposure (not 50/100MB, not unlimited).
+- Application limit: unchanged **10MB**, enforced **server-side** before any
+  Storage upload or DB insert (files >10MB → `fileTooLarge`, no orphan object/
+  row). MIME allowlist unchanged (JPEG/PNG/WebP; PDF/HEIC rejected).
+- Added a **client-side** size pre-check (UX only, not security) so files above
+  the transport ceiling get the friendly message instead of a raw error.
+- `fileTooLarge` copy now states the 10MB limit in en + he.
+- `allowedDevOrigins` (mobile fix) preserved; no security headers, CORS, Auth,
+  RLS, or Storage privacy changed.
+
+**Security:** auth + Fleet-writer still required before processing; 10MB limit
+enforced server-side even if the client is bypassed; MIME allowlist intact;
+private Storage; cancellation/failure cleanup intact; no file contents or PII in
+logs.
+
+**Focused tests:** `validate:upload-size-limit` — 25 assertions (transport >10MB
+and tight; app limit exactly 10MB; the exact server predicate accepts
+500KB/1.1MB/3MB/≤10MB and rejects >10MB; MIME allowlist; reject-before-upload/
+insert ordering; single intake row; client pre-check; cancel cleanup; bilingual
+copy).
+
+**Real-device retest checklist (phone via `http://192.168.1.179:3000`):**
+1. Log in (`qa.owner@vinid.local`). Add Vehicle → **Scan vehicle registration**.
+2. Capture/choose a real authorized photo **>1MB and <10MB** → upload → extraction
+   begins → Review appears → **no 1MB / body-size error**.
+3. Cancel before final creation → confirm no orphan document remains.
+4. Try a file **>10MB** → clear "image is too large… up to 10MB" message, nothing created.
+
+**Visual gate:** remains **pending** founder confirmation.
