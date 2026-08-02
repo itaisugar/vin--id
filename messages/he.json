@@ -390,7 +390,6 @@
       "licensePlate": "מספר רישוי",
       "mileage": "קילומטראז'",
       "mileageUnit": "יחידה",
-      "photoUrl": "כתובת תמונה",
       "status": "סטטוס",
       "createdAt": "נוסף בתאריך"
     },
@@ -445,7 +444,6 @@
         "tooLong": "הערך ארוך מדי.",
         "invalidYear": "הזן שנה תקינה.",
         "invalidMileage": "הזן קילומטראז' תקין.",
-        "invalidUrl": "הזן כתובת URL תקינה.",
         "saveFailed": "לא הצלחנו לשמור את הרכב. נסה שוב.",
         "archiveFailed": "לא הצלחנו להעביר את הרכב לארכיון. נסה שוב.",
         "invalidDate": "הזן תאריך תקין.",
@@ -1247,8 +1245,6 @@
       "requiresAttention": "דורשים טיפול",
       "servicesOverdue": "טיפול באיחור",
       "servicesDueSoon": "טיפול מתקרב",
-      "documentsExpired": "מסמכים שפגו",
-      "documentsExpiringSoon": "מסמכים לקראת פקיעה",
       "openIssues": "תקלות פתוחות",
       "monthCost": "עלות החודש",
       "mixedCurrencyNote": "עלויות החודש נרשמו ביותר ממטבע אחד. מסוכם רק המטבע הנפוץ ביותר — לא מתבצעת המרה."
