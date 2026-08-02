@@ -41,7 +41,10 @@ alter table public.document_extractions
 alter table public.document_extractions
   add constraint document_extractions_record_type_check
   check (created_record_type is null or created_record_type in (
-    'maintenance', 'insurance', 'registration', 'inspection', 'vehicle'
+    -- Purely additive: keep every previously-allowed value (incl. 'issue' from
+    -- 20260726160000) and add 'vehicle'. Widening only — never narrow, so no
+    -- existing document_extractions row can be invalidated.
+    'maintenance', 'insurance', 'registration', 'inspection', 'issue', 'vehicle'
   ));
 
 -- Provenance of a vehicle's initial data gains two values:
