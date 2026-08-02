@@ -248,9 +248,12 @@ export async function runFleetExtraction(params: {
     return { ok: false, error: "extractFailed" };
   }
 
-  const provider = getExtractionProvider();
+  let provider: ReturnType<typeof getExtractionProvider> | null = null;
   let extraction: ScanExtraction;
   try {
+    // Resolving the provider can throw when production AI config is missing —
+    // caught here and surfaced as a retryable/manual failure, never a mock.
+    provider = getExtractionProvider();
     extraction = await provider.extract({
       imageBase64: downscaled.toString("base64"),
       mediaType: "image/jpeg",
@@ -267,7 +270,7 @@ export async function runFleetExtraction(params: {
       vehicle_id: params.vehicleId ?? doc?.vehicle_id ?? null,
       status: "failed",
       source: "fleet_intake",
-      engine: provider.engine,
+      engine: provider?.engine ?? "unavailable",
       extracted_data: {},
       content_hash: params.contentHash,
       pending_storage_path: params.pending?.storage_path ?? null,
@@ -303,8 +306,8 @@ export async function runFleetExtraction(params: {
       vehicle_id: match.resolvedVehicleId,
       status: "pending_confirmation",
       source: "fleet_intake",
-      engine: provider.engine,
-      provider_model: provider.engine === "anthropic"
+      engine: provider!.engine,
+      provider_model: provider!.engine === "anthropic"
         ? (process.env.EXTRACTION_MODEL || "claude-haiku-4-5-20251001")
         : "mock",
       extracted_data: extraction,

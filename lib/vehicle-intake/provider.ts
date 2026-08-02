@@ -6,6 +6,10 @@ import {
   type VehicleRegistrationExtraction,
 } from "./extraction-types";
 import type { ScanImageMime } from "@/lib/documents/scan/types";
+import {
+  ExtractionUnavailableError,
+  resolveExtractionProviderMode,
+} from "@/lib/server/ai/provider-mode";
 
 /**
  * Vehicle-registration extraction provider.
@@ -48,6 +52,31 @@ function extractJsonObject(body: string): string {
 }
 
 /**
+ * Turn a model's raw text into a validated extraction, or throw. Factored out so
+ * the "malformed response never becomes mock output" rule is unit-testable
+ * without a live provider. Throws `VehicleExtractionError`, never returns mock.
+ */
+export function parseVehicleModelResponse(text: string): VehicleRegistrationExtraction {
+  const trimmed = text.trim();
+  if (!trimmed) throw new VehicleExtractionError("unreadable");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(extractJsonObject(trimmed));
+  } catch {
+    throw new VehicleExtractionError("invalid_json");
+  }
+  if (!parsed || typeof parsed !== "object") throw new VehicleExtractionError("invalid_json");
+  return parseVehicleRegistrationExtraction(parsed);
+}
+
+/** Minimal shape of the Anthropic client used here — injectable for tests. */
+export interface AnthropicMessagesClient {
+  messages: {
+    create(args: unknown): Promise<{ content: Array<{ type: string; text?: string }> }>;
+  };
+}
+
+/**
  * Deterministic mock: returns a recognizable vehicle-registration result so the
  * flow and tests work with no provider key. It NEVER echoes real document data
  * because there is none — it produces a fixed sample.
@@ -75,16 +104,24 @@ export class MockVehicleExtractionProvider implements VehicleExtractionProvider 
 export class AnthropicVehicleExtractionProvider implements VehicleExtractionProvider {
   readonly engine = "anthropic" as const;
   readonly model: string;
-  constructor() {
+  /** Optional injected client (tests); production lazy-loads the SDK. */
+  private readonly injectedClient?: AnthropicMessagesClient;
+  constructor(injectedClient?: AnthropicMessagesClient) {
+    this.injectedClient = injectedClient;
     this.model = process.env.EXTRACTION_MODEL || DEFAULT_MODEL;
   }
-  async extract(input: VehicleExtractionInput): Promise<VehicleRegistrationExtraction> {
+
+  private async client(): Promise<AnthropicMessagesClient> {
+    if (this.injectedClient) return this.injectedClient;
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new VehicleExtractionError("no_key");
-
     // Lazy import so a mock-only deployment never loads the SDK.
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
-    const client = new Anthropic({ apiKey, timeout: 30_000, maxRetries: 1 });
+    return new Anthropic({ apiKey, timeout: 30_000, maxRetries: 1 });
+  }
+
+  async extract(input: VehicleExtractionInput): Promise<VehicleRegistrationExtraction> {
+    const client = await this.client();
 
     let text: string;
     try {
@@ -102,29 +139,34 @@ export class AnthropicVehicleExtractionProvider implements VehicleExtractionProv
           },
         ],
       });
+      // A provider timeout / 5xx rejects the promise above and is caught below —
+      // it NEVER produces mock output.
       text = response.content
-        .filter((b): b is import("@anthropic-ai/sdk").Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
+        .filter((b) => b.type === "text")
+        .map((b) => b.text ?? "")
         .join("")
         .trim();
     } catch (err) {
+      if (err instanceof VehicleExtractionError) throw err;
       throw new VehicleExtractionError("provider_error", err instanceof Error ? err.message : undefined);
     }
-    if (!text) throw new VehicleExtractionError("unreadable");
 
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(extractJsonObject(text));
-    } catch {
-      throw new VehicleExtractionError("invalid_json");
-    }
-    if (!parsed || typeof parsed !== "object") throw new VehicleExtractionError("invalid_json");
-    return parseVehicleRegistrationExtraction(parsed);
+    // Malformed / empty response → a typed failure, never a fabricated result.
+    return parseVehicleModelResponse(text);
   }
 }
 
-export function getVehicleExtractionProvider(): VehicleExtractionProvider {
-  return process.env.ANTHROPIC_API_KEY
+/**
+ * Select the vehicle-registration extraction provider through the shared
+ * production-safety gate. In production a missing key or an explicit `mock`
+ * selection throws `ExtractionUnavailableError` instead of silently mocking.
+ */
+export function getVehicleExtractionProvider(
+  env: Record<string, string | undefined> = process.env,
+): VehicleExtractionProvider {
+  const mode = resolveExtractionProviderMode(env);
+  if (mode.engine === "unavailable") throw new ExtractionUnavailableError(mode.reason);
+  return mode.engine === "anthropic"
     ? new AnthropicVehicleExtractionProvider()
     : new MockVehicleExtractionProvider();
 }

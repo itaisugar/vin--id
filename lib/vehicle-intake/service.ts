@@ -7,6 +7,7 @@ import { isScanImageMime, MAX_SCAN_FILE_SIZE, type ScanImageMime } from "@/lib/d
 import { requireFleetWriter, requireOrganization } from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { getVehicleExtractionProvider, VehicleExtractionError } from "./provider";
+import { ExtractionUnavailableError } from "@/lib/server/ai/provider-mode";
 import type { VehicleRegistrationExtraction } from "./extraction-types";
 
 /**
@@ -27,6 +28,7 @@ export type IntakeErrorKey =
   | "fileTooLarge"
   | "uploadFailed"
   | "extractFailed"
+  | "extractUnavailable"
   | "saveFailed";
 
 export interface RegistrationIntakeRecord {
@@ -68,6 +70,21 @@ export async function createRegistrationIntake(
   if (!isScanImageMime(file.type)) return { ok: false, error: "invalidFileType" };
   if (file.size > MAX_SCAN_FILE_SIZE) return { ok: false, error: "fileTooLarge" };
 
+  // Resolve the provider BEFORE uploading. In production a missing/invalid AI
+  // configuration returns an explicit unavailable state (no upload, no synthetic
+  // extraction, no mock) — the user can retry, replace the image, continue
+  // manually, or cancel. Only the reason is logged, never document content.
+  let provider;
+  try {
+    provider = getVehicleExtractionProvider();
+  } catch (err) {
+    if (err instanceof ExtractionUnavailableError) {
+      console.error("[vehicle-intake] extraction unavailable:", { reason: err.reason });
+      return { ok: false, error: "extractUnavailable" };
+    }
+    throw err;
+  }
+
   const { userId, organizationId } = ctx;
   const supabase = await createClient();
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -99,7 +116,6 @@ export async function createRegistrationIntake(
     return { ok: false, error: "extractFailed" };
   }
 
-  const provider = getVehicleExtractionProvider();
   let extraction: VehicleRegistrationExtraction;
   try {
     extraction = await provider.extract({
