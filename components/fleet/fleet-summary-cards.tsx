@@ -101,18 +101,12 @@ export async function FleetSummaryCards({
       href: "/vehicles?filter=service_due_soon",
       tone: "warn",
     },
-    {
-      key: "documentsExpired",
-      value: summary.documentsExpired,
-      href: "/vehicles?filter=document_expiring",
-      tone: "danger",
-    },
-    {
-      key: "documentsExpiringSoon",
-      value: summary.documentsExpiringSoon,
-      href: "/vehicles?filter=document_expiring",
-      tone: "warn",
-    },
+    // Document-expiry summary tiles were removed from the dashboard: they were
+    // noise on the "what needs action today?" home screen. Document expiry still
+    // surfaces where it is actionable — the action list, the deadline list, the
+    // /vehicles?filter=document_expiring view, Documents and Service & Compliance.
+    // The underlying summary.documentsExpired* counts are still computed and
+    // validated; only their presentation here is gone.
     {
       key: "openIssues",
       value: summary.openIssues,
