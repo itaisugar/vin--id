@@ -15,6 +15,7 @@ import { compareVehicleSources, type VehicleSourceComparison } from "@/lib/vehic
 import type { VehicleRegistrationExtraction } from "@/lib/vehicle-intake/extraction-types";
 import type { VehicleLookupDraft } from "@/lib/vehicle-lookup/types";
 import { normalizeRegistration } from "@/lib/vehicle-lookup/normalize-registration";
+import { MAX_SCAN_FILE_SIZE } from "@/lib/documents/scan/types";
 import { EMPTY_VEHICLE_FORM, type VehicleFormValues } from "@/lib/vehicles/types";
 
 /**
@@ -64,8 +65,16 @@ export function ScanRegistrationFlow({
     e.preventDefault();
     setError(null);
     const form = new FormData(e.currentTarget);
-    if (!(form.get("file") instanceof File) || (form.get("file") as File).size === 0) {
+    const file = form.get("file");
+    if (!(file instanceof File) || file.size === 0) {
       setError(ts("errors.fileRequired"));
+      return;
+    }
+    // Client-side size guard for immediate feedback and to avoid hitting the
+    // Server Action transport ceiling on very large files. The server still
+    // enforces the 10MB limit (this check is UX, not security).
+    if (file.size > MAX_SCAN_FILE_SIZE) {
+      setError(ts("errors.fileTooLarge"));
       return;
     }
     setStep("extracting");

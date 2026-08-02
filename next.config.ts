@@ -27,6 +27,20 @@ const nextConfig: NextConfig = {
   // before sending them to the extraction provider. Keep it external so it is
   // required at runtime rather than bundled.
   serverExternalPackages: ["sharp"],
+  experimental: {
+    // Vehicle-registration photos are uploaded through a Server Action
+    // (createRegistrationIntakeAction) as multipart FormData. Server Actions
+    // default to a 1MB request-body limit, which rejects normal phone-camera
+    // photos before the action even runs. The product limit is 10MB (enforced
+    // server-side by MAX_SCAN_FILE_SIZE), so raise the TRANSPORT ceiling just
+    // above it to cover the 10MB file + multipart overhead. This is only the
+    // body ceiling — files >10MB are still rejected by application validation
+    // with a clear message. Kept deliberately tight (not 50/100MB) to bound
+    // request-memory/DoS exposure.
+    serverActions: {
+      bodySizeLimit: "12mb",
+    },
+  },
 };
 
 export default withNextIntl(nextConfig);
