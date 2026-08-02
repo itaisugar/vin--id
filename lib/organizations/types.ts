@@ -263,6 +263,7 @@ export type AcceptInvitationResult =
 /** Translation keys under `organization.team.errors`. */
 export type InvitationErrorKey =
   | "notAuthorized"
+  | "personalWorkspace"
   | "invalidEmail"
   | "invalidRole"
   | "alreadyMember"
