@@ -51,7 +51,6 @@ const FIELD_NAMES: (keyof VehicleFormValues)[] = [
   "license_plate",
   "mileage",
   "mileage_unit",
-  "photo_url",
   // Fleet Lite fields. The two `assigned_driver_*` keys are intentionally not
   // here: they have no input any more, so submitting them would only carry a
   // stale value back to a server action that no longer persists it.
@@ -230,15 +229,6 @@ export function VehicleForm({
           </Select>
         </div>
       </div>
-
-      <Field
-        name="photo_url"
-        label={t("fields.photoUrl")}
-        type="url"
-        placeholder="https://…"
-        error={fieldError("photo_url")}
-        registration={register("photo_url")}
-      />
 
       {/* Service & compliance.
           CREATE: collapsed, so a first vehicle stays a short form.

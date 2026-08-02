@@ -126,10 +126,11 @@ const vehicleBaseSchema = z.object({
       .optional(),
   ),
   mileage_unit: z.enum(MILEAGE_UNITS).default("km"),
-  photo_url: z.preprocess(
-    emptyToUndefined,
-    z.url({ error: "invalidUrl" }).max(2048, { error: "tooLong" }).optional(),
-  ),
+  // `photo_url` is intentionally NOT a form input. The column still exists and
+  // stored values are preserved and displayed (see `Vehicle.photo_url` /
+  // `vehicle-card`), but the create/edit forms no longer own it — so it is never
+  // parsed from, or written by, the form. Any stray client value is stripped by
+  // this object schema.
 });
 
 /**
@@ -157,7 +158,6 @@ export interface VehicleFormValues extends FleetVehicleFormValues {
   license_plate: string;
   mileage: string;
   mileage_unit: MileageUnit;
-  photo_url: string;
 }
 
 export const EMPTY_VEHICLE_FORM: VehicleFormValues = {
@@ -168,7 +168,6 @@ export const EMPTY_VEHICLE_FORM: VehicleFormValues = {
   license_plate: "",
   mileage: "",
   mileage_unit: "km",
-  photo_url: "",
   ...EMPTY_FLEET_FORM,
 };
 
@@ -182,7 +181,6 @@ export function vehicleToFormValues(v: Vehicle): VehicleFormValues {
     license_plate: v.license_plate ?? "",
     mileage: v.current_mileage != null ? String(v.current_mileage) : "",
     mileage_unit: v.mileage_unit ?? "km",
-    photo_url: v.photo_url ?? "",
     // Fleet fields
     operational_status: v.operational_status ?? "active",
     vehicle_type: v.vehicle_type ?? "",
@@ -211,7 +209,10 @@ export function vehicleInputToRow(input: VehicleInput) {
     license_plate: input.license_plate ?? null,
     current_mileage: input.mileage ?? null,
     mileage_unit: input.mileage_unit,
-    photo_url: input.photo_url ?? null,
+    // `photo_url` is deliberately omitted from the payload. On CREATE the column
+    // defaults to null; on UPDATE (a full-row `.update`) omitting it means an
+    // existing stored value is PRESERVED rather than nulled out. The form no
+    // longer owns this field — see the schema note above.
     ...fleetFieldsToRow(input),
   };
 }

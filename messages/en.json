@@ -390,7 +390,6 @@
       "licensePlate": "License plate",
       "mileage": "Mileage",
       "mileageUnit": "Unit",
-      "photoUrl": "Photo URL",
       "status": "Status",
       "createdAt": "Added on"
     },
@@ -445,7 +444,6 @@
         "tooLong": "This value is too long.",
         "invalidYear": "Enter a valid year.",
         "invalidMileage": "Enter a valid mileage.",
-        "invalidUrl": "Enter a valid URL.",
         "saveFailed": "We couldn't save the vehicle. Please try again.",
         "archiveFailed": "We couldn't archive the vehicle. Please try again.",
         "invalidDate": "Enter a valid date.",
@@ -1247,8 +1245,6 @@
       "requiresAttention": "Need attention",
       "servicesOverdue": "Service overdue",
       "servicesDueSoon": "Service due soon",
-      "documentsExpired": "Documents expired",
-      "documentsExpiringSoon": "Documents expiring",
       "openIssues": "Open issues",
       "monthCost": "Cost this month",
       "mixedCurrencyNote": "This month's costs were recorded in more than one currency. Only the most-used currency is totalled — amounts are never converted."
