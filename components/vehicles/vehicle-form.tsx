@@ -49,6 +49,8 @@ const FIELD_NAMES: (keyof VehicleFormValues)[] = [
   "year",
   "vin",
   "license_plate",
+  "color",
+  "fuel_type",
   "mileage",
   "mileage_unit",
   // Fleet Lite fields. The two `assigned_driver_*` keys are intentionally not
@@ -71,6 +73,7 @@ export function VehicleForm({
   const t = useTranslations("vehicles");
   const tf = useTranslations("fleet");
   const [serverError, setServerError] = React.useState<string | null>(null);
+  const [duplicateId, setDuplicateId] = React.useState<string | null>(null);
 
   const {
     register,
@@ -111,6 +114,7 @@ export function VehicleForm({
 
   const onSubmit: SubmitHandler<VehicleFormValues> = async (values) => {
     setServerError(null);
+    setDuplicateId(null);
     const result = await action(values);
     // Reaching here means no redirect happened → it failed.
     if (result?.fieldErrors) {
@@ -120,6 +124,7 @@ export function VehicleForm({
       }
     }
     if (result?.error) setServerError(result.error);
+    if (result?.duplicateId) setDuplicateId(result.duplicateId);
   };
 
   // Resolve a field's error message key into translated text.
@@ -206,6 +211,20 @@ export function VehicleForm({
         error={fieldError("license_plate")}
         registration={register("license_plate")}
       />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          name="color"
+          label={t("fields.color")}
+          error={fieldError("color")}
+          registration={register("color")}
+        />
+        <Field
+          name="fuel_type"
+          label={t("fields.fuelType")}
+          error={fieldError("fuel_type")}
+          registration={register("fuel_type")}
+        />
+      </div>
 
       {/* Mileage + unit on one row */}
       <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -324,9 +343,17 @@ export function VehicleForm({
       </details>
 
       {serverError ? (
-        <p role="alert" className="text-sm text-danger">
-          {t(`form.errors.${serverError}`)}
-        </p>
+        <div role="alert" className="space-y-2 text-sm text-danger">
+          <p>{t(`form.errors.${serverError}`)}</p>
+          {duplicateId ? (
+            <Link
+              href={`/vehicles/${duplicateId}`}
+              className="inline-flex font-medium text-accent underline"
+            >
+              {t("lookup.openExisting")}
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="flex gap-2">

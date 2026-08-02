@@ -391,7 +391,9 @@
       "mileage": "Mileage",
       "mileageUnit": "Unit",
       "status": "Status",
-      "createdAt": "Added on"
+      "createdAt": "Added on",
+      "color": "Color",
+      "fuelType": "Fuel type"
     },
     "helpers": {
       "make": "Choose from the list or type your own.",
@@ -451,7 +453,46 @@
         "notAuthorized": "You do not have permission to do that.",
         "noOrganization": "Your account is not linked to an organization.",
         "notFound": "That vehicle could not be found.",
-        "invalidStatus": "That status is not valid."
+        "invalidStatus": "That status is not valid.",
+        "duplicate": "A vehicle with this registration number already exists in this workspace."
+      }
+    },
+    "lookup": {
+      "methods": {
+        "registration": "Registration number",
+        "registrationHelp": "Enter a registration number and we’ll retrieve available official vehicle details.",
+        "manual": "Manual entry",
+        "manualHelp": "Type the vehicle details yourself."
+      },
+      "back": "Back",
+      "inputPlaceholder": "e.g. 12345678",
+      "search": "Search official registry",
+      "searching": "Searching…",
+      "notFound": "No vehicle found in the official registry. This doesn’t mean it doesn’t exist — you can continue manually.",
+      "continueManual": "Continue with manual entry",
+      "openExisting": "Open existing vehicle",
+      "sourceLabel": "Official government data",
+      "fetchedAt": "Retrieved {time}",
+      "notOwnership": "Official data may not reflect recent physical or ownership changes, and does not verify ownership.",
+      "duplicateWarning": "A vehicle with this registration number already exists in this workspace.",
+      "format": {
+        "empty": "Enter a registration number.",
+        "non_numeric": "Use digits only (spaces and hyphens are allowed).",
+        "out_of_range": "Enter a valid Israeli registration number (5–8 digits)."
+      },
+      "unavailable": {
+        "timeout": "The official registry didn’t respond in time. Try again or continue manually.",
+        "provider_error": "The official registry is unavailable right now. Try again or continue manually.",
+        "invalid_response": "We couldn’t read the official response. Continue manually.",
+        "ambiguous": "The official registry returned more than one match. Please enter the details manually.",
+        "configuration": "Official lookup isn’t available right now. Continue manually."
+      },
+      "warnings": {
+        "leadingZero": "The official record may have dropped leading zeros from the registration number. Check it.",
+        "codedModel": "The official model name is coded or abbreviated. Review it before saving.",
+        "expiryUnparseable": "The official registration expiry date couldn’t be read. Enter it manually if needed.",
+        "expiryPassed": "The registration expiry date has already passed.",
+        "partial": "Some official fields were unavailable. Complete the missing details manually."
       }
     }
   },
