@@ -237,6 +237,48 @@ where exists (
       and not tg.tgisinternal
   );
 
+-- -----------------------------------------------------------------------------
+-- 9. Active-workspace pointer integrity.
+--    Every profiles.active_organization_id must name an organization the user
+--    still belongs to. current_org_id() ignores a dangling pointer on read, but
+--    a lingering one is stale state — after atomic member removal
+--    (20260731120000) the repair trigger keeps this at zero.
+--    Expected: 0 rows.
+-- -----------------------------------------------------------------------------
+select p.id as profile_with_invalid_active_pointer,
+       p.active_organization_id
+from public.profiles p
+where p.active_organization_id is not null
+  and not exists (
+    select 1 from public.organization_members m
+    where m.user_id = p.id
+      and m.organization_id = p.active_organization_id
+  );
+
+-- -----------------------------------------------------------------------------
+-- 10. Member-removal grant posture (migration 20260731120000).
+--     remove_organization_member(uuid): authenticated only, anon denied.
+--     repair_active_workspace_after_member_removal(): direct EXECUTE denied to
+--     public, anon AND authenticated — it runs only as a trigger.
+--     Expected: 0 rows (every listed expectation holds).
+-- -----------------------------------------------------------------------------
+select problem from (
+  select 'rpc: authenticated cannot execute' as problem
+   where not has_function_privilege('authenticated', 'public.remove_organization_member(uuid)', 'execute')
+  union all
+  select 'rpc: anon CAN execute'
+   where has_function_privilege('anon', 'public.remove_organization_member(uuid)', 'execute')
+  union all
+  select 'trigger fn: public CAN execute'
+   where has_function_privilege('public', 'public.repair_active_workspace_after_member_removal()', 'execute')
+  union all
+  select 'trigger fn: anon CAN execute'
+   where has_function_privilege('anon', 'public.repair_active_workspace_after_member_removal()', 'execute')
+  union all
+  select 'trigger fn: authenticated CAN execute'
+   where has_function_privilege('authenticated', 'public.repair_active_workspace_after_member_removal()', 'execute')
+) g;
+
 -- =============================================================================
 -- End of audit
 -- =============================================================================

@@ -180,44 +180,41 @@ export async function changeMemberRole(
   return { ok: true };
 }
 
+/** The `state` field of `remove_organization_member()`'s JSON result. */
+type RemoveMemberState =
+  | "ok"
+  | "not_authenticated"
+  | "not_authorized"
+  | "not_found"
+  | "last_owner";
+
 /**
  * Remove a member from the organization.
  *
- * Admins may remove non-owners; owners may remove anyone, except that the last
- * owner of a live organization cannot be removed (database trigger).
+ * Delegates to the `remove_organization_member()` RPC, which does the whole
+ * thing in ONE transaction: it authorizes the caller (owners remove anyone,
+ * admins remove non-owners, and a member may leave their own membership),
+ * enforces last-owner protection, deletes exactly one membership, and — via the
+ * AFTER DELETE trigger — repairs the removed user's active workspace so no stale
+ * `active_organization_id` can survive. The previous two-step "delete then patch
+ * the profile" was non-atomic and, because `profiles` RLS is own-row, its patch
+ * silently affected zero rows for anyone but the caller.
+ *
+ * Authorization is re-derived inside the database from `auth.uid()`; the member
+ * id is the only client input and is re-checked against the caller's own
+ * organization there.
  */
 export async function removeMember(
   memberId: string,
 ): Promise<MemberActionResult> {
-  let ctx;
-  try {
-    ctx = await requireOrganizationAdmin();
-  } catch (error) {
-    if (
-      error instanceof NotAuthorizedError ||
-      error instanceof OrganizationMissingError
-    ) {
-      return { ok: false, error: "notAuthorized" };
-    }
-    throw error;
-  }
-
-  const target = await findMemberInOwnOrg(memberId, ctx.organizationId);
-  if (!target) return { ok: false, error: "memberNotFound" };
-
-  if (ctx.role !== "owner" && requiresOwnership(target.role)) {
-    return { ok: false, error: "cannotManageOwner" };
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("organization_members")
-    .delete()
-    .eq("id", memberId)
-    .eq("organization_id", ctx.organizationId)
-    .select("id");
+  const { data, error } = await supabase.rpc("remove_organization_member", {
+    p_member_id: memberId,
+  });
 
   if (error) {
+    // The last-owner trigger is the RPC's final backstop; surface it cleanly if
+    // it ever fires instead of the RPC's own pre-check.
     if (error.code === CHECK_VIOLATION) return { ok: false, error: "lastOwner" };
     console.error("[organizations] removeMember failed:", {
       code: error.code,
@@ -225,21 +222,22 @@ export async function removeMember(
     });
     return { ok: false, error: "saveFailed" };
   }
-  if (!data || data.length === 0) return { ok: false, error: "notAuthorized" };
 
-  // Clear the removed user's cached pointer so nothing displays a stale org.
-  // Access is already gone the moment the membership row disappeared.
-  const { error: cacheError } = await supabase
-    .from("profiles")
-    .update({ organization_id: null })
-    .eq("id", target.user_id);
-  if (cacheError) {
-    console.warn("[organizations] profile org cache not cleared:", {
-      code: cacheError.code,
-    });
+  const state = (data as { state?: RemoveMemberState } | null)?.state;
+  switch (state) {
+    case "ok":
+      return { ok: true };
+    case "last_owner":
+      return { ok: false, error: "lastOwner" };
+    case "not_found":
+      return { ok: false, error: "memberNotFound" };
+    case "not_authenticated":
+    case "not_authorized":
+      return { ok: false, error: "notAuthorized" };
+    default:
+      console.error("[organizations] removeMember unexpected state:", { state });
+      return { ok: false, error: "saveFailed" };
   }
-
-  return { ok: true };
 }
 
 /** Minimal organization settings for the team screen header. */

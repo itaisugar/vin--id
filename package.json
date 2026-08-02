@@ -15,7 +15,8 @@
     "validate:fleet-ai-intake": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/fleet-ai-intake-check.mjs",
     "validate:private-vehicle": "node --experimental-strip-types scripts/validation/private-vehicle-check.mjs",
     "validate:qa-quick-wins": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/qa-quick-wins-check.mjs",
-    "validate:multi-workspace": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/multi-workspace-check.mjs"
+    "validate:multi-workspace": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/multi-workspace-check.mjs",
+    "validate:member-removal": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/member-removal-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
