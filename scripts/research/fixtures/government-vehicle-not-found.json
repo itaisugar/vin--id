@@ -1,0 +1,14 @@
+{
+  "_comment": "SANITIZED research fixture: a zero-result datastore_search response (plate absent from the resource). Captured 2026-08-02 shape.",
+  "help": "https://data.gov.il/api/3/action/help_show?name=datastore_search",
+  "success": true,
+  "result": {
+    "resource_id": "053cea08-09bc-40ec-8f7a-156f0677aff3",
+    "fields": [
+      { "id": "_id", "type": "int" },
+      { "id": "mispar_rechev", "type": "numeric" }
+    ],
+    "records": [],
+    "total": 0
+  }
+}

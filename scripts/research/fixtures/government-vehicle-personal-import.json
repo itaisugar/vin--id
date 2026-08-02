@@ -1,0 +1,51 @@
+{
+  "_comment": "SANITIZED research fixture: a personal-import vehicle from resource 03adc637-b6fe-402b-9937-7c3d3afc9140 (personal_import_vehicles). Chassis field is named `shilda` here (NOT `misgeret`), and there is no `kinuy_mishari`. Plate + chassis MASKED. Illustrative field values only.",
+  "help": "https://data.gov.il/api/3/action/help_show?name=datastore_search",
+  "success": true,
+  "result": {
+    "resource_id": "03adc637-b6fe-402b-9937-7c3d3afc9140",
+    "fields": [
+      { "id": "_id", "type": "int" },
+      { "id": "mispar_rechev", "type": "numeric" },
+      { "id": "shilda", "type": "text" },
+      { "id": "tozeret_cd", "type": "numeric" },
+      { "id": "tozeret_nm", "type": "text" },
+      { "id": "sug_rechev_cd", "type": "numeric" },
+      { "id": "sug_rechev_nm", "type": "text" },
+      { "id": "degem_nm", "type": "text" },
+      { "id": "mishkal_kolel", "type": "numeric" },
+      { "id": "shnat_yitzur", "type": "numeric" },
+      { "id": "nefach_manoa", "type": "numeric" },
+      { "id": "tozeret_eretz_nm", "type": "text" },
+      { "id": "degem_manoa", "type": "text" },
+      { "id": "mivchan_acharon_dt", "type": "text" },
+      { "id": "tokef_dt", "type": "text" },
+      { "id": "sug_yevu", "type": "text" },
+      { "id": "moed_aliya_lakvish", "type": "text" },
+      { "id": "sug_delek_nm", "type": "text" }
+    ],
+    "records": [
+      {
+        "_id": 4210,
+        "mispar_rechev": "0000099",
+        "shilda": "MASKED-CHASSIS-9999",
+        "tozeret_cd": 227,
+        "tozeret_nm": "טסלה ארהב",
+        "sug_rechev_cd": 1,
+        "sug_rechev_nm": "פרטי נוסעים",
+        "degem_nm": "MODEL 3",
+        "mishkal_kolel": 2232,
+        "shnat_yitzur": 2021,
+        "nefach_manoa": 0,
+        "tozeret_eretz_nm": "ארצות הברית",
+        "degem_manoa": "ELECTRIC",
+        "mivchan_acharon_dt": "2026-05-02",
+        "tokef_dt": "2027-05-01",
+        "sug_yevu": "יבוא אישי",
+        "moed_aliya_lakvish": "2021-11",
+        "sug_delek_nm": "חשמל"
+      }
+    ],
+    "total": 1
+  }
+}

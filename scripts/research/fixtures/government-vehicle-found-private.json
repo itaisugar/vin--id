@@ -1,0 +1,63 @@
+{
+  "_comment": "SANITIZED research fixture. Captured 2026-08-02 from data.gov.il datastore_search on resource 053cea08-09bc-40ec-8f7a-156f0677aff3 (private-and-commercial-vehicles). The registration number (mispar_rechev) and chassis (misgeret) are MASKED — this file must never contain a real plate or VIN. Shape mirrors the live CKAN envelope.",
+  "help": "https://data.gov.il/api/3/action/help_show?name=datastore_search",
+  "success": true,
+  "result": {
+    "resource_id": "053cea08-09bc-40ec-8f7a-156f0677aff3",
+    "fields": [
+      { "id": "_id", "type": "int" },
+      { "id": "mispar_rechev", "type": "numeric" },
+      { "id": "tozeret_cd", "type": "numeric" },
+      { "id": "sug_degem", "type": "text" },
+      { "id": "tozeret_nm", "type": "text" },
+      { "id": "degem_cd", "type": "numeric" },
+      { "id": "degem_nm", "type": "text" },
+      { "id": "ramat_gimur", "type": "text" },
+      { "id": "ramat_eivzur_betihuty", "type": "numeric" },
+      { "id": "kvutzat_zihum", "type": "numeric" },
+      { "id": "shnat_yitzur", "type": "numeric" },
+      { "id": "degem_manoa", "type": "text" },
+      { "id": "mivchan_acharon_dt", "type": "text" },
+      { "id": "tokef_dt", "type": "text" },
+      { "id": "baalut", "type": "text" },
+      { "id": "misgeret", "type": "text" },
+      { "id": "tzeva_cd", "type": "numeric" },
+      { "id": "tzeva_rechev", "type": "text" },
+      { "id": "zmig_kidmi", "type": "text" },
+      { "id": "zmig_ahori", "type": "text" },
+      { "id": "sug_delek_nm", "type": "text" },
+      { "id": "horaat_rishum", "type": "numeric" },
+      { "id": "moed_aliya_lakvish", "type": "text" },
+      { "id": "kinuy_mishari", "type": "text" }
+    ],
+    "records": [
+      {
+        "_id": 1235,
+        "mispar_rechev": "0000074",
+        "tozeret_cd": 413,
+        "sug_degem": "P",
+        "tozeret_nm": "טויוטה יפן",
+        "degem_cd": 871,
+        "degem_nm": "ZRE151L-AEPDKW",
+        "ramat_gimur": "SUN",
+        "ramat_eivzur_betihuty": null,
+        "kvutzat_zihum": 15,
+        "shnat_yitzur": 2011,
+        "degem_manoa": "1ZR",
+        "mivchan_acharon_dt": "2026-07-13",
+        "tokef_dt": "2027-08-27",
+        "baalut": "פרטי",
+        "misgeret": "MASKED-CHASSIS-0000",
+        "tzeva_cd": 6,
+        "tzeva_rechev": "אפור כהה מטלי",
+        "zmig_kidmi": "195/65R15",
+        "zmig_ahori": "195/65R15",
+        "sug_delek_nm": "בנזין",
+        "horaat_rishum": null,
+        "moed_aliya_lakvish": "2011-8",
+        "kinuy_mishari": "COROLLA"
+      }
+    ],
+    "total": 1
+  }
+}
