@@ -259,3 +259,57 @@ PDF registration support; existing-vehicle registration scan; richer per-field
 provenance in Review; additional persisted technical fields; recurring
 government re-sync; usage quotas / per-user scan caps; founder-approved legal
 attribution copy; the full browser visual/RTL/accessibility pass (Section 7).
+
+## 20. Mobile interaction release blocker (found in founder QA)
+
+**Founder-reported defects (real phone, LAN origin `http://192.168.1.179:3000`):**
+all three Add Vehicle method buttons and the language toggle ignored taps.
+Desktop `http://localhost:3000` worked.
+
+**Reproduction environment:** Next.js 16 dev server, phone + Mac on the same
+Wi-Fi, app opened at the Mac's LAN IP. Empirically: a `/_next/static/*.js`
+chunk requested with the LAN origin returned **403** (localhost origin → 200),
+and the dev log showed *"Blocked cross-origin request to Next.js dev resource
+/_next/webpack-hmr from 192.168.1.179."*
+
+**Root cause (single, shared, dev-only):** Next.js 16 blocks cross-origin
+requests to dev resources from hosts not in `allowedDevOrigins`; only
+`localhost` is trusted by default. From the phone the JS chunks were 403, so the
+page rendered (SSR HTML) but **never hydrated** — every client control was inert.
+The Add Vehicle buttons (`<button type="button">` + `onClick`) and the language
+toggle (`<button>` + `setLocale`) were already correct; there was no component
+bug. This affects `next dev` only — `next build`/`next start` and the production
+HTTPS domain are unaffected, so it is **not** a production-code defect.
+
+**Fix:** add a dev-only `allowedDevOrigins` entry in `next.config.ts` (the LAN
+host, plus a comma-separated `ALLOWED_DEV_ORIGINS` env override). No production
+trust boundary, CORS, Auth redirect, cookie, or server-action origin check was
+changed. After the fix the LAN chunk returns 200 and hydration is restored.
+
+**Affected files:** `next.config.ts` (fix), `scripts/validation/mobile-interaction-check.mjs`
+(new, 21 assertions), `package.json` (script), `scripts/qa/seed-local-qa.mjs`
+(local QA fixtures).
+
+**Focused tests:** `validate:mobile-interaction` — asserts the dev-origin fix is
+present and dev-only, the three Add Vehicle controls are real non-disabled
+`<button>`s wired to the state machine with no `<div onClick>` / no mobile
+`hidden`, the language toggle is a hydratable labelled `<button>` invoking
+`setLocale`, and locale/direction/cookie behavior works on both HTTP LAN and
+HTTPS prod (SameSite=Lax, no hardcoded `Secure`). **No automated touch
+validation was performed (no browser/device automation available); a real-device
+manual retest is required.**
+
+**Real-device retest checklist (phone via `http://192.168.1.179:3000`):**
+1. Log in (`qa.owner@vinid.local` / QA password).
+2. Add Vehicle → tap **Registration number** → registration input opens on first tap.
+3. Back → tap **Scan vehicle registration** → camera/gallery upload opens.
+4. Back → tap **Manual entry** → manual form opens.
+5. Tap the **globe** language toggle → menu opens → pick עברית → UI switches to
+   Hebrew **RTL**; pick English → **LTR**; session + workspace preserved.
+6. Repeat 2–5 in both Hebrew and English; confirm no double-tap needed and no
+   horizontal overflow.
+Desktop (`http://localhost:3000`): confirm the same controls still work in
+English LTR and Hebrew RTL.
+
+**Visual gate:** still **pending** founder confirmation (now including the mobile
+retest above).
