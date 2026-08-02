@@ -51,6 +51,8 @@ export interface Vehicle {
   year: number | null;
   vin: string | null;
   license_plate: string | null;
+  color: string | null;
+  fuel_type: string | null;
   /**
    * The fleet's "Current KM". There is deliberately no separate `current_km`
    * column — this is the single source of truth, and `mileage_unit` records
@@ -59,6 +61,15 @@ export interface Vehicle {
   current_mileage: number | null;
   mileage_unit: MileageUnit;
   photo_url: string | null;
+  /**
+   * Provenance of the INITIAL data. `null`/`"manual"` = user-entered;
+   * `"israel_government"` = pre-filled from the official lookup and confirmed.
+   * Provenance only, never verification — the confirmed row values are the
+   * source of truth. Server-set; never written from the form.
+   */
+  data_source: string | null;
+  government_fetched_at: string | null;
+  government_resource_id: string | null;
   /** LIFECYCLE status — drives archive/sold and the Passport transfer flow. */
   status: VehicleStatus;
   /** OPERATIONAL status — "can this vehicle work today?". A separate axis. */
@@ -79,7 +90,7 @@ export interface Vehicle {
 
 // Columns selected for list/detail views.
 export const VEHICLE_COLUMNS =
-  "id, owner_user_id, organization_id, make, model, year, vin, license_plate, current_mileage, mileage_unit, photo_url, status, operational_status, vehicle_type, assigned_driver_name, assigned_driver_phone, next_service_date, next_service_km, test_expiry_date, insurance_expiry_date, archived_at, sold_at, created_at, updated_at, deleted_at";
+  "id, owner_user_id, organization_id, make, model, year, vin, license_plate, color, fuel_type, current_mileage, mileage_unit, photo_url, data_source, government_fetched_at, government_resource_id, status, operational_status, vehicle_type, assigned_driver_name, assigned_driver_phone, next_service_date, next_service_km, test_expiry_date, insurance_expiry_date, archived_at, sold_at, created_at, updated_at, deleted_at";
 
 // -----------------------------------------------------------------------------
 // Validation
@@ -116,6 +127,8 @@ const vehicleBaseSchema = z.object({
     .max(MAX_YEAR, { error: "invalidYear" }),
   vin: optionalText(64),
   license_plate: optionalText(32),
+  color: optionalText(40),
+  fuel_type: optionalText(40),
   mileage: z.preprocess(
     emptyToUndefined,
     z.coerce
@@ -156,6 +169,8 @@ export interface VehicleFormValues extends FleetVehicleFormValues {
   year: string;
   vin: string;
   license_plate: string;
+  color: string;
+  fuel_type: string;
   mileage: string;
   mileage_unit: MileageUnit;
 }
@@ -166,6 +181,8 @@ export const EMPTY_VEHICLE_FORM: VehicleFormValues = {
   year: "",
   vin: "",
   license_plate: "",
+  color: "",
+  fuel_type: "",
   mileage: "",
   mileage_unit: "km",
   ...EMPTY_FLEET_FORM,
@@ -179,6 +196,8 @@ export function vehicleToFormValues(v: Vehicle): VehicleFormValues {
     year: v.year != null ? String(v.year) : "",
     vin: v.vin ?? "",
     license_plate: v.license_plate ?? "",
+    color: v.color ?? "",
+    fuel_type: v.fuel_type ?? "",
     mileage: v.current_mileage != null ? String(v.current_mileage) : "",
     mileage_unit: v.mileage_unit ?? "km",
     // Fleet fields
@@ -207,6 +226,8 @@ export function vehicleInputToRow(input: VehicleInput) {
     year: input.year,
     vin: input.vin ?? null,
     license_plate: input.license_plate ?? null,
+    color: input.color ?? null,
+    fuel_type: input.fuel_type ?? null,
     current_mileage: input.mileage ?? null,
     mileage_unit: input.mileage_unit,
     // `photo_url` is deliberately omitted from the payload. On CREATE the column
