@@ -59,7 +59,7 @@ Every pre-confirmation failure keeps manual entry available and the staged file 
 New-vehicle creation only (no existing-vehicle scan). Images only (JPEG/PNG/WebP; no PDF, matching the existing scan flow). Extraction reliability varies with image quality (warnings surfaced). Additional technical fields not persisted. Not ownership/authenticity/roadworthiness verification.
 
 ## 17. Production configuration
-`ANTHROPIC_API_KEY` (server-only) enables real extraction; without it the deterministic mock is used. `EXTRACTION_MODEL` selects the model. Government lookup uses Task D's config. Server egress to `data.gov.il` required.
+`ANTHROPIC_API_KEY` (server-only) enables real extraction. Provider selection now goes through the shared production-safety gate `resolveExtractionProviderMode()` (see `lib/server/ai/provider-mode.ts`): **in production** a missing key — or an explicit `AI_EXTRACTION_PROVIDER=mock` — resolves to an explicit *unavailable* state (`extractUnavailable`), never a silent mock; **test/development** keep the deterministic mock as a zero-config fallback and can force it with `AI_EXTRACTION_PROVIDER=mock`. There is no anthropic→mock fallback: a provider timeout / 5xx / malformed response surfaces as a typed failure. `EXTRACTION_MODEL` selects the model. Government lookup uses Task D's config. Server egress to `data.gov.il` required.
 
 ## 18. Stacked-branch dependency
 Parent: `feat/government-vehicle-lookup` (Task D). This branch reuses that branch's `lib/vehicle-lookup/*`, `data_source`/government columns, and `lookupVehicleAction`. Release Task D first (or together, in order).
