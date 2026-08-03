@@ -104,6 +104,14 @@ async function main() {
     const orgA = await orgOf(admin, aOwner.id);
     const orgB = await orgOf(admin, bOwner.id);
 
+    // These fixtures exercise team management — members, roles, invitations —
+    // which is a BUSINESS-organization capability. Personal workspaces can no
+    // longer be invited into (enforced by the invitation INSERT policy), so the
+    // signup-created orgs are marked business here, exactly as a real user's
+    // org becomes once they run Team & Access. current_org_id() still resolves
+    // to them via the active pointer set at signup.
+    await admin.from("organizations").update({ kind: "business" }).in("id", [orgA, orgB]);
+
     // ==================================================== signup + migration
     section("Signup and migration");
     orgA && orgB && orgA !== orgB

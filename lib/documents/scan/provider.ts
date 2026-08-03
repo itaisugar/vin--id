@@ -3,6 +3,10 @@ import "server-only";
 import type { ScanExtraction, ScanImageMime } from "./types";
 import { MockExtractionProvider } from "@/lib/server/ai/mock-document-scan";
 import { AnthropicExtractionProvider } from "@/lib/server/ai/anthropic-document-scan";
+import {
+  ExtractionUnavailableError,
+  resolveExtractionProviderMode,
+} from "@/lib/server/ai/provider-mode";
 
 /**
  * Provider abstraction for scanned-document extraction. The swap point between
@@ -29,14 +33,17 @@ export interface DocumentExtractionProvider {
 }
 
 /**
- * Select the active provider. The real Anthropic provider is used whenever an
- * ANTHROPIC_API_KEY is configured; otherwise we fall back to the deterministic
- * mock (so the app still works with no key). The MOCK_AI flag no longer gates
- * this — extraction is "real whenever a key is present" per owner decision.
+ * Select the active provider through the shared production-safety gate
+ * (`resolveExtractionProviderMode`). The real Anthropic provider is used
+ * whenever a key is configured; the deterministic mock is used in test/dev as a
+ * zero-config fallback. In PRODUCTION a missing key (or an explicit `mock`
+ * selection) throws `ExtractionUnavailableError` instead of silently mocking —
+ * every caller already treats a thrown extraction as "unavailable → manual".
  */
 export function getExtractionProvider(): DocumentExtractionProvider {
-  const hasKey = Boolean(process.env.ANTHROPIC_API_KEY);
-  return hasKey
+  const mode = resolveExtractionProviderMode();
+  if (mode.engine === "unavailable") throw new ExtractionUnavailableError(mode.reason);
+  return mode.engine === "anthropic"
     ? new AnthropicExtractionProvider()
     : new MockExtractionProvider();
 }

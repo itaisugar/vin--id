@@ -391,7 +391,9 @@
       "mileage": "Mileage",
       "mileageUnit": "Unit",
       "status": "Status",
-      "createdAt": "Added on"
+      "createdAt": "Added on",
+      "color": "Color",
+      "fuelType": "Fuel type"
     },
     "helpers": {
       "make": "Choose from the list or type your own.",
@@ -451,7 +453,88 @@
         "notAuthorized": "You do not have permission to do that.",
         "noOrganization": "Your account is not linked to an organization.",
         "notFound": "That vehicle could not be found.",
-        "invalidStatus": "That status is not valid."
+        "invalidStatus": "That status is not valid.",
+        "duplicate": "A vehicle with this registration number already exists in this workspace."
+      }
+    },
+    "lookup": {
+      "methods": {
+        "registration": "Registration number",
+        "registrationHelp": "Enter a registration number and we’ll retrieve available official vehicle details.",
+        "manual": "Manual entry",
+        "manualHelp": "Type the vehicle details yourself.",
+        "scan": "Scan registration document",
+        "scanHelp": "Photograph or upload the vehicle registration and we’ll extract the details for you."
+      },
+      "back": "Back",
+      "inputPlaceholder": "e.g. 12345678",
+      "search": "Search official registry",
+      "searching": "Searching…",
+      "notFound": "No vehicle found in the official registry. This doesn’t mean it doesn’t exist — you can continue manually.",
+      "continueManual": "Continue with manual entry",
+      "openExisting": "Open existing vehicle",
+      "sourceLabel": "Official government data",
+      "fetchedAt": "Retrieved {time}",
+      "notOwnership": "Official data may not reflect recent physical or ownership changes, and does not verify ownership.",
+      "duplicateWarning": "A vehicle with this registration number already exists in this workspace.",
+      "format": {
+        "empty": "Enter a registration number.",
+        "non_numeric": "Use digits only (spaces and hyphens are allowed).",
+        "out_of_range": "Enter a valid Israeli registration number (5–8 digits)."
+      },
+      "unavailable": {
+        "timeout": "The official registry didn’t respond in time. Try again or continue manually.",
+        "provider_error": "The official registry is unavailable right now. Try again or continue manually.",
+        "invalid_response": "We couldn’t read the official response. Continue manually.",
+        "ambiguous": "The official registry returned more than one match. Please enter the details manually.",
+        "configuration": "Official lookup isn’t available right now. Continue manually."
+      },
+      "warnings": {
+        "leadingZero": "The official record may have dropped leading zeros from the registration number. Check it.",
+        "codedModel": "The official model name is coded or abbreviated. Review it before saving.",
+        "expiryUnparseable": "The official registration expiry date couldn’t be read. Enter it manually if needed.",
+        "expiryPassed": "The registration expiry date has already passed.",
+        "partial": "Some official fields were unavailable. Complete the missing details manually."
+      }
+    },
+    "scan": {
+      "uploadLabel": "Vehicle registration photo",
+      "uploadHelp": "Take or upload a photo of the vehicle registration (JPEG, PNG or WebP, up to 10 MB). PDFs are not supported.",
+      "privacyNote": "The image is processed to extract vehicle details. Owner details are not saved.",
+      "extract": "Extract details",
+      "extracting": "Extracting the vehicle details…",
+      "wrongDoc": "This doesn’t look like a vehicle registration. Replace the file or continue manually.",
+      "replace": "Replace document",
+      "extracted": "We extracted the details below. Review the registration number before searching the official registry.",
+      "qualityWarning": "Some areas were hard to read — please review the details carefully.",
+      "plateHelp": "Correct the registration number if needed, then search the official registry.",
+      "skipLookup": "Skip and review",
+      "createReminder": "Create a reminder before the test expiry",
+      "reviewTitle": "Review extracted details",
+      "sourceDocument": "Registration document",
+      "sourceGovernment": "Official government data",
+      "notOwnership": "Extracted and official data may not reflect recent physical or ownership changes, and do not verify ownership.",
+      "registrationConflict": "The registration number on the document and in the official registry differ. Resolve it before saving.",
+      "conflictsSummary": "{count} field(s) differ between sources — review",
+      "fields": {
+        "registration_number": "Registration number",
+        "make": "Manufacturer",
+        "model": "Model",
+        "year": "Year",
+        "vin": "Chassis / VIN",
+        "color": "Color",
+        "fuel_type": "Fuel type",
+        "test_expiry_date": "Test expiry"
+      },
+      "errors": {
+        "fileRequired": "Choose a photo or file first.",
+        "invalidFileType": "Use a JPEG, PNG or WebP image.",
+        "fileTooLarge": "The image is too large. Upload an image up to 10MB.",
+        "uploadFailed": "Upload failed. Try again.",
+        "extractFailed": "We couldn’t read the document. Try another photo or continue manually.",
+        "extractUnavailable": "Automatic scanning is unavailable right now. Try again later, replace the photo, or add the vehicle manually.",
+        "saveFailed": "Something went wrong. Please try again.",
+        "notAuthorized": "You do not have permission to do this."
       }
     }
   },
@@ -1605,6 +1688,28 @@
         "lastOwner": "This organization must keep at least one owner. Promote someone else to owner first.",
         "cannotManageOwner": "Only an owner can change or remove another owner.",
         "copyFailed": "Couldn't copy automatically. Select the link and copy it manually.",
+        "saveFailed": "Something went wrong. Please try again.",
+        "personalWorkspace": "Personal workspaces can't have members. Create a separate organization first."
+      }
+    },
+    "activation": {
+      "title": "Organization management",
+      "description": "Managing vehicles for a business or team? Create a separate organization workspace and invite members.",
+      "createCta": "Create organization",
+      "personalNote": "Your personal vehicles and records will remain in your Personal workspace.",
+      "form": {
+        "nameLabel": "Organization name",
+        "namePlaceholder": "Acme Fleet",
+        "submit": "Create organization",
+        "creating": "Creating…",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "required": "Enter an organization name.",
+        "tooLong": "That name is too long.",
+        "invalidName": "Enter a valid organization name.",
+        "notAuthenticated": "Please sign in again.",
+        "noProfile": "Your account isn't fully set up yet. Reload and try again.",
         "saveFailed": "Something went wrong. Please try again."
       }
     }

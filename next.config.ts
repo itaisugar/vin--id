@@ -10,10 +10,36 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // DEV-ONLY. Next.js 16 blocks cross-origin requests to dev resources
+  // (`/_next/static/*`, `/_next/webpack-hmr`) unless the requesting host is
+  // trusted. Only `localhost` is trusted by default, so opening the dev server
+  // from a phone on the LAN returns 403 for every JS chunk — the page renders
+  // but never hydrates, so no control responds. Trust LAN hosts for on-device QA
+  // via the ALLOWED_DEV_ORIGINS env var (comma-separated, e.g. in a gitignored
+  // .env.development.local) — no machine-specific IP is committed. This setting
+  // is ignored by `next build`/`next start`, so it does NOT affect production
+  // trust boundaries. See
+  // https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  allowedDevOrigins:
+    process.env.ALLOWED_DEV_ORIGINS?.split(",").map((s) => s.trim()).filter(Boolean) ?? [],
   // `sharp` is a native module used server-side to downscale scanned images
   // before sending them to the extraction provider. Keep it external so it is
   // required at runtime rather than bundled.
   serverExternalPackages: ["sharp"],
+  experimental: {
+    // Vehicle-registration photos are uploaded through a Server Action
+    // (createRegistrationIntakeAction) as multipart FormData. Server Actions
+    // default to a 1MB request-body limit, which rejects normal phone-camera
+    // photos before the action even runs. The product limit is 10MB (enforced
+    // server-side by MAX_SCAN_FILE_SIZE), so raise the TRANSPORT ceiling just
+    // above it to cover the 10MB file + multipart overhead. This is only the
+    // body ceiling — files >10MB are still rejected by application validation
+    // with a clear message. Kept deliberately tight (not 50/100MB) to bound
+    // request-memory/DoS exposure.
+    serverActions: {
+      bodySizeLimit: "12mb",
+    },
+  },
 };
 
 export default withNextIntl(nextConfig);

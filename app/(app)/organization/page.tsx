@@ -5,13 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CreateOrganizationForm } from "@/components/organization/create-organization-form";
 import { InvitationList } from "@/components/organization/invitation-list";
 import { InviteForm } from "@/components/organization/invite-form";
 import { MemberList } from "@/components/organization/member-list";
 import { RoleBadge } from "@/components/organization/role-badge";
 import { listPendingInvitations } from "@/lib/organizations/invitations";
 import { listOrganizationMembers } from "@/lib/organizations/members";
-import { getCurrentUserContext } from "@/lib/organizations/service";
+import {
+  getCurrentUserContext,
+  isPersonalWorkspace,
+} from "@/lib/organizations/service";
 import { canManageOrganization } from "@/lib/organizations/types";
 import { redirectDriversAway } from "@/lib/drivers/guard";
 
@@ -40,6 +44,30 @@ export default async function OrganizationPage() {
         <Card>
           <CardContent className="py-8 text-center text-sm text-ink-2">
             {t("noOrganization")}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // A Personal workspace is one person's private vehicle environment, not a team.
+  // It shows a focused activation prompt to create a SEPARATE Business
+  // organization — never member, invitation or role controls. This branch mirrors
+  // the database: the invitation INSERT policy rejects a personal org, so hiding
+  // the controls here is presentation over an already-enforced rule.
+  if (await isPersonalWorkspace()) {
+    const ta = await getTranslations("organization.activation");
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-base">{ta("title")}</CardTitle>
+            <p className="text-sm text-ink-2">{ta("description")}</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CreateOrganizationForm />
+            <p className="text-xs text-ink-2">{ta("personalNote")}</p>
           </CardContent>
         </Card>
       </div>

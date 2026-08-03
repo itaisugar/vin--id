@@ -5,7 +5,11 @@ import * as z from "zod";
 import { AppUrlNotConfiguredError, getAppBaseUrl } from "@/lib/app-url";
 import { NotAuthorizedError, OrganizationMissingError } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
-import { requireOrganization, requireOrganizationAdmin } from "./service";
+import {
+  isPersonalWorkspace,
+  requireOrganization,
+  requireOrganizationAdmin,
+} from "./service";
 import {
   invitationInputSchema,
   INVITATION_COLUMNS,
@@ -122,6 +126,15 @@ export async function createInvitation(
       return { ok: false, error: "notAuthorized" };
     }
     throw error;
+  }
+
+  // A Personal workspace is one person's private vehicle environment — it cannot
+  // have members. The database enforces this too (the invitation INSERT policy
+  // rejects a personal org), but checking here returns a clear, stable state
+  // instead of a generic RLS failure. UI hiding is not the boundary; this and
+  // the policy are.
+  if (await isPersonalWorkspace()) {
+    return { ok: false, error: "personalWorkspace" };
   }
 
   const parsed = invitationInputSchema.safeParse(values);

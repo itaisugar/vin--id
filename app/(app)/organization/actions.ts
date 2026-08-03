@@ -1,10 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
   createInvitation,
   revokeInvitation,
 } from "@/lib/organizations/invitations";
+import {
+  createBusinessOrganization,
+  type CreateOrganizationErrorKey,
+} from "@/lib/organizations/organization";
 import { changeMemberRole, removeMember } from "@/lib/organizations/members";
 import {
   isOrgRole,
@@ -43,6 +48,30 @@ export async function createInvitationAction(
 
   revalidatePath("/organization");
   return { inviteUrl: result.inviteUrl, email: result.invitation.email };
+}
+
+export type CreateOrganizationActionState = {
+  error?: CreateOrganizationErrorKey;
+};
+
+/**
+ * Create a separate Business organization for the current user.
+ *
+ * The service delegates to the `create_business_organization()` RPC, which
+ * derives the owner from `auth.uid()`, so nothing here trusts a client-supplied
+ * id, owner or role. On success the new organization is already the active
+ * workspace (set inside the RPC), so the whole app is revalidated and the user
+ * is sent to the Business Team & Access screen — the create form only ever
+ * renders in a Personal workspace, so a redirect there is the success feedback.
+ */
+export async function createOrganizationAction(
+  values: unknown,
+): Promise<CreateOrganizationActionState> {
+  const result = await createBusinessOrganization(values);
+  if (!result.ok) return { error: result.error };
+
+  revalidatePath("/", "layout");
+  redirect("/organization");
 }
 
 export type MemberActionState = { error?: MemberErrorKey; success?: boolean };

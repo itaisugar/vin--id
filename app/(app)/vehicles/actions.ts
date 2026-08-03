@@ -4,16 +4,24 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod";
 import { trackEvent } from "@/lib/analytics/track";
-import { NotAuthorizedError, OrganizationMissingError } from "@/lib/auth/errors";
+import { NotAuthenticatedError, NotAuthorizedError, OrganizationMissingError } from "@/lib/auth/errors";
 import { OPERATIONAL_STATUSES } from "@/lib/fleet/types";
+import { requireFleetWriter } from "@/lib/organizations/service";
 import {
   archiveVehicle,
   createVehicle,
+  DuplicateVehicleError,
+  findVehicleByRegistration,
   setOperationalStatus,
   updateVehicle,
   VehicleNotFoundError,
+  type ExistingVehicleMatch,
+  type VehicleSourceMeta,
 } from "@/lib/vehicles/service";
 import { vehicleInputSchema } from "@/lib/vehicles/types";
+import { getVehicleLookupConfig } from "@/lib/vehicle-lookup/config";
+import { lookupVehicle } from "@/lib/vehicle-lookup/service";
+import type { VehicleLookupResult } from "@/lib/vehicle-lookup/types";
 
 /**
  * Result returned to the client form on failure. `fieldErrors`/`error` values
@@ -23,7 +31,67 @@ import { vehicleInputSchema } from "@/lib/vehicles/types";
 export type VehicleActionState = {
   error?: string;
   fieldErrors?: Partial<Record<string, string>>;
+  /** When `error === "duplicate"`, the existing vehicle to offer opening. */
+  duplicateId?: string;
 };
+
+/** Result of a government lookup: the typed contract + a workspace dup match. */
+export type VehicleLookupActionState = {
+  result: VehicleLookupResult;
+  /** An existing vehicle in THIS workspace with the same plate, if any. */
+  duplicate?: ExistingVehicleMatch | null;
+};
+
+/**
+ * Government vehicle lookup (read-only).
+ *
+ * Authorization mirrors vehicle creation: `requireFleetWriter()` — a user who
+ * may create a vehicle in the active workspace may look one up; a viewer/driver
+ * is denied. It writes nothing, creates no reminder, and returns only the
+ * mapped contract plus an organization-scoped duplicate hint. Raw provider
+ * errors never leave the service; they arrive here as stable `unavailable`
+ * states. Logs carry the status only — never the registration number.
+ */
+export async function lookupVehicleAction(
+  registration: unknown,
+): Promise<VehicleLookupActionState> {
+  // Authenticated, create-capable users only.
+  try {
+    await requireFleetWriter();
+  } catch (error) {
+    if (
+      error instanceof NotAuthorizedError ||
+      error instanceof OrganizationMissingError ||
+      error instanceof NotAuthenticatedError
+    ) {
+      return {
+        result: { status: "unavailable", source: "israel_government", retryable: false, reason: "configuration" },
+      };
+    }
+    throw error;
+  }
+
+  const reg = typeof registration === "string" ? registration : "";
+  const result = await lookupVehicle(reg);
+
+  await trackEvent({
+    eventName: "vehicle_lookup",
+    entityType: "vehicle",
+    metadata: {
+      status: result.status,
+      retryable: result.status === "unavailable" ? result.retryable : undefined,
+    },
+  });
+
+  // Only a found result needs a duplicate hint. The check is org-scoped, so it
+  // can never disclose that the plate exists in another workspace.
+  let duplicate: ExistingVehicleMatch | null = null;
+  if (result.status === "found") {
+    duplicate = await findVehicleByRegistration(result.vehicle.registration_number);
+  }
+
+  return { result, duplicate };
+}
 
 /**
  * Map a thrown error to a translation key, without leaking database detail to
@@ -54,16 +122,58 @@ function toFieldErrors(error: z.ZodError): VehicleActionState {
   return { fieldErrors };
 }
 
+/**
+ * Client-supplied lookup provenance. Deliberately minimal: only the source flag
+ * and the fetch timestamp are trusted from the client, and the source is checked
+ * against a fixed allowlist. The resource id is NEVER taken from the client — it
+ * is re-derived from server config below.
+ */
+export type CreateVehicleLookupMeta = {
+  source: "israel_government";
+  fetchedAt?: string;
+};
+
+/**
+ * Build server-trusted source metadata. Unknown source values are ignored
+ * (treated as manual). The resource id comes from configuration, not the client.
+ */
+function resolveSourceMeta(
+  meta: CreateVehicleLookupMeta | undefined,
+): VehicleSourceMeta | undefined {
+  if (!meta || meta.source !== "israel_government") return undefined;
+  const fetchedAt =
+    typeof meta.fetchedAt === "string" && !Number.isNaN(Date.parse(meta.fetchedAt))
+      ? meta.fetchedAt
+      : new Date().toISOString();
+  let resourceId: string | null = null;
+  try {
+    resourceId = getVehicleLookupConfig().resourceId;
+  } catch {
+    resourceId = null; // config trouble is non-fatal for recording provenance
+  }
+  return {
+    data_source: "israel_government",
+    government_fetched_at: fetchedAt,
+    government_resource_id: resourceId,
+  };
+}
+
 export async function createVehicleAction(
   values: unknown,
+  lookupMeta?: CreateVehicleLookupMeta,
 ): Promise<VehicleActionState> {
   const parsed = vehicleInputSchema.safeParse(values);
   if (!parsed.success) return toFieldErrors(parsed.error);
 
   let newId: string;
   try {
-    newId = await createVehicle(parsed.data);
+    newId = await createVehicle(parsed.data, resolveSourceMeta(lookupMeta));
   } catch (error) {
+    // A same-workspace duplicate is a first-class, user-facing state, not a
+    // generic failure — return the existing id so the UI can offer to open it.
+    if (error instanceof DuplicateVehicleError) {
+      return { error: "duplicate", duplicateId: error.existingId };
+    }
     return toActionError(error, "saveFailed");
   }
 
@@ -72,6 +182,7 @@ export async function createVehicleAction(
     entityType: "vehicle",
     entityId: newId,
     vehicleId: newId,
+    metadata: { dataSource: lookupMeta?.source === "israel_government" ? "israel_government" : "manual" },
   });
 
   revalidatePath("/vehicles");

@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { createVehicleAction } from "../actions";
-import { VehicleForm } from "@/components/vehicles/vehicle-form";
+import { AddVehicleFlow } from "@/components/vehicles/add-vehicle-flow";
 import { redirectDriversAway } from "@/lib/drivers/guard";
 
 export default async function NewVehiclePage() {
@@ -15,11 +14,7 @@ export default async function NewVehiclePage() {
         <h1 className="text-2xl font-bold">{t("new.title")}</h1>
         <p className="text-sm text-ink-2">{t("new.subtitle")}</p>
       </div>
-      <VehicleForm
-        mode="create"
-        action={createVehicleAction}
-        cancelHref="/vehicles"
-      />
+      <AddVehicleFlow cancelHref="/vehicles" />
     </div>
   );
 }

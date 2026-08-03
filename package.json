@@ -17,7 +17,14 @@
     "validate:qa-quick-wins": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/qa-quick-wins-check.mjs",
     "validate:multi-workspace": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/multi-workspace-check.mjs",
     "validate:member-removal": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/member-removal-check.mjs",
-    "validate:dashboard-vehicle-cleanup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/dashboard-vehicle-cleanup-check.mjs"
+    "validate:dashboard-vehicle-cleanup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/dashboard-vehicle-cleanup-check.mjs",
+    "validate:private-first": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/validation/private-first-check.mjs",
+    "validate:government-vehicle-lookup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/government-vehicle-lookup-check.mjs",
+    "validate:government-vehicle-live": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/government-vehicle-live.mjs",
+    "validate:vehicle-registration-intake": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/vehicle-registration-intake-check.mjs",
+    "validate:ai-provider-hardening": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/ai-provider-hardening-check.mjs",
+    "validate:mobile-interaction": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/mobile-interaction-check.mjs",
+    "validate:upload-size-limit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/upload-size-limit-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
