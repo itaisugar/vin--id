@@ -320,7 +320,7 @@
       "cta": "Add first vehicle"
     },
     "checklist": {
-      "title": "Get started",
+      "title": "Setup progress",
       "explainer": "Vin.ID helps you build a digital history for your vehicle and turn it into a Vehicle Passport.",
       "steps": {
         "vehicle": {
@@ -1843,6 +1843,26 @@
       "notAMember": "You are no longer a member of that workspace.",
       "notAuthenticated": "Please sign in again.",
       "failed": "Could not switch workspace. Try again."
+    }
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "back": "Back",
+    "progress": "{current} / {total}",
+    "welcome": {
+      "title": "Your vehicle. Every record. One place.",
+      "subtitle": "Keep documents, maintenance, reminders and history in one Vehicle Passport.",
+      "cta": "Get started"
+    },
+    "vehicle": {
+      "title": "How would you like to add your first vehicle?",
+      "registration": "Search by registration number",
+      "registrationDesc": "Fetch official details automatically.",
+      "scan": "Scan vehicle registration",
+      "scanDesc": "Photograph the document — we extract the details.",
+      "manual": "Enter manually",
+      "manualDesc": "Type the details yourself.",
+      "later": "I'll add a vehicle later"
     }
   }
 }
