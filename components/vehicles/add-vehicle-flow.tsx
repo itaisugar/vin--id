@@ -45,11 +45,18 @@ function draftToFormValues(draft: VehicleLookupDraft): VehicleFormValues {
   };
 }
 
-export function AddVehicleFlow({ cancelHref }: { cancelHref: string }) {
+export function AddVehicleFlow({
+  cancelHref,
+  initialMethod,
+}: {
+  cancelHref: string;
+  /** Deep-link straight into a method (e.g. from onboarding); defaults to the chooser. */
+  initialMethod?: "lookup" | "scan" | "manual";
+}) {
   const tl = useTranslations("vehicles.lookup");
   const format = useFormatter();
 
-  const [step, setStep] = React.useState<Step>("choose");
+  const [step, setStep] = React.useState<Step>(initialMethod ?? "choose");
   const [reg, setReg] = React.useState("");
   const [formatError, setFormatError] = React.useState<string | null>(null);
   const [lookup, setLookup] = React.useState<VehicleLookupActionState | null>(null);

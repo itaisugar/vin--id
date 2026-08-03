@@ -141,7 +141,12 @@ export async function signup(
 
   await trackEvent({ eventName: "user_signed_up", entityType: "user" });
 
-  redirect("/dashboard");
+  // New users go to onboarding; an explicit internal redirect (e.g. an invite
+  // link that sent them to sign up) is honored instead so they aren't detoured.
+  const rt = formData.get("redirectTo");
+  const target =
+    typeof rt === "string" && rt.startsWith("/") && !rt.startsWith("//") ? rt : "/onboarding";
+  redirect(target);
 }
 
 /**
