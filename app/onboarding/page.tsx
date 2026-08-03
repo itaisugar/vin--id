@@ -22,8 +22,5 @@ export default async function OnboardingPage() {
   const cookieStore = await cookies();
   if (cookieStore.get(ONBOARDED_COOKIE)?.value === "1") redirect("/dashboard");
 
-  const firstName =
-    (user.user_metadata?.first_name as string | undefined)?.trim() || null;
-
-  return <OnboardingFlow firstName={firstName} />;
+  return <OnboardingFlow />;
 }

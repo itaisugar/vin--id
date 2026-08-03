@@ -3,48 +3,34 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { completeOnboarding } from "@/app/onboarding/actions";
-import { CreateOrganizationForm } from "@/components/organization/create-organization-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CarIcon, ScanIcon, PlusIcon, TeamIcon } from "@/components/icons";
+import { CarIcon, ScanIcon, PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 /**
- * VIN-ID onboarding — a short, focused, instrument-cluster styled flow.
+ * VIN-ID onboarding — Private-first, two steps, instrument-cluster styled.
  *
- * Welcome → Choose mode → (Personal add-vehicle | Join org | Create org).
- * Nothing here changes backend rules: it reuses the existing vehicle-add flow
- * (/vehicles/new), the invitation landing (/invite/[token]) and the
- * create-organization action. Completion is a cookie (see actions.ts) so a
- * returning user is never shown this again.
+ *   1. Welcome — value proposition + one CTA.
+ *   2. Add first vehicle — the three existing methods, deep-linked into the
+ *      real Add Vehicle flow, plus "I'll add a vehicle later".
+ *
+ * There is NO mode selection: every new user already has their Personal
+ * workspace, so onboarding just guides them to first value. Creating a Business
+ * organization and joining via invitation stay where they belong (Team & Access
+ * and the invitation link) — deliberately NOT surfaced here. Completion is a
+ * cookie (see actions.ts); it is never used for authorization or account type.
  */
 
-type Step = "welcome" | "mode" | "personal" | "join" | "create";
+type Step = "welcome" | "vehicle";
+const STEP_INDEX: Record<Step, number> = { welcome: 1, vehicle: 2 };
+const TOTAL = 2;
 
-// Position on the 3-notch "gauge": welcome=1, mode=2, any path=3.
-const STEP_INDEX: Record<Step, number> = { welcome: 1, mode: 2, personal: 3, join: 3, create: 3 };
-const TOTAL = 3;
-
-export function OnboardingFlow({ firstName }: { firstName: string | null }) {
+export function OnboardingFlow() {
   const t = useTranslations("onboarding");
   const [step, setStep] = React.useState<Step>("welcome");
-  const [inviteInput, setInviteInput] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
 
   const go = (target: string) => startTransition(() => { void completeOnboarding(target); });
-
-  // Set the completion cookie when entering the create step, so the create
-  // action's own redirect to Team & Access still counts as "onboarded".
-  React.useEffect(() => {
-    if (step === "create") startTransition(() => { void completeOnboarding(); });
-  }, [step]);
-
-  function proceedJoin() {
-    const token = parseInviteToken(inviteInput);
-    if (!token) return;
-    go(`/invite/${encodeURIComponent(token)}`);
-  }
 
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden bg-bg text-ink">
@@ -68,21 +54,11 @@ export function OnboardingFlow({ firstName }: { firstName: string | null }) {
       </header>
 
       <div className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10">
-        {step === "welcome" && <WelcomeStep firstName={firstName} onStart={() => setStep("mode")} isPending={isPending} />}
-        {step === "mode" && <ModeStep onBack={() => setStep("welcome")} onPick={(m) => setStep(m)} />}
-        {step === "personal" && <PersonalStep onBack={() => setStep("mode")} isPending={isPending} go={go} />}
-        {step === "join" && (
-          <JoinStep
-            onBack={() => setStep("mode")}
-            value={inviteInput}
-            onChange={setInviteInput}
-            onContinue={proceedJoin}
-            onNoLink={() => go("/dashboard")}
-            canContinue={parseInviteToken(inviteInput) !== null}
-            isPending={isPending}
-          />
+        {step === "welcome" ? (
+          <WelcomeStep onStart={() => setStep("vehicle")} isPending={isPending} />
+        ) : (
+          <VehicleStep onBack={() => setStep("welcome")} isPending={isPending} go={go} />
         )}
-        {step === "create" && <CreateStep onBack={() => setStep("mode")} />}
       </div>
     </main>
   );
@@ -90,16 +66,12 @@ export function OnboardingFlow({ firstName }: { firstName: string | null }) {
 
 /* ---- Steps --------------------------------------------------------------- */
 
-function WelcomeStep({ firstName, onStart, isPending }: {
-  firstName: string | null; onStart: () => void; isPending: boolean;
-}) {
+function WelcomeStep({ onStart, isPending }: { onStart: () => void; isPending: boolean }) {
   const t = useTranslations("onboarding.welcome");
   return (
     <div className="flex flex-1 flex-col items-center justify-center text-center">
       <RevGauge />
-      <h1 className="mt-8 text-3xl font-extrabold tracking-tight">
-        {firstName ? t("titleNamed", { name: firstName }) : t("title")}
-      </h1>
+      <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-balance">{t("title")}</h1>
       <p className="mt-3 text-balance text-ink-2">{t("subtitle")}</p>
       <div className="mt-9 w-full">
         <Button className="w-full glow-accent" onClick={onStart} disabled={isPending}>{t("cta")}</Button>
@@ -108,86 +80,28 @@ function WelcomeStep({ firstName, onStart, isPending }: {
   );
 }
 
-function ModeStep({ onBack, onPick }: { onBack: () => void; onPick: (m: "personal" | "join" | "create") => void }) {
-  const t = useTranslations("onboarding.mode");
-  return (
-    <StepShell onBack={onBack} title={t("title")} subtitle={t("subtitle")}>
-      <div className="space-y-3">
-        <ChoiceCard icon={<CarIcon className="h-6 w-6" />} title={t("personal.title")} desc={t("personal.desc")} onClick={() => onPick("personal")} />
-        <ChoiceCard icon={<TeamIcon className="h-6 w-6" />} title={t("join.title")} desc={t("join.desc")} onClick={() => onPick("join")} />
-        <ChoiceCard icon={<KeyIcon className="h-6 w-6" />} title={t("create.title")} desc={t("create.desc")} onClick={() => onPick("create")} />
-      </div>
-    </StepShell>
-  );
-}
-
-function PersonalStep({ onBack, go, isPending }: { onBack: () => void; go: (t: string) => void; isPending: boolean }) {
-  const t = useTranslations("onboarding.personal");
-  return (
-    <StepShell onBack={onBack} title={t("title")} subtitle={t("subtitle")}>
-      <div className="space-y-3">
-        <ChoiceCard icon={<SearchIcon className="h-6 w-6" />} title={t("registration")} desc={t("registrationDesc")} onClick={() => go("/vehicles/new?method=lookup")} disabled={isPending} />
-        <ChoiceCard icon={<ScanIcon className="h-6 w-6" />} title={t("scan")} desc={t("scanDesc")} onClick={() => go("/vehicles/new?method=scan")} disabled={isPending} />
-        <ChoiceCard icon={<PlusIcon className="h-6 w-6" />} title={t("manual")} desc={t("manualDesc")} onClick={() => go("/vehicles/new?method=manual")} disabled={isPending} />
-      </div>
-      <button type="button" onClick={() => go("/dashboard")} disabled={isPending} className="mt-5 w-full text-center text-sm font-medium text-ink-2 transition hover:text-ink disabled:opacity-50">
-        {t("later")}
-      </button>
-    </StepShell>
-  );
-}
-
-function JoinStep({ onBack, value, onChange, onContinue, onNoLink, canContinue, isPending }: {
-  onBack: () => void; value: string; onChange: (v: string) => void; onContinue: () => void;
-  onNoLink: () => void; canContinue: boolean; isPending: boolean;
-}) {
-  const t = useTranslations("onboarding.join");
-  return (
-    <StepShell onBack={onBack} title={t("title")} subtitle={t("subtitle")}>
-      <form onSubmit={(e) => { e.preventDefault(); if (canContinue) onContinue(); }} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="invite">{t("inputLabel")}</Label>
-          <Input id="invite" dir="ltr" autoComplete="off" placeholder={t("placeholder")} value={value} onChange={(e) => onChange(e.target.value)} disabled={isPending} />
-          <p className="text-xs text-ink-2">{t("help")}</p>
-        </div>
-        <Button type="submit" className="w-full" disabled={!canContinue || isPending}>{t("continue")}</Button>
-      </form>
-      <button type="button" onClick={onNoLink} disabled={isPending} className="mt-5 w-full text-center text-sm font-medium text-ink-2 transition hover:text-ink disabled:opacity-50">
-        {t("noLink")}
-      </button>
-    </StepShell>
-  );
-}
-
-function CreateStep({ onBack }: { onBack: () => void }) {
-  const t = useTranslations("onboarding.create");
-  return (
-    <StepShell onBack={onBack} title={t("title")} subtitle={t("subtitle")}>
-      <div className="rounded-2xl border border-line bg-surface p-5 cockpit-lift">
-        <CreateOrganizationForm />
-      </div>
-      <p className="mt-4 text-xs text-ink-2">{t("personalNote")}</p>
-    </StepShell>
-  );
-}
-
-/* ---- Shared pieces ------------------------------------------------------- */
-
-function StepShell({ onBack, title, subtitle, children }: {
-  onBack: () => void; title: string; subtitle: string; children: React.ReactNode;
-}) {
+function VehicleStep({ onBack, go, isPending }: { onBack: () => void; go: (t: string) => void; isPending: boolean }) {
+  const t = useTranslations("onboarding.vehicle");
   const tRoot = useTranslations("onboarding");
   return (
     <div className="flex flex-1 flex-col justify-center py-6">
       <button type="button" onClick={onBack} className="mb-5 inline-flex items-center gap-1 self-start text-sm font-medium text-accent transition hover:underline">
         <ChevronIcon className="h-4 w-4 rotate-180 rtl:rotate-0" /> {tRoot("back")}
       </button>
-      <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
-      <p className="mt-2 text-sm text-ink-2">{subtitle}</p>
-      <div className="mt-6">{children}</div>
+      <h1 className="text-2xl font-extrabold tracking-tight text-balance">{t("title")}</h1>
+      <div className="mt-6 space-y-3">
+        <ChoiceCard icon={<SearchIcon className="h-6 w-6" />} title={t("registration")} desc={t("registrationDesc")} onClick={() => go("/vehicles/new?method=lookup")} disabled={isPending} />
+        <ChoiceCard icon={<ScanIcon className="h-6 w-6" />} title={t("scan")} desc={t("scanDesc")} onClick={() => go("/vehicles/new?method=scan")} disabled={isPending} />
+        <ChoiceCard icon={<PlusIcon className="h-6 w-6" />} title={t("manual")} desc={t("manualDesc")} onClick={() => go("/vehicles/new?method=manual")} disabled={isPending} />
+      </div>
+      <button type="button" onClick={() => go("/dashboard")} disabled={isPending} className="mt-6 w-full text-center text-sm font-medium text-ink-2 transition hover:text-ink disabled:opacity-50">
+        {t("later")}
+      </button>
     </div>
   );
 }
+
+/* ---- Shared pieces ------------------------------------------------------- */
 
 function ChoiceCard({ icon, title, desc, onClick, disabled }: {
   icon: React.ReactNode; title: string; desc: string; onClick: () => void; disabled?: boolean;
@@ -213,7 +127,7 @@ function ChoiceCard({ icon, title, desc, onClick, disabled }: {
   );
 }
 
-/** Tach-style progress gauge: redline segments + a digital step readout. */
+/** Minimal two-notch progress gauge + a digital step readout (no fake segments). */
 function GaugeStepper({ current, total, label }: { current: number; total: number; label: string }) {
   return (
     <div className="flex items-center gap-2" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={current} aria-label={label}>
@@ -226,7 +140,7 @@ function GaugeStepper({ current, total, label }: { current: number; total: numbe
               key={i}
               className={cn(
                 "w-1.5 rounded-full transition-all",
-                i === 0 ? "h-2.5" : i === 1 ? "h-3.5" : "h-4",
+                i === 0 ? "h-3" : "h-4",
                 on ? (last ? "bg-accent glow-accent" : "bg-accent") : "bg-surface-3",
               )}
             />
@@ -263,7 +177,7 @@ function RevGauge() {
   );
 }
 
-/* ---- Inline icons (kept minimal; reuse shared ones where they exist) ----- */
+/* ---- Inline icons -------------------------------------------------------- */
 
 function ChevronIcon({ className }: { className?: string }) {
   return (
@@ -278,20 +192,4 @@ function SearchIcon({ className }: { className?: string }) {
       <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
     </svg>
   );
-}
-function KeyIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <circle cx="7.5" cy="15.5" r="4.5" /><path d="m10.7 12.3 8.3-8.3M16 6l3 3M13.5 8.5 16 11" />
-    </svg>
-  );
-}
-
-/** Extract an invitation token from a pasted full URL, path, or raw token. */
-export function parseInviteToken(raw: string): string | null {
-  const s = (raw || "").trim();
-  if (!s) return null;
-  const m = s.match(/\/invite\/([^/?#]+)/);
-  const token = (m ? m[1] : s).trim();
-  return token.length > 0 ? token : null;
 }
