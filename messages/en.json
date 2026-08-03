@@ -1844,5 +1844,57 @@
       "notAuthenticated": "Please sign in again.",
       "failed": "Could not switch workspace. Try again."
     }
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "back": "Back",
+    "progress": "{current} / {total}",
+    "welcome": {
+      "title": "Welcome to VIN·ID",
+      "titleNamed": "Welcome, {name}",
+      "subtitle": "The digital identity and trust layer for every vehicle.",
+      "cta": "Get started"
+    },
+    "mode": {
+      "title": "How will you use VIN·ID?",
+      "subtitle": "You can change this later.",
+      "personal": {
+        "title": "Personal",
+        "desc": "Track and protect your own vehicles."
+      },
+      "join": {
+        "title": "Join an organization",
+        "desc": "You were invited to a fleet or team."
+      },
+      "create": {
+        "title": "Create an organization",
+        "desc": "Manage a fleet with your team."
+      }
+    },
+    "personal": {
+      "title": "Add your first vehicle",
+      "subtitle": "Choose how you'd like to start.",
+      "registration": "Search by registration number",
+      "registrationDesc": "Fetch official details automatically.",
+      "scan": "Scan vehicle registration",
+      "scanDesc": "Photograph the document — we extract the details.",
+      "manual": "Enter manually",
+      "manualDesc": "Type the details yourself.",
+      "later": "I'll do this later"
+    },
+    "join": {
+      "title": "Join an organization",
+      "subtitle": "Organizations are joined by invitation.",
+      "inputLabel": "Invitation link or code",
+      "placeholder": "Paste your invite link",
+      "help": "Ask an admin for an invitation link. Opening it lets you review and accept.",
+      "continue": "Continue",
+      "noLink": "I don't have a link yet"
+    },
+    "create": {
+      "title": "Create an organization",
+      "subtitle": "Set up a workspace for your team or fleet.",
+      "personalNote": "Your personal vehicles stay in your own private workspace, separate from this organization."
+    }
   }
 }
