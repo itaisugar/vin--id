@@ -363,3 +363,56 @@ copy).
 4. Try a file **>10MB** → clear "image is too large… up to 10MB" message, nothing created.
 
 **Visual gate:** remains **pending** founder confirmation.
+
+## 22. Release execution log — database release (2026-08-03)
+
+Validated release commit: `88f084c`. Production project `jsthfmgvcdrfzpgkpwvt`
+(West EU / Ireland).
+
+**Phase 1 — diff audit:** clean. `origin/main...feat/all-requested-improvements`
+adds exactly migrations 45/46/47 and the approved code; no unrelated migration,
+no secrets/env/dumps.
+
+**Phase 3 — automated gate:** green at `88f084c` (922/0 across 17 suites,
+47 migrations, tsc/lint/build/i18n clean).
+
+**Phase 4 — read-only preflight:** remote history at migration 44
+(`20260731120000`); 45/46/47 pending exactly once; all integrity audits 0
+(ownerless orgs, duplicate memberships, invalid active pointers, cross-org
+vehicles/extractions); `vehicle-documents` bucket private. Baseline counts:
+users 5, profiles 5, organizations 5, memberships 6, invitations 3, vehicles 8,
+maintenance 9, issues 7, reminders 2, documents 4, extractions 3, passports 15,
+driver assignments 0, storage objects 4 (≈3.69 MB).
+
+**Phase 5 — verified backup:** `~/vin-id-backups/prod-20260803-124637/`
+(outside the repo): schema.sql, data.sql, roles.sql, migration_history.txt,
+row_counts.txt, storage_inventory.txt (metadata only), restore_instructions.md,
+manifest.sha256 — all checksums verified OK. (Storage object *contents* are not
+in a DB backup; the release does not touch Storage objects.)
+
+**Phase 6 — dry run:** listed exactly 45/46/47 in order; no replay of 1–44, no
+reset.
+
+**Phase 7 — migrations applied:** `supabase db push --linked` applied
+20260802120000 → 130000 → 140000; only a benign idempotent constraint-skip
+NOTICE. Remote history 44 → 47.
+
+**Phase 8 — post-migration verification (read-only):** history=47; both new RPCs
+(`create_business_organization`, `confirm_vehicle_registration_intake`) exist,
+`authenticated` EXECUTE, `anon` denied; invitation INSERT policy blocks
+`kind='personal'`; new vehicle columns additive+nullable; `data_source` CHECK
+controlled; `created_record_type` retains `issue` and adds `vehicle`; `source`
+adds `vehicle_registration` and retains prior values; RLS enabled on all core
+tables; **row counts unchanged (no data loss)**; audits still 0; bucket still
+private; org kinds business:2 / personal:3. (`raw_text` is a legacy, unused,
+empty column — not part of this release.)
+
+**Pending — deployment (Phases 9–13):** merging `feat/all-requested-improvements`
+→ `main` and the Vercel Production deploy are not yet done (require GitHub PR
+merge + Vercel access). Production DB is safely ahead of the app: migrations
+45–47 are additive/backward-compatible, so the currently deployed app continues
+to function; the new features light up once the app is deployed. Then run the
+Production browser smoke, one controlled end-to-end intake, and the final
+integrity audit.
+
+**Classification:** `DATABASE RELEASE VALIDATED — DEPLOYMENT PENDING`.
