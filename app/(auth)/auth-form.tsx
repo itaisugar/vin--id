@@ -127,7 +127,10 @@ export function AuthForm({
           </div>
 
           <form action={formAction} className="space-y-4" noValidate>
-          {isLogin && redirectTo ? (
+          {/* Carry redirectTo for BOTH login and signup — an invitation link
+              that sends a recipient to sign up must survive to /invite/[token]
+              instead of being detoured to onboarding. */}
+          {redirectTo ? (
             <input type="hidden" name="redirectTo" value={redirectTo} />
           ) : null}
 
