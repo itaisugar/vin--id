@@ -5,6 +5,15 @@ Branch `feat/dashboard-vehicle-centric-redesign` (from `origin/main` @ `fdf02ff`
 `app/globals.css` edit, no RLS/role/Driver change.** Matches the approved visual
 reference: simple, premium, calm, vehicle-first.
 
+> **Founder visual QA: APPROVED — 2026-08-05.** Approved as implemented:
+> vehicle-centric composition with vehicles as the primary content, compact
+> attention banner, two-column desktop / single-column mobile grid, the health
+> ring (full green healthy → reduced orange attention → reduced red severe/
+> multiple), the make centred in the ring, the plate as the dominant card text,
+> the unchanged palette, and Hebrew RTL / responsive behaviour. The
+> severity-and-count health model is approved as implemented; no further visual
+> or scoring changes.
+
 ## Information architecture
 1. App shell (unchanged) — brand, language switch, logout, navigation.
 2. Dashboard header — greeting, a context-aware title
