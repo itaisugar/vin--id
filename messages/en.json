@@ -309,8 +309,21 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "titlePersonal": "Your vehicles",
+    "titleBusiness": "Your fleet",
     "welcome": "Welcome, {name}",
     "subtitle": "Your vehicles, history and Vehicle Passports in one place.",
+    "attention": {
+      "title": "Needs your attention",
+      "review": "Review",
+      "allClear": "All clear",
+      "more": "+{count}"
+    },
+    "vehicles": {
+      "heading": "Vehicles",
+      "viewAll": "View all",
+      "ready": "Ready"
+    },
     "onboarding": {
       "heading": "Welcome to Vin.ID",
       "explainer": "Vin.ID helps you build a digital history for your vehicle.",
