@@ -101,21 +101,30 @@ banner.includes('href="/vehicles?filter=needs_attention"')
   ? P("uses only warning/danger tokens (no large success panel)")
   : F("non-approved tone tokens in banner");
 
-section("7. Vehicle card: fixed status arc, colour + text, single link");
-/M 20\.3 79\.7 A 42 42 0 1 1 79\.7 79\.7/.test(card)
-  ? P("arc uses fixed 270° geometry (identical on every card)")
-  : F("arc geometry is not fixed");
-// Code-only check (comments legitimately use words like "percentage"): a value
-// gauge would need a dynamic dash offset/array — the motif has neither.
-!/strokeDashoffset|strokeDasharray/.test(card)
-  ? P("arc encodes no percentage / score / progress (no dash offset/array)")
-  : F("arc appears to encode a value");
+section("7. Vehicle card: meaningful health ring, colour + text, single link");
+/let score = 100/.test(card) &&
+/score -= PENALTY\[a\.urgency\]/.test(card) &&
+/Math\.max\(0, Math\.min\(100/.test(card)
+  ? P("healthScore: starts at 100, subtracts real penalties, clamps 0–100")
+  : F("health score model missing or not clamped");
+/strokeDashoffset=\{offset\}/.test(card) && /CIRC \* \(1 - score \/ 100\)/.test(card)
+  ? P("ring fill is the health score (full circle at 100)")
+  : F("ring fill not driven by the score");
+/score >= 85/.test(card) && /score >= 45/.test(card)
+  ? P("colour steps green→orange→red by score thresholds (85 / 45)")
+  : F("colour thresholds missing");
 /stroke-danger/.test(card) && /stroke-warn/.test(card) && /stroke-ok/.test(card)
-  ? P("arc colour is the only semantic variable")
-  : F("arc colour states incomplete");
+  ? P("ring colour uses danger/warn/ok tokens")
+  : F("ring colour states incomplete");
+/\{make\}/.test(card) && /line-clamp-2/.test(card) && /break-words/.test(card)
+  ? P("make centred in the ring; long names wrap/clamp (no overflow)")
+  : F("make label or overflow handling missing");
 /actions\.reasons\.\$\{/.test(card) && /td\("ready"\)/.test(card)
   ? P("status line reuses existing reasons wording; ready = Ready")
   : F("status line wording invented or missing");
+/license_plate[\s\S]{0,120}text-2xl/.test(card)
+  ? P("plate remains the dominant text outside the ring")
+  : F("plate not dominant");
 (card.match(/<Link/g) || []).length === 1
   ? P("whole card is one link (no nested conflicting links)")
   : F("card has zero or multiple links");
