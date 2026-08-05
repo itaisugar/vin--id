@@ -151,6 +151,16 @@ export interface FleetOverview {
   insights: FleetInsight[];
   deadlines: FleetDeadline[];
   vehicles: Vehicle[];
+  /**
+   * Per-vehicle computed rows (effective status, service, documents, issues,
+   * actions) — the SAME rows the fleet list renders, so the dashboard vehicle
+   * cards and `/vehicles` share one effective state and can never disagree.
+   * Already built in memory from the shared queries; exposing them adds no
+   * query, no second status calculation, and changes no number. Consumers that
+   * only need per-vehicle attention (the dashboard) avoid the global 15-action
+   * cap on `actions` that would otherwise mark a capped-out vehicle "Ready".
+   */
+  rows: FleetVehicleRow[];
   costs: FleetCostSummary;
 }
 
@@ -745,6 +755,7 @@ export async function getFleetOverview(): Promise<FleetOverview> {
     insights,
     deadlines: deadlines.slice(0, DEADLINE_LIMIT),
     vehicles,
+    rows,
     costs,
   };
 }

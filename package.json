@@ -25,7 +25,8 @@
     "validate:ai-provider-hardening": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/ai-provider-hardening-check.mjs",
     "validate:mobile-interaction": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/mobile-interaction-check.mjs",
     "validate:upload-size-limit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/validation/lib/register-hooks.mjs --experimental-strip-types scripts/validation/upload-size-limit-check.mjs",
-    "validate:onboarding": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/onboarding-check.mjs"
+    "validate:onboarding": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/onboarding-check.mjs",
+    "validate:dashboard": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validation/dashboard-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -309,8 +309,21 @@
   },
   "dashboard": {
     "title": "לוח בקרה",
+    "titlePersonal": "הרכבים שלך",
+    "titleBusiness": "הצי שלך",
     "welcome": "ברוך הבא, {name}",
     "subtitle": "הרכבים, ההיסטוריה ודרכוני הרכב שלך במקום אחד.",
+    "attention": {
+      "title": "דורש את תשומת ליבך",
+      "review": "לבדיקה",
+      "allClear": "הכל תקין",
+      "more": "+{count}"
+    },
+    "vehicles": {
+      "heading": "רכבים",
+      "viewAll": "הצג הכל",
+      "ready": "מוכן"
+    },
     "onboarding": {
       "heading": "ברוך הבא ל-Vin.ID",
       "explainer": "Vin.ID עוזר לך לבנות היסטוריה דיגיטלית לרכב שלך.",

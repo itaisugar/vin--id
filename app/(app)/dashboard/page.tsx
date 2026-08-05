@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ActionList } from "@/components/fleet/action-list";
-import { DeadlineList } from "@/components/fleet/deadline-list";
-import { FleetInsights } from "@/components/fleet/fleet-insights";
-import { FleetSummaryCards } from "@/components/fleet/fleet-summary-cards";
+import { AttentionBanner } from "@/components/fleet/attention-banner";
 import { OrganizationMissing } from "@/components/fleet/organization-missing";
-import { CarIcon, ScanIcon } from "@/components/icons";
+import { VehicleArcCard, rowUrgencyKey } from "@/components/fleet/vehicle-arc-card";
+import { CarIcon, PlusIcon, ScanIcon } from "@/components/icons";
 import { OrganizationMissingError } from "@/lib/auth/errors";
 import { getFleetOverview, type FleetOverview } from "@/lib/fleet/service";
-import { getCurrentOrganization } from "@/lib/organizations/service";
+import {
+  getCurrentOrganization,
+  getCurrentRole,
+  isPersonalWorkspace,
+} from "@/lib/organizations/service";
 import { createClient } from "@/lib/supabase/server";
 import { redirectDriversAway } from "@/lib/drivers/guard";
-import { getCurrentRole } from "@/lib/organizations/service";
 import { canWriteFleetData } from "@/lib/organizations/types";
 
 /**
@@ -65,47 +66,106 @@ export default async function DashboardPage() {
     user?.email?.split("@")[0] ||
     "";
 
-  const { summary, actions, insights, deadlines } = overview;
+  const { summary, rows } = overview;
 
   // Presentation only: the intake pages and actions re-check this server-side.
   const role = await getCurrentRole();
   const canWrite = role != null && canWriteFleetData(role);
+  // A personal workspace is "your vehicles"; a business workspace is "your fleet".
+  const personal = await isPersonalWorkspace();
+  const tv = await getTranslations("vehicles");
+
+  // Urgency-first, then more actions, then plate — the same intent as the fleet
+  // list's default sort. At most four cards; "View all" leads to the full list.
+  const preview = [...rows]
+    .sort((a, b) => {
+      const byUrgency = rowUrgencyKey(a) - rowUrgencyKey(b);
+      if (byUrgency !== 0) return byUrgency;
+      const byCount = b.actions.length - a.actions.length;
+      if (byCount !== 0) return byCount;
+      return (a.vehicle.license_plate ?? "").localeCompare(
+        b.vehicle.license_plate ?? "",
+      );
+    })
+    .slice(0, 4);
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        {firstName ? (
-          <p className="text-sm text-ink-2">
-            {td("welcome", { name: firstName })}
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-4">
+        <div className="min-w-0 space-y-1">
+          {firstName ? (
+            <p className="text-sm text-ink-2">
+              {td("welcome", { name: firstName })}
+            </p>
+          ) : null}
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {personal ? td("titlePersonal") : td("titleBusiness")}
+          </h1>
+          <p className="text-sm text-ink-3">
+            {organizationName ?? t("subtitle")}
           </p>
+        </div>
+
+        {/* Write CTAs — writer-only and only once there is a fleet to act on;
+            an empty workspace is guided by EmptyFleet instead. */}
+        {summary.totalVehicles > 0 && canWrite ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/fleet-intake"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
+              <ScanIcon className="h-5 w-5" />
+              {td("quickActions.scanDocument")}
+            </Link>
+            <Link
+              href="/vehicles/new"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-surface-2 active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
+              <PlusIcon className="h-5 w-5" />
+              {tv("addVehicle")}
+            </Link>
+          </div>
         ) : null}
-        <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-ink-3">{organizationName ?? t("subtitle")}</p>
       </div>
 
       {summary.totalVehicles === 0 ? (
         <EmptyFleet />
       ) : (
         <>
-          <FleetSummaryCards summary={summary} />
+          {/* One compact attention surface, or a quiet all-clear line. */}
+          <AttentionBanner rows={rows} />
 
-          {/* Fleet intake, not /scan: this entry point accepts a document whose
-              vehicle is not yet known and matches it server-side. Rendered only
-              for writers — a viewer previously saw a prominent button leading to
-              a flow whose every step the server rejects. */}
-          {canWrite ? (
-            <Link
-              href="/fleet-intake"
-              className="flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-bold text-on-accent glow-accent transition hover:brightness-110 active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-            >
-              <ScanIcon className="h-5 w-5" />
-              {td("quickActions.scanDocument")}
-            </Link>
-          ) : null}
+          {/* Vehicles — the dominant content. */}
+          <section
+            aria-labelledby="dashboard-vehicles-heading"
+            className="space-y-3"
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <h2
+                id="dashboard-vehicles-heading"
+                className="flex items-baseline gap-2 text-lg font-extrabold tracking-tight"
+              >
+                {td("vehicles.heading")}
+                <span className="num text-sm font-semibold text-ink-3">
+                  {summary.totalVehicles}
+                </span>
+              </h2>
+              <Link
+                href="/vehicles"
+                className="shrink-0 rounded text-sm font-medium text-accent transition hover:text-glow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+              >
+                {td("vehicles.viewAll")}
+              </Link>
+            </div>
 
-          <ActionList items={actions} />
-          <FleetInsights items={insights} />
-          <DeadlineList items={deadlines} />
+            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              {preview.map((r) => (
+                <li key={r.vehicle.id} className="h-full">
+                  <VehicleArcCard row={r} />
+                </li>
+              ))}
+            </ul>
+          </section>
         </>
       )}
     </div>
